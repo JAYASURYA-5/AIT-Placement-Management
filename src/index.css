@@ -1901,28 +1901,11 @@ body {
 .mock-interview-types {
   display: flex;
   justify-content: center;
->>>>>>> 1d27413 (added mock interview with added functionalities)
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 28px;
 }
 
-<<<<<<< HEAD
-.resources-cat-chip {
-  padding: 8px 18px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: var(--font-family);
-  border: 1.5px solid var(--border-medium);
-  background-color: var(--bg-white);
-  color: var(--text-main);
-  cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.resources-cat-chip:hover {
-=======
 .mock-type-btn {
   padding: 8px 24px;
   border-radius: 12px;
@@ -1937,25 +1920,9 @@ body {
 }
 
 .mock-type-btn:hover {
->>>>>>> 1d27413 (added mock interview with added functionalities)
   border-color: var(--primary-maroon);
   color: var(--primary-maroon);
   background-color: var(--primary-maroon-light);
-}
-
-<<<<<<< HEAD
-.resources-cat-chip.active {
-  background-color: var(--primary-maroon);
-  color: #fff;
-  border-color: var(--primary-maroon);
-  box-shadow: 0 4px 12px rgba(76, 21, 54, 0.22);
-}
-
-/* Resources Grid */
-.resources-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
 }
 
 @media (max-width: 1100px) {
