@@ -1517,6 +1517,239 @@ body {
   }
 }
 
+/* Notifications Workspace Styles */
+.notifications-workspace {
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-light);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.notification-row-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: 1px solid var(--border-light);
+  background-color: var(--bg-card);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.notification-row-item:hover {
+  border-color: var(--border-medium);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.notification-row-item.unread {
+  background-color: #FFFDF9;
+  border-left: 4px solid var(--primary-maroon);
+}
+
+.notification-left-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.notification-icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notification-icon-badge.orange {
+  background-color: #FEF3C7;
+  color: #D97706;
+}
+
+.notification-icon-badge.purple {
+  background-color: #F3E8FF;
+  color: #7C3AED;
+}
+
+.notification-icon-badge.blue {
+  background-color: #DBEAFE;
+  color: #2563EB;
+}
+
+.notification-icon-badge.green {
+  background-color: #D1FAE5;
+  color: #059669;
+}
+
+.notification-text-title {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.notification-text-sub {
+  font-size: 12.5px;
+  color: var(--text-light);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.notification-right-meta {
+  text-align: right;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.notification-footer-btn-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+/* Offer Letter Workspace Styles */
+.offer-letter-card {
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-light);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+}
+
+.celebration-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.celebration-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-top: 12px;
+}
+
+.celebration-subtitle {
+  font-size: 13.5px;
+  color: var(--text-light);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.offer-company-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 16px 0;
+  padding: 10px 20px;
+  border-radius: 16px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-light);
+}
+
+.offer-details-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 24px 0;
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+  padding: 20px 0;
+}
+
+.offer-detail-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.offer-detail-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.offer-detail-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.offer-action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.offer-btn-primary {
+  width: 100%;
+  background: var(--primary-maroon);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 13.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.offer-btn-primary:hover {
+  background: var(--primary-maroon-dark);
+}
+
+.offer-btn-secondary {
+  width: 100%;
+  background: white;
+  color: var(--primary-maroon);
+  border: 1px solid var(--border-medium);
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 13.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.offer-btn-secondary:hover {
+  background: var(--primary-maroon-light);
+  border-color: var(--primary-maroon);
+}
+
+.admin-upload-simulation-panel {
+  background-color: #FFFDF9;
+  border: 2px dashed #EAB308;
+  border-radius: 20px;
+  padding: 24px;
+  max-width: 600px;
+  margin: 0 auto 24px auto;
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   body {
     padding: 8px;

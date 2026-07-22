@@ -13,7 +13,8 @@ import {
   StatsIcon,
   DocumentsIcon,
   SettingsIcon,
-  LogoutIcon
+  LogoutIcon,
+  BellIcon
 } from './Icons';
 
 export const menuItems = [
@@ -29,6 +30,7 @@ export const menuItems = [
   { id: 'leaderboard', label: 'Leaderboard', icon: LeaderboardIcon },
   { id: 'stats', label: 'Placement Stats', icon: StatsIcon },
   { id: 'documents', label: 'Documents', icon: DocumentsIcon },
+  { id: 'notifications', label: 'Notifications', icon: BellIcon },
   { id: 'settings', label: 'Settings', icon: SettingsIcon },
 ];
 
