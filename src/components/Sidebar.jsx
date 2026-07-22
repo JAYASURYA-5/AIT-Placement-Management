@@ -21,7 +21,6 @@ import {
 
 export const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: DashboardIcon },
-  { id: 'profile', label: 'Profile', icon: ProfileIcon },
   { id: 'applications', label: 'Applications', icon: ApplicationsIcon },
   { id: 'calendar', label: 'Drive Calendar', icon: CalendarIcon },
   { id: 'assessments', label: 'Assessments', icon: AssessmentsIcon },
@@ -29,8 +28,6 @@ export const menuItems = [
   { id: 'training', label: 'Training', icon: TrainingIcon },
   { id: 'mock-interview', label: 'Mock Interview', icon: MockInterviewIcon },
   { id: 'certificates', label: 'Certificates', icon: CertificatesIcon },
-  { id: 'leaderboard', label: 'Leaderboard', icon: LeaderboardIcon },
-  { id: 'stats', label: 'Placement Stats', icon: StatsIcon },
   { id: 'resources', label: 'Resources', icon: ResourcesIcon },
   { id: 'alumni', label: 'Alumni Network', icon: AlumniIcon },
   { id: 'documents', label: 'Documents', icon: DocumentsIcon },
