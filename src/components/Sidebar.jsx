@@ -31,8 +31,6 @@ export const menuItems = [
   { id: 'resources', label: 'Resources', icon: ResourcesIcon },
   { id: 'alumni', label: 'Alumni Network', icon: AlumniIcon },
   { id: 'documents', label: 'Documents', icon: DocumentsIcon },
-  { id: 'notifications', label: 'Notifications', icon: BellIcon },
-  { id: 'settings', label: 'Settings', icon: SettingsIcon },
 ];
 
 export default function Sidebar({ activeTab, setActiveTab, onLogout }) {

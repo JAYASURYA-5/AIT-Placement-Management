@@ -82,7 +82,8 @@ export default function Header({ searchQuery, setSearchQuery, notifications, set
           <button
             className="notification-btn"
             onClick={() => {
-              setShowNotifications(!showNotifications);
+              setActiveTab('notifications');
+              setShowNotifications(false);
               setShowProfileMenu(false);
             }}
             title="Notifications"
