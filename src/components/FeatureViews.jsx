@@ -2784,6 +2784,705 @@ Zoho Corporation`;
               </div>
             ))}
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (activeTab === 'mock-interview') {
+    const [interviewType, setInterviewType] = useState('Technical');
+    const [difficulty, setDifficulty] = useState('Mid-Level');
+    const [interviewStarted, setInterviewStarted] = useState(false);
+    const [currentQuestion, setCurrentQuestion] = useState(0);
+    const [answers, setAnswers] = useState({});
+    const [currentAnswer, setCurrentAnswer] = useState('');
+    const [interviewCompleted, setInterviewCompleted] = useState(false);
+    const [interviewResult, setInterviewResult] = useState(null);
+    const [isRecording, setIsRecording] = useState(false);
+    const [isSpeaking, setIsSpeaking] = useState(false);
+    const [autoReadAloud, setAutoReadAloud] = useState(true);
+    const [timerSeconds, setTimerSeconds] = useState(90);
+    const [timerActive, setTimerActive] = useState(false);
+    const [selectedHistoryModal, setSelectedHistoryModal] = useState(null);
+
+    const interviewTypes = ['Technical', 'HR', 'Behavioural'];
+    const difficultyLevels = ['Junior Level', 'Mid-Level', 'Senior Level'];
+
+    const questionBank = {
+      Technical: {
+        'Junior Level': [
+          { id: 1, question: "Explain the difference between == and === in JavaScript.", hint: "Think about type coercion and strict equality comparison.", keywords: ["strict equality", "type coercion", "types", "triple equals"] },
+          { id: 2, question: "What is the Virtual DOM and how does React use it?", hint: "Consider rendering efficiency and diffing algorithm.", keywords: ["diffing", "reconciliation", "memory", "DOM node"] },
+          { id: 3, question: "Explain CSS box model components.", hint: "Margin, border, padding, content.", keywords: ["content", "padding", "border", "margin"] }
+        ],
+        'Mid-Level': [
+          { id: 1, question: "Describe the concept of closures in JavaScript with a practical use case.", hint: "Scope chain, lexical environment, private variables.", keywords: ["lexical scope", "outer scope", "private variables", "state persistence"] },
+          { id: 2, question: "What are RESTful API principles and standard HTTP methods?", hint: "GET, POST, PUT, DELETE, statelessness, idempotency.", keywords: ["stateless", "GET", "POST", "PUT", "DELETE", "idempotent"] },
+          { id: 3, question: "Explain the difference between SQL and NoSQL databases.", hint: "Relational vs document-based, ACID vs BASE, scaling.", keywords: ["ACID", "relational", "schema", "horizontal scaling", "document"] }
+        ],
+        'Senior Level': [
+          { id: 1, question: "How would you design a scalable microservices architecture for a high-traffic placement portal?", hint: "Message queues, load balancing, caching, API gateways.", keywords: ["API gateway", "load balancer", "Redis", "Kafka", "event-driven", "caching"] },
+          { id: 2, question: "Explain memory leaks in single-page applications and how to prevent them.", hint: "Event listeners, uncleaned intervals, detached DOM nodes.", keywords: ["event listeners", "cleanup", "useEffect", "garbage collection", "memory snapshot"] },
+          { id: 3, question: "Compare Server-Side Rendering (SSR) vs Static Site Generation (SSG) in modern Web Frameworks.", hint: "Build time vs request time, SEO, dynamic data requirements.", keywords: ["hydration", "build-time", "revalidation", "SEO", "TTFB"] }
+        ]
+      },
+      HR: {
+        'Junior Level': [
+          { id: 1, question: "Tell me about yourself and why you chose Information Technology at AIT.", hint: "Focus on academic projects, skills, and genuine interest.", keywords: ["passion", "AIT", "projects", "learning", "teamwork"] },
+          { id: 2, question: "What are your greatest strengths and one area you are working to improve?", hint: "Be honest, self-aware, and demonstrate action taken.", keywords: ["self-awareness", "problem solving", "improvement", "growth mindset"] }
+        ],
+        'Mid-Level': [
+          { id: 1, question: "Where do you see yourself in 3 to 5 years in your engineering career?", hint: "Show ambition, skill progression, and commitment.", keywords: ["leadership", "full-stack", "domain expertise", "mentorship"] },
+          { id: 2, question: "Why should our company hire you over other qualified candidates?", hint: "Highlight unique project experience, adaptability, and culture fit.", keywords: ["adaptability", "value proposition", "collaboration", "ownership"] }
+        ],
+        'Senior Level': [
+          { id: 1, question: "How do you handle disagreement with a technical decision made by a team lead or architect?", hint: "Focus on data, constructive dialogue, and team alignment.", keywords: ["data-driven", "constructive feedback", "alignment", "respect"] },
+          { id: 2, question: "Describe your approach to mentoring junior developers and managing project deadlines.", hint: "Code reviews, clear delegation, empathy, risk mitigation.", keywords: ["code review", "delegation", "empathy", "sprint planning"] }
+        ]
+      },
+      Behavioural: {
+        'Junior Level': [
+          { id: 1, question: "Describe a project experience where your team faced a bug right before submission.", hint: "Use STAR method: Situation, Task, Action, Result.", keywords: ["STAR method", "debugging", "teamwork", "prioritization"] }
+        ],
+        'Mid-Level': [
+          { id: 1, question: "Give an example of a time you failed to meet a goal and how you handled the outcome.", hint: "Focus on accountability, lessons learned, and subsequent success.", keywords: ["ownership", "accountability", "reflection", "corrective action"] }
+        ],
+        'Senior Level': [
+          { id: 1, question: "Tell me about a complex technical conflict you resolved under high pressure.", hint: "Trade-offs, root cause analysis, stakeholder communication.", keywords: ["root cause", "trade-offs", "stakeholders", "calm leadership"] }
+        ]
+      }
+    };
+
+    const questions = questionBank[interviewType]?.[difficulty] || questionBank.Technical['Mid-Level'];
+
+    const recentInterviews = [
+      { id: 1, role: 'Frontend Developer', date: '20 Jul 2025', type: 'Technical', difficulty: 'Mid-Level', performance: 'Good', score: 84, status: 'Passed', statusColor: '#16A34A', statusBg: '#DCFCE7' },
+      { id: 2, role: 'System Engineer', date: '18 Jul 2025', type: 'HR', difficulty: 'Junior Level', performance: 'Reasonable', score: 72, status: 'Average', statusColor: '#D97706', statusBg: '#FEF9C3' },
+      { id: 3, role: 'React Developer', date: '15 Jul 2025', type: 'Technical', difficulty: 'Senior Level', performance: 'Excellent', score: 92, status: 'Excellent', statusColor: '#2563EB', statusBg: '#EFF6FF' }
+    ];
+
+    // Speech Synthesis (AI Voice output)
+    const speakText = (text) => {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      window.speechSynthesis.speak(utterance);
+    };
+
+    const stopSpeaking = () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        setIsSpeaking(false);
+      }
+    };
+
+    // Speech Recognition (Voice Input)
+    const toggleRecording = () => {
+      if (isRecording) {
+        setIsRecording(false);
+        return;
+      }
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("Speech Recognition is not supported in this browser. You can type your answer into the text area!");
+        return;
+      }
+
+      try {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => setIsRecording(true);
+        recognition.onresult = (event) => {
+          let transcript = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+          }
+          setCurrentAnswer(prev => {
+            const trimmed = prev ? prev + ' ' + transcript : transcript;
+            return trimmed;
+          });
+        };
+        recognition.onerror = () => setIsRecording(false);
+        recognition.onend = () => setIsRecording(false);
+
+        recognition.start();
+      } catch (err) {
+        console.error("Speech recognition error:", err);
+        setIsRecording(false);
+      }
+    };
+
+    // Timer Effect
+    useEffect(() => {
+      let interval = null;
+      if (timerActive && timerSeconds > 0) {
+        interval = setInterval(() => {
+          setTimerSeconds(prev => prev - 1);
+        }, 1000);
+      } else if (timerSeconds === 0 && timerActive) {
+        setTimerActive(false);
+      }
+      return () => clearInterval(interval);
+    }, [timerActive, timerSeconds]);
+
+    // Handle Start Interview
+    const handleStartInterview = () => {
+      setInterviewStarted(true);
+      setCurrentQuestion(0);
+      setAnswers({});
+      setCurrentAnswer('');
+      setInterviewCompleted(false);
+      setInterviewResult(null);
+      setTimerSeconds(90);
+      setTimerActive(true);
+
+      if (autoReadAloud && questions[0]) {
+        setTimeout(() => speakText(questions[0].question), 400);
+      }
+    };
+
+    // Handle Next Question
+    const handleNextQuestion = () => {
+      stopSpeaking();
+      const updatedAnswers = { ...answers, [currentQuestion]: currentAnswer };
+      setAnswers(updatedAnswers);
+      setCurrentAnswer('');
+
+      if (currentQuestion < questions.length - 1) {
+        const nextIdx = currentQuestion + 1;
+        setCurrentQuestion(nextIdx);
+        setTimerSeconds(90);
+        setTimerActive(true);
+        if (autoReadAloud && questions[nextIdx]) {
+          setTimeout(() => speakText(questions[nextIdx].question), 400);
+        }
+      } else {
+        // Complete interview & Calculate detailed score
+        setTimerActive(false);
+        setInterviewCompleted(true);
+        
+        let totalScore = 0;
+        const qDetails = questions.map((q, idx) => {
+          const userAns = updatedAnswers[idx] || '';
+          const words = userAns.trim() ? userAns.trim().split(/\s+/).length : 0;
+          const matchedKw = q.keywords.filter(kw => userAns.toLowerCase().includes(kw.toLowerCase()));
+          const kwScore = (matchedKw.length / q.keywords.length) * 60;
+          const wordLengthScore = Math.min(40, (words / 30) * 40);
+          const qScore = Math.round(kwScore + wordLengthScore);
+          totalScore += qScore;
+
+          return {
+            question: q.question,
+            userAnswer: userAns || "No answer provided.",
+            score: qScore,
+            matchedKeywords: matchedKw,
+            missingKeywords: q.keywords.filter(kw => !matchedKw.includes(kw)),
+            words
+          };
+        });
+
+        const finalScore = Math.round(totalScore / questions.length);
+
+        setInterviewResult({
+          score: finalScore,
+          totalQuestions: questions.length,
+          answered: Object.keys(updatedAnswers).filter(k => updatedAnswers[k].trim().length > 0).length,
+          rating: finalScore >= 80 ? 'Excellent' : finalScore >= 60 ? 'Good' : finalScore >= 40 ? 'Average' : 'Needs Improvement',
+          questionDetails: qDetails,
+          feedback: [
+            finalScore >= 75 ? 'Strong technical terminology used in responses.' : 'Incorporate more domain-specific terms.',
+            'Maintain structured responses using the STAR method for experience questions.',
+            'Aim for 100-150 words per response to cover key points comprehensively.',
+            'Good pacing and response confidence during the session.'
+          ]
+        });
+      }
+    };
+
+    const handleEndInterview = () => {
+      stopSpeaking();
+      setTimerActive(false);
+      setInterviewStarted(false);
+      setInterviewCompleted(false);
+      setInterviewResult(null);
+      setCurrentQuestion(0);
+      setAnswers({});
+      setCurrentAnswer('');
+    };
+
+    // Download AI Performance Report
+    const handleDownloadReport = () => {
+      if (!interviewResult) return;
+      const report = `=========================================
+AIT AI MOCK INTERVIEW EVALUATION REPORT
+=========================================
+Date: ${new Date().toLocaleDateString()}
+Interview Type: ${interviewType}
+Difficulty Level: ${difficulty}
+Overall Score: ${interviewResult.score} / 100
+Rating: ${interviewResult.rating}
+Questions Answered: ${interviewResult.answered} / ${interviewResult.totalQuestions}
+
+QUESTION BREAKDOWN:
+${interviewResult.questionDetails.map((q, i) => `
+Q${i+1}: ${q.question}
+Score: ${q.score}/100 | Word Count: ${q.words} words
+Keywords Matched: ${q.matchedKeywords.join(', ') || 'None'}
+Keywords Missing: ${q.missingKeywords.join(', ') || 'None'}
+User Response: "${q.userAnswer}"
+`).join('\n-----------------------------------------')}
+
+AI FEEDBACK & RECOMMENDATIONS:
+${interviewResult.feedback.map(f => `- ${f}`).join('\n')}
+
+=========================================
+Generated by AIT Placement Portal AI Engine
+`;
+      const blob = new Blob([report], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `AIT_Mock_Interview_${interviewType}_${interviewResult.score}pts.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // Calculate live answer metrics
+    const currentWords = currentAnswer.trim() ? currentAnswer.trim().split(/\s+/).length : 0;
+    const estSpeakingTime = Math.ceil(currentWords / 2.2); // ~130 wpm
+    const currentQKeywords = questions[currentQuestion]?.keywords || [];
+    const liveMatchedKw = currentQKeywords.filter(kw => currentAnswer.toLowerCase().includes(kw.toLowerCase()));
+
+    return (
+      <div className="feature-page-container">
+        <div className="mock-interview-layout">
+          <div className="mock-interview-main">
+            <div className="mock-interview-card">
+              {!interviewStarted && !interviewCompleted ? (
+                <>
+                  {/* Header */}
+                  <div className="mock-interview-header">
+                    <h2 className="mock-interview-title">AI Mock Interview</h2>
+                    <p className="mock-interview-subtitle">Practice. Improve. Succeed.</p>
+                  </div>
+
+                  {/* Type Selector */}
+                  <div className="mock-interview-types">
+                    {interviewTypes.map(type => (
+                      <button
+                        key={type}
+                        className={`mock-type-btn ${interviewType === type ? 'active' : ''}`}
+                        onClick={() => setInterviewType(type)}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Difficulty Selector */}
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}>
+                    <span style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--text-muted)', alignSelf: 'center', marginRight: '6px' }}>Difficulty:</span>
+                    {difficultyLevels.map(lvl => (
+                      <button
+                        key={lvl}
+                        style={{
+                          padding: '6px 14px',
+                          borderRadius: '10px',
+                          border: difficulty === lvl ? '1.5px solid var(--primary-maroon)' : '1px solid var(--border-medium)',
+                          backgroundColor: difficulty === lvl ? 'var(--primary-maroon-light)' : 'var(--bg-white)',
+                          color: difficulty === lvl ? 'var(--primary-maroon)' : 'var(--text-muted)',
+                          fontSize: '12px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          fontFamily: 'var(--font-family)'
+                        }}
+                        onClick={() => setDifficulty(lvl)}
+                      >
+                        {lvl}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Feature Icons */}
+                  <div className="mock-interview-features">
+                    <div className="mock-feature-item" style={{ cursor: 'pointer' }} onClick={() => speakText("AI Voice Synthesis engine is active and ready for your interview session.")}>
+                      <div className="mock-feature-icon" style={{ color: '#9333EA', backgroundColor: '#F3E8FF' }}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                          <line x1="12" y1="19" x2="12" y2="23"/>
+                          <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                      </div>
+                      <span className="mock-feature-label">AI Voice</span>
+                    </div>
+                    <div className="mock-feature-item">
+                      <div className="mock-feature-icon" style={{ color: '#DC2626', backgroundColor: '#FEE2E2' }}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M23 7l-7 5 7 5V7z"/>
+                          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                          <circle cx="8.5" cy="12" r="2.5" fill="none"/>
+                        </svg>
+                      </div>
+                      <span className="mock-feature-label">Real-time Feedback</span>
+                    </div>
+                    <div className="mock-feature-item">
+                      <div className="mock-feature-icon" style={{ color: '#16A34A', backgroundColor: '#DCFCE7' }}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                          <path d="M8 10h8"/>
+                          <path d="M8 14h4"/>
+                        </svg>
+                      </div>
+                      <span className="mock-feature-label">Performance Analysis</span>
+                    </div>
+                  </div>
+
+                  {/* Controls Bar */}
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '700', color: 'var(--text-main)', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={autoReadAloud}
+                        onChange={(e) => setAutoReadAloud(e.target.checked)}
+                        style={{ accentColor: 'var(--primary-maroon)', width: '16px', height: '16px' }}
+                      />
+                      🔊 Auto-read questions aloud
+                    </label>
+                  </div>
+
+                  {/* Start Button */}
+                  <button className="mock-start-btn" onClick={handleStartInterview}>
+                    Start {interviewType} Interview ({difficulty})
+                  </button>
+
+                  {/* Recent Interviews */}
+                  <div className="mock-recent-section">
+                    <div className="mock-recent-header">
+                      <span className="mock-recent-title">Recent Interviews</span>
+                      <button className="mock-view-all-btn" onClick={() => setSelectedHistoryModal(recentInterviews)}>View History</button>
+                    </div>
+                    <div className="mock-recent-list">
+                      {recentInterviews.map(interview => (
+                        <div
+                          key={interview.id}
+                          className="mock-recent-item"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => setSelectedHistoryModal(interview)}
+                        >
+                          <div className="mock-recent-dot" style={{ backgroundColor: interview.statusColor }}></div>
+                          <span className="mock-recent-role">{interview.role}</span>
+                          <span className="mock-recent-date">{interview.date}</span>
+                          <span className="mock-recent-perf">{interview.performance} ({interview.score}%)</span>
+                          <span className="mock-recent-status" style={{
+                            color: interview.statusColor,
+                            backgroundColor: interview.statusBg
+                          }}>{interview.status}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : interviewStarted && !interviewCompleted ? (
+                /* Active Interview Session */
+                <div className="mock-active-session">
+                  <div className="mock-session-header">
+                    <div>
+                      <h3 className="mock-session-title">{interviewType} Interview ({difficulty})</h3>
+                      <p className="mock-session-subtitle">Question {currentQuestion + 1} of {questions.length}</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      {/* Timer Pill */}
+                      <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 14px',
+                        borderRadius: '12px',
+                        backgroundColor: timerSeconds < 20 ? '#FEE2E2' : 'var(--bg-card)',
+                        color: timerSeconds < 20 ? '#DC2626' : 'var(--primary-maroon)',
+                        border: '1px solid var(--border-medium)',
+                        fontWeight: '800',
+                        fontSize: '13px'
+                      }}>
+                        ⏱ {Math.floor(timerSeconds / 60)}:{(timerSeconds % 60).toString().padStart(2, '0')}
+                      </div>
+
+                      {/* Read Aloud Button */}
+                      <button
+                        className="mock-record-btn"
+                        onClick={() => isSpeaking ? stopSpeaking() : speakText(questions[currentQuestion].question)}
+                        style={{ borderColor: isSpeaking ? '#9333EA' : 'var(--border-medium)' }}
+                      >
+                        {isSpeaking ? '🔊 Speaking...' : '🔊 Read Aloud'}
+                      </button>
+
+                      {/* Voice Input Button */}
+                      <button
+                        className={`mock-record-btn ${isRecording ? 'recording' : ''}`}
+                        onClick={toggleRecording}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill={isRecording ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+                          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                        </svg>
+                        {isRecording ? 'Listening...' : 'Voice Input'}
+                      </button>
+
+                      <button className="mock-end-btn" onClick={handleEndInterview}>
+                        End Session
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="mock-progress-bar">
+                    <div
+                      className="mock-progress-fill"
+                      style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+                    ></div>
+                  </div>
+
+                  {/* Question Card */}
+                  <div className="mock-question-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div className="mock-question-number">Q{currentQuestion + 1}</div>
+                      <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--primary-maroon)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {difficulty}
+                      </span>
+                    </div>
+                    <p className="mock-question-text">{questions[currentQuestion].question}</p>
+                    <p className="mock-question-hint">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                      </svg>
+                      Hint: {questions[currentQuestion].hint}
+                    </p>
+                  </div>
+
+                  {/* Live Keywords Analysis Pill Bar */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', backgroundColor: 'var(--bg-card)', padding: '10px 14px', borderRadius: '12px', border: '1px solid var(--border-light)' }}>
+                    <span style={{ fontSize: '12px', fontWeight: '800', color: 'var(--text-muted)' }}>Target Keywords:</span>
+                    {currentQKeywords.map((kw, i) => {
+                      const matched = liveMatchedKw.includes(kw);
+                      return (
+                        <span key={i} style={{
+                          fontSize: '11.5px',
+                          fontWeight: '700',
+                          padding: '3px 10px',
+                          borderRadius: '8px',
+                          backgroundColor: matched ? '#DCFCE7' : 'white',
+                          color: matched ? '#16A34A' : 'var(--text-light)',
+                          border: matched ? '1px solid #BBF7D0' : '1px solid var(--border-medium)',
+                          transition: 'all 0.2s ease'
+                        }}>
+                          {matched ? '✓ ' : ''}{kw}
+                        </span>
+                      );
+                    })}
+                  </div>
+
+                  {/* Answer Input */}
+                  <div className="mock-answer-area">
+                    <textarea
+                      className="mock-answer-input"
+                      placeholder="Type or click 'Voice Input' to speak your answer... Speak naturally as in a real interview."
+                      value={currentAnswer}
+                      onChange={(e) => setCurrentAnswer(e.target.value)}
+                      rows={5}
+                    />
+                    <div className="mock-answer-actions">
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        <span className="mock-char-count">{currentWords} words ({currentAnswer.length} chars)</span>
+                        {currentWords > 0 && (
+                          <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--primary-maroon)' }}>
+                            ~{estSpeakingTime}s est. speaking time
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        className="mock-next-btn"
+                        onClick={handleNextQuestion}
+                        disabled={!currentAnswer.trim()}
+                      >
+                        {currentQuestion < questions.length - 1 ? 'Next Question →' : 'Finish & Evaluate ✓'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Interview Results */
+                <div className="mock-results-section">
+                  <div className="mock-results-header">
+                    <div className="mock-results-score-circle" style={{
+                      borderColor: interviewResult?.score >= 80 ? '#16A34A' : interviewResult?.score >= 60 ? '#D97706' : '#DC2626'
+                    }}>
+                      <span className="mock-results-score-value">{interviewResult?.score}</span>
+                      <span className="mock-results-score-label">/ 100</span>
+                    </div>
+                    <div>
+                      <h3 className="mock-results-title">Interview Completed!</h3>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <span className="mock-results-rating" style={{
+                          color: interviewResult?.score >= 80 ? '#16A34A' : interviewResult?.score >= 60 ? '#D97706' : '#DC2626',
+                          backgroundColor: interviewResult?.score >= 80 ? '#DCFCE7' : interviewResult?.score >= 60 ? '#FEF9C3' : '#FEE2E2'
+                        }}>{interviewResult?.rating}</span>
+                        <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-muted)' }}>
+                          ({interviewType} - {difficulty})
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mock-results-stats">
+                    <div className="mock-stat-box">
+                      <span className="mock-stat-value">{interviewResult?.totalQuestions}</span>
+                      <span className="mock-stat-label">Total Questions</span>
+                    </div>
+                    <div className="mock-stat-box">
+                      <span className="mock-stat-value">{interviewResult?.answered}</span>
+                      <span className="mock-stat-label">Answered</span>
+                    </div>
+                    <div className="mock-stat-box">
+                      <span className="mock-stat-value">{difficulty}</span>
+                      <span className="mock-stat-label">Difficulty</span>
+                    </div>
+                  </div>
+
+                  {/* Detailed Q&A Breakdown */}
+                  {interviewResult?.questionDetails && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '10px' }}>
+                      <h4 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--primary-maroon)' }}>
+                        Detailed Answer Breakdown
+                      </h4>
+                      {interviewResult.questionDetails.map((item, idx) => (
+                        <div key={idx} style={{
+                          padding: '16px', borderRadius: '14px', backgroundColor: 'var(--bg-card)',
+                          border: '1px solid var(--border-light)', display: 'flex', flexDirection: 'column', gap: '8px'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '13.5px', fontWeight: '800', color: 'var(--text-main)' }}>
+                              Q{idx + 1}: {item.question}
+                            </span>
+                            <span style={{
+                              fontSize: '12px', fontWeight: '800', padding: '2px 8px', borderRadius: '6px',
+                              backgroundColor: item.score >= 75 ? '#DCFCE7' : '#FEF9C3',
+                              color: item.score >= 75 ? '#15803D' : '#A16207'
+                            }}>
+                              {item.score}/100
+                            </span>
+                          </div>
+                          <p style={{ fontSize: '13px', color: 'var(--text-muted)', italic: 'true', backgroundColor: 'white', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-light)' }}>
+                            "{item.userAnswer}"
+                          </p>
+                          <div style={{ display: 'flex', gap: '8px', fontSize: '12px', flexWrap: 'wrap' }}>
+                            <span style={{ color: '#16A34A', fontWeight: '700' }}>✓ Matched: {item.matchedKeywords.join(', ') || 'None'}</span>
+                            {item.missingKeywords.length > 0 && (
+                              <span style={{ color: '#DC2626', fontWeight: '700' }}>⚠ Consider adding: {item.missingKeywords.join(', ')}</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="mock-results-feedback">
+                    <h4 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--primary-maroon)', marginBottom: '12px' }}>
+                      AI Feedback & Recommendations
+                    </h4>
+                    {interviewResult?.feedback.map((fb, idx) => (
+                      <div key={idx} className="mock-feedback-item">
+                        <span className="mock-feedback-check">✓</span>
+                        <span>{fb}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '20px', flexWrap: 'wrap' }}>
+                    <button className="mock-start-btn" style={{ flex: 1, marginBottom: 0 }} onClick={handleStartInterview}>
+                      Retake Interview
+                    </button>
+                    <button
+                      className="mock-back-btn"
+                      style={{ padding: '14px 20px', backgroundColor: 'var(--primary-maroon-light)', color: 'var(--primary-maroon)', borderColor: 'var(--primary-maroon)' }}
+                      onClick={handleDownloadReport}
+                    >
+                      📄 Download Report
+                    </button>
+                    <button className="mock-back-btn" onClick={handleEndInterview}>
+                      Back to Home
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* History Item Modal */}
+        {selectedHistoryModal && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', zIndex: 1000, padding: '20px'
+          }}>
+            <div style={{
+              backgroundColor: 'white', borderRadius: '24px', padding: '32px',
+              maxWidth: '550px', width: '100%', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)',
+              border: '1px solid var(--border-light)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '14px', marginBottom: '16px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--primary-maroon)' }}>Interview History Details</h3>
+                <button
+                  style={{ border: 'none', background: 'transparent', fontSize: '18px', fontWeight: '800', cursor: 'pointer', color: 'var(--text-light)' }}
+                  onClick={() => setSelectedHistoryModal(null)}
+                >
+                  ✕
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '13.5px' }}>
+                {Array.isArray(selectedHistoryModal) ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {selectedHistoryModal.map(h => (
+                      <div key={h.id} style={{ padding: '12px', border: '1px solid var(--border-light)', borderRadius: '12px', backgroundColor: 'var(--bg-card)' }}>
+                        <div style={{ fontWeight: '800' }}>{h.role} ({h.type})</div>
+                        <div style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>Date: {h.date} | Score: {h.score}%</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <div><strong>Role:</strong> {selectedHistoryModal.role}</div>
+                    <div><strong>Date:</strong> {selectedHistoryModal.date}</div>
+                    <div><strong>Category:</strong> {selectedHistoryModal.type} ({selectedHistoryModal.difficulty})</div>
+                    <div><strong>Performance Rating:</strong> {selectedHistoryModal.performance}</div>
+                    <div><strong>Overall Score:</strong> {selectedHistoryModal.score}%</div>
+                    <div style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--primary-maroon-light)', color: 'var(--primary-maroon)', fontWeight: '700', fontSize: '12.5px', marginTop: '8px' }}>
+                      ✓ Verified assessment record logged in placement portal database.
+                    </div>
+                  </>
+                )}
+              </div>
+              <button
+                className="btn-apply"
+                style={{ width: '100%', marginTop: '20px' }}
+                onClick={() => setSelectedHistoryModal(null)}
+              >
+                Close Details
+              </button>
+            </div>
+          </div>
         )}
       </div>
     );
