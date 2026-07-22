@@ -16,7 +16,8 @@ import {
   LogoutIcon,
   ResourcesIcon,
   ChatbotIcon,
-  AlumniIcon
+  AlumniIcon,
+  BellIcon
 } from './Icons';
 
 export const menuItems = [
@@ -35,6 +36,7 @@ export const menuItems = [
   { id: 'chatbot', label: 'Chatbot / Support', icon: ChatbotIcon },
   { id: 'alumni', label: 'Alumni Network', icon: AlumniIcon },
   { id: 'documents', label: 'Documents', icon: DocumentsIcon },
+  { id: 'notifications', label: 'Notifications', icon: BellIcon },
   { id: 'settings', label: 'Settings', icon: SettingsIcon },
 ];
 

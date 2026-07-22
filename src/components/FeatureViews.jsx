@@ -24,7 +24,8 @@ import {
   ResourcesIcon,
   ChatbotIcon,
   SparklesIcon as SparklesIconAlias,
-  AlumniIcon
+  AlumniIcon,
+  BellIcon
 } from './Icons';
 
 // ─── Standalone Alumni Network Component ───────────────────────────────
@@ -2119,6 +2120,435 @@ Report generated via AIT AI Resume Workspace.
     );
   }
 
+  // Notifications View
+  if (activeTab === 'notifications') {
+    const [filter, setFilter] = useState('all');
+    const [notifList, setNotifList] = useState([
+      { 
+        id: 1, 
+        title: "Zoho Drive Registration is Open", 
+        sub: "Register before 24 Jul 2025", 
+        time: "10:30 AM", 
+        iconType: "orange", 
+        icon: <DocumentsIcon style={{ width: '20px', height: '20px' }} />,
+        unread: true,
+        important: true 
+      },
+      { 
+        id: 2, 
+        title: "TCS Online Test will be on 30 Jul 2025", 
+        sub: "Check your email for test link", 
+        time: "Yesterday", 
+        iconType: "purple", 
+        icon: <AssessmentsIcon style={{ width: '20px', height: '20px' }} />,
+        unread: true,
+        important: false 
+      },
+      { 
+        id: 3, 
+        title: "Infosys Interview Shortlist Released", 
+        sub: "Check your dashboard", 
+        time: "19 Jul 2025", 
+        iconType: "blue", 
+        icon: <ProfileIcon style={{ width: '20px', height: '20px' }} />,
+        unread: false,
+        important: true 
+      },
+      { 
+        id: 4, 
+        title: "Resume Writing Workshop on 25 Jul 2025", 
+        sub: "Venue: Seminar Hall", 
+        time: "19 Jul 2025", 
+        iconType: "green", 
+        icon: <ResumeIcon style={{ width: '20px', height: '20px' }} />,
+        unread: false,
+        important: false 
+      }
+    ]);
+
+    const handleToggleRead = (id) => {
+      setNotifList(prev => prev.map(n => n.id === id ? { ...n, unread: !n.unread } : n));
+    };
+
+    const handleMarkAllRead = () => {
+      setNotifList(prev => prev.map(n => ({ ...n, unread: false })));
+    };
+
+    const filteredNotifs = notifList.filter(n => {
+      if (filter === 'unread') return n.unread;
+      if (filter === 'important') return n.important;
+      return true;
+    });
+
+    return (
+      <div className="feature-page-container">
+        <div className="notifications-workspace">
+          {/* Header */}
+          <div className="resume-workspace-header" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+            <div>
+              <h2 style={{ fontSize: '20px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <BellIcon style={{ color: 'var(--primary-maroon)' }} /> 16. Notifications
+              </h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>
+                Stay updated with critical alerts, interview results, and campus drive schedules.
+              </p>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              {notifList.some(n => n.unread) && (
+                <button 
+                  className="api-settings-btn" 
+                  style={{ fontSize: '12.5px', padding: '6px 12px' }}
+                  onClick={handleMarkAllRead}
+                >
+                  ✓ Mark all as read
+                </button>
+              )}
+              
+              <div className="resume-tabs" style={{ margin: 0 }}>
+                <button 
+                  className={`resume-tab-btn ${filter === 'all' ? 'active' : ''}`}
+                  onClick={() => setFilter('all')}
+                >
+                  All
+                </button>
+                <button 
+                  className={`resume-tab-btn ${filter === 'unread' ? 'active' : ''}`}
+                  onClick={() => setFilter('unread')}
+                >
+                  Unread
+                </button>
+                <button 
+                  className={`resume-tab-btn ${filter === 'important' ? 'active' : ''}`}
+                  onClick={() => setFilter('important')}
+                >
+                  Important
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* List */}
+          <div className="notifications-list">
+            {filteredNotifs.length > 0 ? (
+              filteredNotifs.map(notif => (
+                <div 
+                  key={notif.id} 
+                  className={`notification-row-item ${notif.unread ? 'unread' : ''}`}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleToggleRead(notif.id)}
+                  title="Click to toggle read status"
+                >
+                  <div className="notification-left-content">
+                    <div className={`notification-icon-badge ${notif.iconType}`}>
+                      {notif.icon}
+                    </div>
+                    <div>
+                      <div className="notification-text-title">{notif.title}</div>
+                      <div className="notification-text-sub">{notif.sub}</div>
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    {notif.important && (
+                      <span style={{ 
+                        fontSize: '10.5px', 
+                        fontWeight: '800', 
+                        color: 'var(--primary-maroon)', 
+                        backgroundColor: 'var(--primary-maroon-light)', 
+                        padding: '2px 8px', 
+                        borderRadius: '8px'
+                      }}>
+                        Urgent
+                      </span>
+                    )}
+                    <div className="notification-right-meta">
+                      {notif.time}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)', fontSize: '14.5px' }}>
+                📭 No {filter === 'all' ? '' : filter} notifications found. All caught up!
+              </div>
+            )}
+          </div>
+
+          {/* Footer Action Button */}
+          <div className="notification-footer-btn-container">
+            <button 
+              className="btn-apply"
+              style={{ width: '100%', maxWidth: '240px', padding: '12px', fontSize: '13px' }}
+              onClick={() => alert("All catchable notifications loaded. You are viewing the latest status updates.")}
+            >
+              View All Notifications
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Documents View
+  if (activeTab === 'documents') {
+    const [offerLetterUploaded, setOfferLetterUploaded] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [showLetterModal, setShowLetterModal] = useState(false);
+
+    const handleAdminUploadSimulation = () => {
+      setIsUploading(true);
+      setUploadProgress(10);
+      
+      const interval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+              setIsUploading(false);
+              setOfferLetterUploaded(true);
+            }, 500);
+            return 100;
+          }
+          return prev + 30;
+        });
+      }, 300);
+    };
+
+    const handleDownloadOfferLetter = () => {
+      // Build a simulated plain text offer letter download
+      const offerContent = `ZOHO CORPORATION PRIVATE LIMITED
+Estancia IT Park, Plot No. 140 & 151, GST Road, Vallancherry, Chengalpattu District, Tamil Nadu - 603202.
+
+Dear Jayasurya K,
+
+Congratulations! We are pleased to offer you the position of Software Developer at Zoho Corporation.
+
+- Role: Software Developer
+- CTC: 12 LPA (12,0,000 INR per annum)
+- Location: Chennai, India
+- Joining Date: September 01, 2025
+
+Your employment will be subject to successful completion of all background and academic credential verifications.
+
+Sincerely,
+HR Recruitment Team
+Zoho Corporation`;
+
+      const element = document.createElement("a");
+      const file = new Blob([offerContent], { type: 'text/plain' });
+      element.href = URL.createObjectURL(file);
+      element.download = "Zoho_Offer_Letter_Jayasurya_K.txt";
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    };
+
+    return (
+      <div className="feature-page-container">
+        <div className="training-workspace">
+          {/* Header */}
+          <div className="resume-workspace-header" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+            <div>
+              <h2 style={{ fontSize: '20px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <DocumentsIcon style={{ color: 'var(--primary-maroon)' }} /> Offer Letter
+              </h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>
+                Access and submit academic marksheets, verification reports, and official selection letters.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            
+            {/* Simulation panel */}
+            <div className="admin-upload-simulation-panel">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '16px' }}>⚙️</span>
+                <strong style={{ fontSize: '13.5px', color: '#854D0E' }}>Admin Sandbox Simulator</strong>
+              </div>
+              <p style={{ fontSize: '12.5px', color: '#A16207', marginBottom: '14px', maxWidth: '500px', margin: '0 auto 12px auto' }}>
+                Once the admin uploads the offer letter, it will immediately display below. Try simulating this upload!
+              </p>
+
+              {isUploading ? (
+                <div style={{ maxWidth: '300px', margin: '0 auto' }}>
+                  <div style={{ fontSize: '12px', fontWeight: '800', marginBottom: '6px', color: 'var(--text-muted)' }}>
+                    Uploading Offer Letter... {uploadProgress}%
+                  </div>
+                  <div style={{ height: '6px', width: '100%', backgroundColor: 'var(--border-light)', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${uploadProgress}%`, backgroundColor: 'var(--primary-maroon)', borderRadius: '3px', transition: 'width 0.2s ease' }} />
+                  </div>
+                </div>
+              ) : !offerLetterUploaded ? (
+                <button 
+                  className="btn-apply"
+                  style={{ backgroundColor: '#EAB308', color: '#451A03', border: '1px solid #CA8A04' }}
+                  onClick={handleAdminUploadSimulation}
+                >
+                  📤 Simulate Admin Uploading Offer Letter
+                </button>
+              ) : (
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', alignItems: 'center' }}>
+                  <span style={{ color: '#16A34A', fontSize: '13px', fontWeight: '800' }}>✓ Simulated Offer Letter Uploaded Successfully!</span>
+                  <button 
+                    className="api-settings-btn"
+                    style={{ padding: '4px 10px', fontSize: '11px' }}
+                    onClick={() => setOfferLetterUploaded(false)}
+                  >
+                    Revoke/Reset
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Offer Letter Main View */}
+            {offerLetterUploaded ? (
+              <div>
+                <h3 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '16px', color: 'var(--text-main)', textAlign: 'center' }}>
+                  19. Offer Letter
+                </h3>
+                
+                <div className="offer-letter-card">
+                  {/* Celebration graphic banner */}
+                  <div className="celebration-banner">
+                    <svg width="100" height="100" viewBox="0 0 100 100" style={{ marginBottom: '12px' }}>
+                      {/* Popper cone */}
+                      <polygon points="35,65 50,45 60,55" fill="#F59E0B" stroke="#D97706" strokeWidth="2" />
+                      {/* Popper base */}
+                      <path d="M35,65 L25,75 L30,80 L35,65 Z" fill="#8B5CF6" />
+                      {/* Confetti pieces */}
+                      <circle cx="65" cy="30" r="3" fill="#EF4444" />
+                      <circle cx="45" cy="25" r="2.5" fill="#3B82F6" />
+                      <circle cx="55" cy="15" r="2" fill="#10B981" />
+                      <circle cx="75" cy="40" r="3" fill="#EC4899" />
+                      <circle cx="30" cy="45" r="2" fill="#F59E0B" />
+                      <path d="M62,48 Q70,43 72,50" fill="none" stroke="#F59E0B" strokeWidth="2" />
+                      <path d="M48,35 Q50,28 58,32" fill="none" stroke="#8B5CF6" strokeWidth="2" />
+                    </svg>
+                    
+                    <div className="celebration-title">Congratulations! 🎉</div>
+                    <div className="celebration-subtitle">You have been selected</div>
+                  </div>
+
+                  {/* Company Badge with inline Zoho logo */}
+                  <div className="offer-company-badge">
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', marginRight: '10px' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '4px', backgroundColor: '#E11D48', color: 'white', fontWeight: '800', fontSize: '12px' }}>Z</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '4px', backgroundColor: '#3B82F6', color: 'white', fontWeight: '800', fontSize: '12px' }}>o</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '4px', backgroundColor: '#EAB308', color: 'white', fontWeight: '800', fontSize: '12px' }}>h</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', borderRadius: '4px', backgroundColor: '#10B981', color: 'white', fontWeight: '800', fontSize: '12px' }}>o</span>
+                    </div>
+                    Zoho Corporation
+                  </div>
+
+                  {/* Offer columns grid matching mockup */}
+                  <div className="offer-details-grid">
+                    <div className="offer-detail-col">
+                      <span className="offer-detail-label">Role</span>
+                      <span className="offer-detail-value">Software Developer</span>
+                    </div>
+                    <div className="offer-detail-col">
+                      <span className="offer-detail-label">CTC</span>
+                      <span className="offer-detail-value">12 LPA</span>
+                    </div>
+                    <div className="offer-detail-col">
+                      <span className="offer-detail-label">Location</span>
+                      <span className="offer-detail-value">Chennai</span>
+                    </div>
+                    <div className="offer-detail-col">
+                      <span className="offer-detail-label">Joining Date</span>
+                      <span className="offer-detail-value">01 Sep 2025</span>
+                    </div>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="offer-action-buttons">
+                    <button className="offer-btn-primary" onClick={() => setShowLetterModal(true)}>
+                      View Offer Letter
+                    </button>
+                    <button className="offer-btn-secondary" onClick={handleDownloadOfferLetter}>
+                      Download Offer Letter
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div style={{
+                padding: '48px 24px', border: '1px solid var(--border-light)', borderRadius: '24px',
+                backgroundColor: 'white', textAlign: 'center', color: 'var(--text-muted)'
+              }}>
+                <div style={{ fontSize: '40px', marginBottom: '12px' }}>📁</div>
+                <h4 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text-main)' }}>No Issued Offer Letters</h4>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px', maxWidth: '380px', margin: '4px auto 0 auto' }}>
+                  Once you clear placement interviews and the administrator publishes your official appointment details, it will appear here.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Offer Letter Overlay Modal */}
+        {showLetterModal && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', zIndex: 1000, padding: '20px'
+          }}>
+            <div style={{
+              backgroundColor: 'white', borderRadius: '24px', padding: '32px',
+              maxWidth: '600px', width: '100%', maxHeight: '90vh', overflowY: 'auto',
+              boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)', border: '1px solid var(--border-light)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '16px', marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--primary-maroon)' }}>Zoho Corporation - Letter of Intent</h3>
+                <button 
+                  style={{ border: 'none', background: 'transparent', fontSize: '18px', fontWeight: '800', cursor: 'pointer', color: 'var(--text-light)' }}
+                  onClick={() => setShowLetterModal(false)}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div style={{ fontFamily: 'monospace', fontSize: '12.5px', lineHeight: '1.6', color: '#374151', whiteSpace: 'pre-line', backgroundColor: '#F9FAFB', padding: '20px', borderRadius: '14px', border: '1px solid var(--border-light)' }}>
+                <strong>ZOHO CORPORATION PRIVATE LIMITED</strong>{"\n"}
+                Estancia IT Park, Vallancherry, Chengalpattu, TN - 603202.{"\n\n"}
+                Date: July 22, 2026{"\n"}
+                Ref: ZOHO/HR/2026/0452{"\n\n"}
+                To,{"\n"}
+                <strong>Jayasurya K</strong>{"\n"}
+                AIT Campus, IT Department.{"\n\n"}
+                Dear Jayasurya,{"\n\n"}
+                We are pleased to offer you employment as a <strong>Software Developer</strong> at Zoho Corporation. Your annual compensation (CTC) will be <strong>12,00,000 INR</strong> (Twelve Lakhs per Annum).{"\n\n"}
+                Your location of employment will be our corporate headquarters in <strong>Chennai</strong>. You are expected to join us on <strong>September 01, 2025</strong>.{"\n\n"}
+                Please confirm your acceptance of this letter by clicking sign below.{"\n\n"}
+                Best regards,{"\n"}
+                HR Recruitment Team{"\n"}
+                Zoho Corporation
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' }}>
+                <button 
+                  className="api-settings-btn"
+                  onClick={() => setShowLetterModal(false)}
+                >
+                  Close
+                </button>
+                <button 
+                  className="btn-apply"
+                  onClick={() => { alert("Offer Letter signed successfully!"); setShowLetterModal(false); }}
+                >
+                  Sign & Accept Offer
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // Resources & Materials View
   if (activeTab === 'resources') {
     const [searchQuery, setSearchQuery] = useState('');
@@ -2368,7 +2798,6 @@ Report generated via AIT AI Resume Workspace.
   if (activeTab === 'alumni') {
     return <AlumniView />;
   }
-
   // Fallback view for other left menu tabs
   return (
     <div className="feature-page-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
