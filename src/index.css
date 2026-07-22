@@ -4194,3 +4194,36 @@ body {
     margin-top: 4px;
   }
 }
+
+/* =============================================
+   Profile Page Styles
+   ============================================= */
+.profile-overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px 48px;
+}
+
+.profile-overview-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile-overview-col.left-col {
+  border-right: 1.5px solid var(--border-light);
+  padding-right: 32px;
+}
+
+@media (max-width: 768px) {
+  .profile-overview-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .profile-overview-col.left-col {
+    border-right: none;
+    padding-right: 0;
+    border-bottom: 1.5px solid var(--border-light);
+    padding-bottom: 20px;
+  }
+}

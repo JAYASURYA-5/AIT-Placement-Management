@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import DriveCalendarPage from '../pages/DriveCalendar';
 import ApplicationsPage from '../pages/Applications';
+import ExternalProfile from '../pages/Profile';
 import {
   ProfileIcon,
   ApplicationsIcon,
