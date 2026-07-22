@@ -13,7 +13,10 @@ import {
   StatsIcon,
   DocumentsIcon,
   SettingsIcon,
-  LogoutIcon
+  LogoutIcon,
+  ResourcesIcon,
+  ChatbotIcon,
+  AlumniIcon
 } from './Icons';
 
 export const menuItems = [
@@ -28,6 +31,9 @@ export const menuItems = [
   { id: 'certificates', label: 'Certificates', icon: CertificatesIcon },
   { id: 'leaderboard', label: 'Leaderboard', icon: LeaderboardIcon },
   { id: 'stats', label: 'Placement Stats', icon: StatsIcon },
+  { id: 'resources', label: 'Resources', icon: ResourcesIcon },
+  { id: 'chatbot', label: 'Chatbot / Support', icon: ChatbotIcon },
+  { id: 'alumni', label: 'Alumni Network', icon: AlumniIcon },
   { id: 'documents', label: 'Documents', icon: DocumentsIcon },
   { id: 'settings', label: 'Settings', icon: SettingsIcon },
 ];

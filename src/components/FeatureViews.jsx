@@ -20,8 +20,393 @@ import {
   InfoIcon,
   RefreshIcon,
   DownloadIcon,
-  CodeIcon
+  CodeIcon,
+  ResourcesIcon,
+  ChatbotIcon,
+  SparklesIcon as SparklesIconAlias,
+  AlumniIcon
 } from './Icons';
+
+// ─── Standalone Alumni Network Component ───────────────────────────────
+function AlumniView() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeBatch, setActiveBatch] = useState('All');
+  const [connected, setConnected] = useState({});
+
+  const batches = ['All', '2017 Batch', '2018 Batch', '2019 Batch', '2020 Batch', '2021 Batch'];
+
+  const allAlumni = [
+    { id: 1, name: 'Rahul R',     role: 'Software Engineer',  company: 'Google',        batch: '2019 Batch', avatarBg: '#4F46E5', tag: 'Featured' },
+    { id: 2, name: 'Sneha M',     role: 'Product Manager',    company: 'Amazon',        batch: '2018 Batch', avatarBg: '#D97706', tag: 'Featured' },
+    { id: 3, name: 'Arun Kumar',  role: 'Data Scientist',     company: 'Microsoft',     batch: '2020 Batch', avatarBg: '#0EA5E9', tag: 'Featured' },
+    { id: 4, name: 'Priya S',     role: 'Frontend Engineer',  company: 'Flipkart',      batch: '2021 Batch', avatarBg: '#EC4899', tag: '' },
+    { id: 5, name: 'Karthik V',   role: 'DevOps Engineer',    company: 'Zoho',          batch: '2020 Batch', avatarBg: '#10B981', tag: '' },
+    { id: 6, name: 'Deepika R',   role: 'ML Engineer',        company: 'Infosys AI Lab',batch: '2019 Batch', avatarBg: '#8B5CF6', tag: '' },
+    { id: 7, name: 'Vikram N',    role: 'Cloud Architect',    company: 'TCS',           batch: '2017 Batch', avatarBg: '#F59E0B', tag: '' },
+    { id: 8, name: 'Ananya K',    role: 'UX Designer',        company: 'Swiggy',        batch: '2021 Batch', avatarBg: '#EF4444', tag: '' },
+  ];
+
+  const filtered = allAlumni.filter(a => {
+    const matchesBatch = activeBatch === 'All' || a.batch === activeBatch;
+    const matchesSearch =
+      a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.batch.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesBatch && matchesSearch;
+  });
+
+  const handleConnect = (id) => {
+    setConnected(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const getInitials = (name) => name.split(' ').map(n => n[0]).join('').toUpperCase();
+
+  return (
+    <div className="feature-page-container">
+      {/* Header — same style as Resources */}
+      <div style={{ marginBottom: '28px' }}>
+        <h2 style={{ fontSize: '22px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            width: '34px', height: '34px', borderRadius: '10px',
+            backgroundColor: 'var(--primary-maroon)', color: '#fff', fontSize: '14px', fontWeight: '800'
+          }}>20</span>
+          Alumni Network
+        </h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', fontWeight: '500' }}>
+          Connect with AIT alumni placed across top companies worldwide.
+        </p>
+      </div>
+
+      {/* Search Bar — identical to Resources */}
+      <div style={{ position: 'relative', marginBottom: '20px' }}>
+        <svg
+          style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', stroke: 'var(--text-muted)' }}
+          viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        >
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input
+          type="text"
+          placeholder="Search alumni..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="resources-search-input"
+        />
+      </div>
+
+      {/* Batch Filter Chips — same as Resources category chips */}
+      <div className="resources-category-bar">
+        {batches.map(b => (
+          <button
+            key={b}
+            className={`resources-cat-chip ${activeBatch === b ? 'active' : ''}`}
+            onClick={() => setActiveBatch(b)}
+          >
+            {b}
+          </button>
+        ))}
+      </div>
+
+      {/* Alumni Cards Grid — same grid as Resources */}
+      {filtered.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
+          <AlumniIcon style={{ width: '40px', height: '40px', margin: '0 auto 12px', display: 'block', stroke: 'var(--border-medium)' }} />
+          <p style={{ fontWeight: '600', fontSize: '14px' }}>No alumni found for <strong>"{searchQuery || activeBatch}"</strong></p>
+        </div>
+      ) : (
+        <div className="resources-grid">
+          {filtered.map(alumni => (
+            <div key={alumni.id} className="resource-card">
+              <div className="resource-card-info">
+                {/* Avatar — same shape as resource file icon */}
+                <div
+                  className="resource-file-icon"
+                  style={{ backgroundColor: alumni.avatarBg, color: '#fff', fontSize: '15px', fontWeight: '800', letterSpacing: '0' }}
+                >
+                  {getInitials(alumni.name)}
+                  {alumni.tag === 'Featured' && (
+                    <span style={{
+                      position: 'absolute', top: '-4px', right: '-4px',
+                      width: '10px', height: '10px', borderRadius: '50%',
+                      background: '#22C55E', border: '2px solid #fff'
+                    }}></span>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div style={{ flex: 1 }}>
+                  <h4 className="resource-title">{alumni.name}</h4>
+                  <p className="resource-meta">{alumni.role} &bull; {alumni.company}</p>
+                  <p className="resource-desc">{alumni.batch}</p>
+                </div>
+              </div>
+
+              {/* Connect Button — same slot as Download button */}
+              <button
+                className={`resource-download-btn${connected[alumni.id] ? '' : ''}`}
+                onClick={() => handleConnect(alumni.id)}
+                style={connected[alumni.id] ? {
+                  background: '#DCFCE7', color: '#15803D', borderColor: '#16A34A'
+                } : {}}
+              >
+                {connected[alumni.id] ? (
+                  <>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: '14px', height: '14px' }}>
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Connected
+                  </>
+                ) : (
+                  <>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '14px', height: '14px' }}>
+                      <path d="M16 11c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4 4 1.79 4 4z"/>
+                      <path d="M3 20c0-3.31 2.69-6 6-6h6c3.31 0 6 2.69 6 6"/>
+                    </svg>
+                    Connect
+                  </>
+                )}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Standalone Chatbot Component (separate to satisfy Rules of Hooks) ────────
+function ChatbotView() {
+  const messagesEndRef = useRef(null);
+  const [inputValue, setInputValue] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [messages, setMessages] = useState([
+    { id: 1, sender: 'bot', text: 'Hello Jayasurya! How can I help you today?', time: '10:24 AM' },
+    { id: 2, sender: 'user', text: 'When is the next TCS drive?', time: '10:25 AM' },
+    { id: 3, sender: 'bot', text: 'The next TCS drive is on 20 July 2025. Online test will be conducted. Please check your dashboard for more details.', time: '10:25 AM' },
+    { id: 4, sender: 'user', text: 'How to improve my resume?', time: '10:26 AM' },
+    { id: 5, sender: 'bot', text: 'You can use our AI Resume Analyzer to get personalized suggestions.', time: '10:26 AM' }
+  ]);
+
+  const quickPrompts = [
+    'What is the next TCS drive?',
+    'How to improve my resume?',
+    'What companies are visiting this month?',
+    'How do I prepare for aptitude tests?',
+    'What is the cutoff CGPA for Infosys?'
+  ];
+
+  const getBotResponse = (query) => {
+    const q = query.toLowerCase();
+    if (q.includes('tcs') && (q.includes('drive') || q.includes('next') || q.includes('when')))
+      return 'The next TCS drive is on 20 July 2025. It includes an Online Test (Aptitude + Coding), TR, MR, and HR rounds. Registration closes on 18 July 2025.';
+    if (q.includes('resume') || q.includes('cv'))
+      return '🔍 Use the AI Resume Analyzer in the Resume Workspace tab! It gives ATS score, keyword analysis, and rewrites weak bullet points using the STAR method.';
+    if (q.includes('infosys') && (q.includes('cgpa') || q.includes('cutoff') || q.includes('eligibility')))
+      return '📋 Infosys eligibility: Minimum 6.5 CGPA, No active backlogs, 60% throughout academics. Drive is scheduled for 30 July 2025.';
+    if (q.includes('compan') || q.includes('visiting') || q.includes('this month'))
+      return '🏢 Companies visiting this month: TCS (20 Jul), Infosys (30 Jul), Zoho (25 Jul). Check Drive Calendar for full details and registration links.';
+    if (q.includes('aptitude') || q.includes('prepare') || q.includes('preparation'))
+      return '📚 To prepare for aptitude tests: (1) Practice on the Assessments tab, (2) Download the Aptitude Handbook from Resources, (3) Take the Daily MCQ test in Training. Aim for 80%+ accuracy!';
+    if (q.includes('zoho'))
+      return '🚀 Zoho drive is on 25 July 2025 for Software Developer roles. CTC: ₹6.5 LPA. Requirements: Strong coding skills, no arrears. Registration open on the dashboard!';
+    if (q.includes('wipro') || q.includes('elite'))
+      return '🔷 Wipro Elite drive is on 25 August 2025. Role: Elite Developer | CTC: ₹6.5 LPA. Rounds: Online Assessment → Technical Interview → HR Round.';
+    if (q.includes('mock interview') || q.includes('interview prep'))
+      return '🎤 Use the Mock Interview section to practice! It includes HR, Technical, and Behavioral question sets with top company-specific tips.';
+    if (q.includes('leaderboard') || q.includes('rank') || q.includes('ranking'))
+      return '🏆 Check the Leaderboard tab to see your ranking among peers based on training, assessments, and profile completeness.';
+    if (q.includes('hello') || q.includes('hi') || q.includes('hey'))
+      return '👋 Hello Jayasurya! I am your Placement Assistant. Ask me about upcoming drives, resume tips, interview preparation, company details, or placement statistics!';
+    if (q.includes('thank'))
+      return "😊 You're welcome! Best of luck with your placement journey. Feel free to ask anything anytime!";
+    return `I understand you're asking about "${query}". For detailed info, check the relevant section — Drives Calendar, Resume Workspace, Training, or Assessments. I'm also here for quick queries! 💡`;
+  };
+
+  const getTimeString = () =>
+    new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+  useEffect(() => {
+    if (messagesEndRef.current)
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isTyping]);
+
+  const sendMessage = (text) => {
+    const trimmed = (text !== undefined ? text : inputValue).trim();
+    if (!trimmed) return;
+    setMessages(prev => [...prev, { id: Date.now(), sender: 'user', text: trimmed, time: getTimeString() }]);
+    setInputValue('');
+    setIsTyping(true);
+    setTimeout(() => {
+      setMessages(prev => [...prev, { id: Date.now() + 1, sender: 'bot', text: getBotResponse(trimmed), time: getTimeString() }]);
+      setIsTyping(false);
+    }, 1200 + Math.random() * 600);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  };
+
+  const keyFeatures = [
+    'Placement Assistant chat interface with conversation history',
+    "Sample prompts: 'What is the next TCS drive?', 'How to improve my resume?'",
+    'AI response includes calendar data, drive details and resume tips inline',
+    'Type your message... input with send button; minimise / close controls'
+  ];
+
+  const BotSvg = ({ size = 16 }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: size, height: size }}>
+      <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7H3a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
+      <path d="M7 14v4"/><path d="M17 14v4"/><path d="M9 18h6"/>
+      <circle cx="9" cy="12" r="1" fill="currentColor" stroke="none"/>
+      <circle cx="15" cy="12" r="1" fill="currentColor" stroke="none"/>
+    </svg>
+  );
+
+  return (
+    <div className="feature-page-container">
+      {/* Page Header */}
+      <div className="chatbot-page-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span className="chatbot-badge-num">18</span>
+          <h2 style={{ fontSize: '22px', fontWeight: '800' }}>Chatbot / Support</h2>
+        </div>
+        <button className="chatbot-ai-tools-btn">
+          <SparklesIconAlias style={{ width: '15px', height: '15px' }} />
+          AI Tools
+        </button>
+      </div>
+
+      {/* Two-column layout */}
+      <div className="chatbot-layout">
+
+        {/* LEFT: Chat Panel */}
+        <div className="chatbot-panel">
+          {/* Panel Header */}
+          <div className="chatbot-header">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div className="chatbot-avatar-bot"><BotSvg size={20} /></div>
+              <div>
+                <div style={{ fontSize: '14px', fontWeight: '800', color: 'var(--text-main)' }}>Placement Assistant</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
+                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#22C55E', display: 'inline-block' }}></span>
+                  <span style={{ fontSize: '11px', fontWeight: '600', color: '#16A34A' }}>Online</span>
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <button className="chatbot-header-icon-btn" title="Save conversation">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '17px', height: '17px' }}>
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </button>
+              <button className="chatbot-header-icon-btn" title="Clear chat" onClick={() => setMessages([{ id: Date.now(), sender: 'bot', text: 'Hello Jayasurya! How can I help you today?', time: getTimeString() }])}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '17px', height: '17px' }}>
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                </svg>
+              </button>
+              <button className="chatbot-header-icon-btn" title="Profile">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '17px', height: '17px' }}>
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Messages */}
+          <div className="chatbot-messages">
+            {messages.map(msg => (
+              <div key={msg.id} className={`chatbot-msg-row ${msg.sender}`}>
+                {msg.sender === 'bot' && <div className="chatbot-avatar-bot chatbot-msg-avatar"><BotSvg size={16} /></div>}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '72%' }}>
+                  <div className={`chatbot-bubble ${msg.sender}`}>{msg.text}</div>
+                  <span className="chatbot-timestamp">{msg.time}</span>
+                </div>
+                {msg.sender === 'user' && (
+                  <div className="chatbot-avatar-user chatbot-msg-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}>
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                )}
+              </div>
+            ))}
+            {isTyping && (
+              <div className="chatbot-msg-row bot">
+                <div className="chatbot-avatar-bot chatbot-msg-avatar"><BotSvg size={16} /></div>
+                <div className="chatbot-bubble bot chatbot-typing">
+                  <span className="chatbot-dot"></span>
+                  <span className="chatbot-dot"></span>
+                  <span className="chatbot-dot"></span>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Prompts */}
+          <div className="chatbot-quick-prompts">
+            {quickPrompts.slice(0, 3).map((p, i) => (
+              <button key={i} className="chatbot-quick-chip" onClick={() => sendMessage(p)}>{p}</button>
+            ))}
+          </div>
+
+          {/* Input Bar */}
+          <div className="chatbot-input-bar">
+            <input
+              type="text"
+              className="chatbot-input"
+              placeholder="Type your message..."
+              value={inputValue}
+              onChange={e => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={isTyping}
+            />
+            <button className="chatbot-send-btn" onClick={() => sendMessage(undefined)} disabled={!inputValue.trim() || isTyping} title="Send">
+              <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: '18px', height: '18px' }}>
+                <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 19-7z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* RIGHT: Key Features Panel */}
+        <div className="chatbot-features-panel">
+          <h3 className="chatbot-features-title">Key Features</h3>
+          <div className="chatbot-features-divider"></div>
+          <div className="chatbot-features-list">
+            {keyFeatures.map((feat, idx) => (
+              <div key={idx} className="chatbot-feature-item">
+                <span className="chatbot-feature-dot"></span>
+                <p className="chatbot-feature-text">{feat}</p>
+              </div>
+            ))}
+          </div>
+          <div className="chatbot-tip-card">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <SparklesIconAlias style={{ width: '16px', height: '16px', color: 'var(--primary-maroon)' }} />
+              <span style={{ fontWeight: '800', fontSize: '13px', color: 'var(--primary-maroon)' }}>Pro Tip</span>
+            </div>
+            <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: '1.5', fontWeight: '500' }}>
+              Ask me about <strong>specific companies</strong> like TCS, Infosys, Zoho, Wipro — I'll give you drive dates, eligibility, and preparation tips instantly!
+            </p>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
+            <button className="chatbot-action-btn" onClick={() => sendMessage('What companies are visiting this month?')}>📅 Upcoming Drives</button>
+            <button className="chatbot-action-btn" onClick={() => sendMessage('How to improve my resume?')}>📄 Resume Help</button>
+            <button className="chatbot-action-btn" onClick={() => sendMessage('How do I prepare for aptitude tests?')}>📚 Preparation Tips</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function FeatureView({ activeTab, drives, setActiveTab, onApplyDrive }) {
   if (activeTab === 'profile') {
@@ -1734,6 +2119,256 @@ Report generated via AIT AI Resume Workspace.
     );
   }
 
+  // Resources & Materials View
+  if (activeTab === 'resources') {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [activeCategory, setActiveCategory] = useState('All');
+    const [downloadingId, setDownloadingId] = useState(null);
+
+    const categories = ['All', 'Aptitude', 'Technical', 'Interview', 'Resume', 'Soft Skills'];
+
+    const resources = [
+      {
+        id: 1,
+        title: 'Aptitude Handbook',
+        category: 'Aptitude',
+        type: 'PDF',
+        size: '3.4 MB',
+        iconBg: '#E53E3E',
+        iconColor: '#fff',
+        iconLabel: 'PDF',
+        description: 'Comprehensive aptitude preparation guide covering quantitative, logical, and verbal reasoning.'
+      },
+      {
+        id: 2,
+        title: 'DSA Roadmap',
+        category: 'Technical',
+        type: 'PDF',
+        size: '1.8 MB',
+        iconBg: '#276749',
+        iconColor: '#fff',
+        iconLabel: 'XLS',
+        description: 'Step-by-step data structures & algorithms roadmap with curated problem sets and time complexity charts.'
+      },
+      {
+        id: 3,
+        title: 'HR Interview Q&A',
+        category: 'Interview',
+        type: 'PDF',
+        size: '1.2 MB',
+        iconBg: '#E53E3E',
+        iconColor: '#fff',
+        iconLabel: 'PDF',
+        description: 'Top 100 HR interview questions with model answers and tips for freshers.'
+      },
+      {
+        id: 4,
+        title: 'Resume Tips',
+        category: 'Resume',
+        type: 'PDF',
+        size: '856 KB',
+        iconBg: '#276749',
+        iconColor: '#fff',
+        iconLabel: 'DOC',
+        description: 'Expert resume writing tips, ATS optimization strategies, and before/after examples.'
+      },
+      {
+        id: 5,
+        title: 'Group Discussion Tips',
+        category: 'Soft Skills',
+        type: 'PDF',
+        size: '1.1 MB',
+        iconBg: '#6B46C1',
+        iconColor: '#fff',
+        iconLabel: 'PDF',
+        description: 'Effective GD strategies, body language tips, and sample topics with structured outlines.'
+      },
+      {
+        id: 6,
+        title: 'Communication Skills',
+        category: 'Soft Skills',
+        type: 'PDF',
+        size: '1.3 MB',
+        iconBg: '#D53F8C',
+        iconColor: '#fff',
+        iconLabel: 'PDF',
+        description: 'Verbal and non-verbal communication enhancement exercises and workplace etiquette guide.'
+      },
+      {
+        id: 7,
+        title: 'SQL Cheat Sheet',
+        category: 'Technical',
+        type: 'PDF',
+        size: '980 KB',
+        iconBg: '#E53E3E',
+        iconColor: '#fff',
+        iconLabel: 'PDF',
+        description: 'Concise reference for SQL queries — joins, subqueries, aggregates, and stored procedures.'
+      },
+      {
+        id: 8,
+        title: 'Technical Interview Guide',
+        category: 'Interview',
+        type: 'PDF',
+        size: '2.1 MB',
+        iconBg: '#2B6CB0',
+        iconColor: '#fff',
+        iconLabel: 'PDF',
+        description: 'End-to-end guide to technical rounds: coding, system design, and behavioral questions.'
+      },
+      {
+        id: 9,
+        title: 'Quantitative Aptitude',
+        category: 'Aptitude',
+        type: 'PDF',
+        size: '2.7 MB',
+        iconBg: '#E53E3E',
+        iconColor: '#fff',
+        iconLabel: 'PDF',
+        description: 'Practice sets for number systems, percentages, time & work, and data interpretation.'
+      },
+    ];
+
+    const filtered = resources.filter(r => {
+      const matchesCategory = activeCategory === 'All' || r.category === activeCategory;
+      const matchesSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.category.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+
+    const handleDownload = (resource) => {
+      setDownloadingId(resource.id);
+      setTimeout(() => {
+        // Simulate download by creating a text blob
+        const content = `AIT Placement Portal\n\nResource: ${resource.title}\nCategory: ${resource.category}\nSize: ${resource.size}\n\nThis is a demo download for the placement preparation resource.\nIn production, this would download the actual ${resource.type} file.`;
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${resource.title.replace(/\s+/g, '_')}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+        setDownloadingId(null);
+      }, 1200);
+    };
+
+    return (
+      <div className="feature-page-container">
+        {/* Header */}
+        <div style={{ marginBottom: '28px' }}>
+          <h2 style={{ fontSize: '22px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              width: '34px', height: '34px', borderRadius: '10px',
+              backgroundColor: 'var(--primary-maroon)', color: '#fff', fontSize: '14px', fontWeight: '800'
+            }}>17</span>
+            Resources &amp; Materials
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', fontWeight: '500' }}>
+            Access all placement preparation materials in one place.
+          </p>
+        </div>
+
+        {/* Search Bar */}
+        <div style={{ position: 'relative', marginBottom: '20px' }}>
+          <svg
+            style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', stroke: 'var(--text-muted)' }}
+            viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          >
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            placeholder="Search resources..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="resources-search-input"
+          />
+        </div>
+
+        {/* Category Filter Chips */}
+        <div className="resources-category-bar">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              className={`resources-cat-chip ${activeCategory === cat ? 'active' : ''}`}
+              onClick={() => setActiveCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Resource Cards Grid */}
+        {filtered.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
+            <ResourcesIcon style={{ width: '40px', height: '40px', margin: '0 auto 12px', display: 'block', stroke: 'var(--border-medium)' }} />
+            <p style={{ fontWeight: '600', fontSize: '14px' }}>No resources found for <strong>"{searchQuery}"</strong></p>
+          </div>
+        ) : (
+          <div className="resources-grid">
+            {filtered.map(resource => (
+              <div key={resource.id} className="resource-card">
+                <div className="resource-card-info">
+                  {/* Icon */}
+                  <div
+                    className="resource-file-icon"
+                    style={{ backgroundColor: resource.iconBg, color: resource.iconColor }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '22px', height: '22px', marginBottom: '2px' }}>
+                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    <span style={{ fontSize: '9px', fontWeight: '800', letterSpacing: '0.5px' }}>{resource.iconLabel}</span>
+                  </div>
+
+                  {/* Details */}
+                  <div style={{ flex: 1 }}>
+                    <h4 className="resource-title">{resource.title}</h4>
+                    <p className="resource-meta">{resource.type} &bull; {resource.size}</p>
+                    <p className="resource-desc">{resource.description}</p>
+                  </div>
+                </div>
+
+                {/* Download Button */}
+                <button
+                  className={`resource-download-btn ${downloadingId === resource.id ? 'downloading' : ''}`}
+                  onClick={() => handleDownload(resource)}
+                  disabled={downloadingId === resource.id}
+                >
+                  {downloadingId === resource.id ? (
+                    <>
+                      <svg style={{ width: '15px', height: '15px', animation: 'spin 1s linear infinite' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                      </svg>
+                      Downloading...
+                    </>
+                  ) : (
+                    <>
+                      <DownloadIcon style={{ width: '15px', height: '15px' }} />
+                      Download
+                    </>
+                  )}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ─── Chatbot / Support View ────────────────────────────────
+  if (activeTab === 'chatbot') {
+    return <ChatbotView />;
+  }
+
+  // ─── Alumni Network View ────────────────────────────────────
+  if (activeTab === 'alumni') {
+    return <AlumniView />;
+  }
+
   // Fallback view for other left menu tabs
   return (
     <div className="feature-page-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
@@ -1758,4 +2393,5 @@ Report generated via AIT AI Resume Workspace.
       </button>
     </div>
   );
+
 }
