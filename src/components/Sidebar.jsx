@@ -15,7 +15,6 @@ import {
   SettingsIcon,
   LogoutIcon,
   ResourcesIcon,
-  ChatbotIcon,
   AlumniIcon,
   BellIcon
 } from './Icons';
@@ -33,7 +32,6 @@ export const menuItems = [
   { id: 'leaderboard', label: 'Leaderboard', icon: LeaderboardIcon },
   { id: 'stats', label: 'Placement Stats', icon: StatsIcon },
   { id: 'resources', label: 'Resources', icon: ResourcesIcon },
-  { id: 'chatbot', label: 'Chatbot / Support', icon: ChatbotIcon },
   { id: 'alumni', label: 'Alumni Network', icon: AlumniIcon },
   { id: 'documents', label: 'Documents', icon: DocumentsIcon },
   { id: 'notifications', label: 'Notifications', icon: BellIcon },
