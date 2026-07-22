@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import DriveCalendarPage from '../pages/DriveCalendar';
 import ApplicationsPage from '../pages/Applications';
-// Use the shared Profile page and styles from the workspace root
-import ExternalProfile from '../../../src/pages/Profile';
-import '../../../src/index.css';
 import {
   ProfileIcon,
   ApplicationsIcon,
@@ -2684,10 +2681,11 @@ Zoho Corporation`;
               </div>
             ))}
           </div>
-        </div>
+        )}
       </div>
     );
   }
+
 
   if (activeTab === 'mock-interview') {
     const [interviewType, setInterviewType] = useState('Technical');

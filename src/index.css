@@ -55,6 +55,8 @@ body {
   background-color: var(--bg-outer);
   color: var(--text-main);
   min-height: 100vh;
+}
+
   /* ============================================================
      Resources & Materials View Styles
      ============================================================ */
@@ -3889,6 +3891,4 @@ body {
     padding-top: 12px;
     margin-top: 4px;
   }
-}
-
 }
