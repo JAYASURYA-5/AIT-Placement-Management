@@ -1819,9 +1819,6 @@ body {
     overflow: hidden;
   }
 }
-
-<<<<<<< HEAD
-<<<<<<< HEAD
 /* ============================================================
    Resources & Materials View Styles
    ============================================================ */
@@ -1852,13 +1849,17 @@ body {
 }
 
 /* Category Filter Bar */
+/* Category Filter Bar */
 .resources-category-bar {
   display: flex;
-=======
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
 /* =============================================
    10. MOCK INTERVIEW FEATURE STYLES
    ============================================= */
-
 .mock-interview-layout {
   width: 100%;
   max-width: 1000px;
@@ -2892,7 +2893,6 @@ body {
   background-color: var(--primary-maroon);
   color: #fff;
 }
-=======
 .mock-type-btn.active {
   background-color: var(--primary-maroon);
   color: white;
@@ -3424,8 +3424,7 @@ body {
   margin-top: 1px;
 }
 
->>>>>>> 1d27413 (added mock interview with added functionalities)
-=======
+/* End merged mock interview/resources blocks */
 /* Applications Page & Filter Tabs */
 .applications-header {
   margin-bottom: 20px;
@@ -3891,4 +3890,5 @@ body {
     margin-top: 4px;
   }
 }
->>>>>>> 9f8548d (Apply profile fullscreen UI and header sync updates)
+
+}
