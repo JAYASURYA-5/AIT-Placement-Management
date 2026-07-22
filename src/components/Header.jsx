@@ -4,6 +4,60 @@ import { SearchIcon, BellIcon, ChevronDownIcon, ProfileIcon, SettingsIcon, Logou
 export default function Header({ searchQuery, setSearchQuery, notifications, setActiveTab, onLogout }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [profileName, setProfileName] = useState(() => {
+    try {
+      const raw = localStorage.getItem('ait-profile')
+      if (raw) return JSON.parse(raw).name || 'Jayasurya K'
+    } catch (e) {}
+    return 'Jayasurya K'
+  })
+  const [profileRole, setProfileRole] = useState(() => {
+    try {
+      const raw = localStorage.getItem('ait-profile')
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        // derive simple role like 'IV - IT'
+        const branch = parsed.branch || ''
+        const batch = parsed.batch || ''
+        const startYearMatch = batch.match(/(\d{4})/)
+        const startYear = startYearMatch ? parseInt(startYearMatch[0], 10) : null
+        let yearNum = null
+        if (startYear) {
+          const cur = new Date().getFullYear()
+          yearNum = Math.min(5, Math.max(1, cur - startYear + 1))
+        }
+        const romans = ['I','II','III','IV','V']
+        const yearRoman = yearNum ? romans[yearNum-1] : 'IV'
+        const dept = branch.includes('Information') ? 'IT' : branch.split(' ').slice(-1)[0]
+        return `${yearRoman} - ${dept}`
+      }
+    } catch (e) {}
+    return 'IV - IT'
+  })
+
+  React.useEffect(() => {
+    const handler = (e) => {
+      const d = e?.detail || {}
+      if (d.name) setProfileName(d.name)
+      if (d.branch || d.batch) {
+        const branch = d.branch || ''
+        const batch = d.batch || ''
+        const startYearMatch = batch.match(/(\d{4})/)
+        const startYear = startYearMatch ? parseInt(startYearMatch[0], 10) : null
+        let yearNum = null
+        if (startYear) {
+          const cur = new Date().getFullYear()
+          yearNum = Math.min(5, Math.max(1, cur - startYear + 1))
+        }
+        const romans = ['I','II','III','IV','V']
+        const yearRoman = yearNum ? romans[yearNum-1] : 'IV'
+        const dept = branch.includes('Information') ? 'IT' : branch.split(' ').slice(-1)[0]
+        setProfileRole(`${yearRoman} - ${dept}`)
+      }
+    }
+    window.addEventListener('profile:update', handler)
+    return () => window.removeEventListener('profile:update', handler)
+  }, [])
 
   return (
     <header className="top-header">
@@ -90,16 +144,17 @@ export default function Header({ searchQuery, setSearchQuery, notifications, set
           >
             <img
               src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
-              alt="Jayasurya K"
+              alt={profileName}
               className="profile-avatar"
               onError={(e) => {
                 // Fallback avatar if image offline
-                e.target.src = 'https://ui-avatars.com/api/?name=Jayasurya+K&background=4C1536&color=fff';
+                const initials = (profileName || 'Jayasurya K').split(' ').slice(0,2).map(n=>n[0]).join('')
+                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profileName)}&background=4C1536&color=fff`;
               }}
             />
             <div className="profile-details">
-              <span className="profile-name">Jayasurya K</span>
-              <span className="profile-role">IV - IT</span>
+              <span className="profile-name">{profileName}</span>
+              <span className="profile-role">{profileRole}</span>
             </div>
             <ChevronDownIcon style={{ marginLeft: '4px', color: 'var(--text-muted)' }} />
           </div>
