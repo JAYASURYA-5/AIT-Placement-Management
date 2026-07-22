@@ -19,7 +19,8 @@ import {
   KeyIcon,
   InfoIcon,
   RefreshIcon,
-  DownloadIcon
+  DownloadIcon,
+  CodeIcon
 } from './Icons';
 
 export default function FeatureView({ activeTab, drives, setActiveTab, onApplyDrive }) {
@@ -598,13 +599,6 @@ Report generated via AIT AI Resume Workspace.
                     >
                       <SparklesIcon style={{ width: '14px', height: '14px' }} /> Paste Resume Text Instead
                     </button>
-                    <span style={{ fontSize: '12px', color: 'var(--text-light)', fontWeight: '700' }}>OR</span>
-                    <button 
-                      className="btn-apply"
-                      onClick={handleUseSample}
-                    >
-                      🧪 Run with Sample Profile Resume
-                    </button>
                   </div>
 
                   {showPasteArea && (
@@ -1069,6 +1063,669 @@ Report generated via AIT AI Resume Workspace.
                     )}
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (activeTab === 'training') {
+    const [subTab, setSubTab] = useState('aptitude');
+    const [practiceMode, setPracticeMode] = useState(false);
+    const [testCompleted, setTestCompleted] = useState(false);
+    const [scoreResult, setScoreResult] = useState(null);
+    
+    // Donut Category scores
+    const [categoryScores, setCategoryScores] = useState({
+      aptitude: 70,
+      coding: 80,
+      sql: 65,
+      mcq: 85
+    });
+
+    // Test History
+    const [testHistory, setTestHistory] = useState([
+      { id: 1, type: 'aptitude', title: 'Aptitude Test - 5', date: '20 Jul 2025', score: 85 },
+      { id: 2, type: 'coding', title: 'Coding Test - Arrays', date: '18 Jul 2025', score: 90 },
+      { id: 3, type: 'sql', title: 'SQL Test - Joins', date: '15 Jul 2025', score: 70 }
+    ]);
+
+    // Practice States - Aptitude
+    const [aptitudeAnswers, setAptitudeAnswers] = useState({});
+    const [aptitudeSubmitted, setAptitudeSubmitted] = useState(false);
+
+    // Practice States - Coding
+    const [codingCode, setCodingCode] = useState(
+`function fizzBuzz(n) {
+  let result = [];
+  // Write your code here
+  for (let i = 1; i <= n; i++) {
+    if (i % 15 === 0) result.push("FizzBuzz");
+    else if (i % 3 === 0) result.push("Fizz");
+    else if (i % 5 === 0) result.push("Buzz");
+    else result.push(i.toString());
+  }
+  return result;
+}`
+    );
+    const [codingTestResults, setCodingTestResults] = useState(null);
+
+    // Practice States - SQL
+    const [sqlQuery, setSqlQuery] = useState("SELECT * FROM employees WHERE department = 'IT' AND salary > 60000");
+    const [sqlTestResults, setSqlTestResults] = useState(null);
+
+    // Practice States - MCQ
+    const [mcqAnswers, setMcqAnswers] = useState({});
+    const [mcqSubmitted, setMcqSubmitted] = useState(false);
+
+    // Donut overall progress calculation
+    const overallProgress = Math.round(
+      (categoryScores.aptitude + categoryScores.coding + categoryScores.sql + categoryScores.mcq) / 4
+    );
+
+    // Donut SVG constants (Radius = 38, Circumference = 238.76)
+    const circ = 238.76;
+    const qtr = 59.69;
+    
+    const dashApt = (categoryScores.aptitude / 100) * qtr;
+    const dashCod = (categoryScores.coding / 100) * qtr;
+    const dashSql = (categoryScores.sql / 100) * qtr;
+    const dashMcq = (categoryScores.mcq / 100) * qtr;
+
+    // Aptitude Question Data
+    const aptitudeQuestions = [
+      {
+        id: 1,
+        question: "A train running at the speed of 60 km/hr crosses a pole in 9 seconds. What is the length of the train?",
+        options: ["120 metres", "150 metres", "324 metres", "180 metres"],
+        correct: "150 metres",
+        explanation: "Speed in m/s = 60 * 5/18 = 50/3 m/s. Length = Speed * Time = (50/3) * 9 = 150 metres."
+      },
+      {
+        id: 2,
+        question: "The average of 20 numbers is zero. Of them, at most, how many may be greater than zero?",
+        options: ["0", "1", "10", "19"],
+        correct: "19",
+        explanation: "To keep the average 0, we can have up to 19 positive numbers as long as the 20th number is a large negative number that balances the sum to 0."
+      },
+      {
+        id: 3,
+        question: "A sum of money at simple interest amounts to Rs. 815 in 3 years and to Rs. 854 in 4 years. The sum is:",
+        options: ["Rs. 650", "Rs. 690", "Rs. 698", "Rs. 700"],
+        correct: "Rs. 698",
+        explanation: "Simple Interest for 1 year = Rs. 854 - 815 = Rs. 39. SI for 3 years = 39 * 3 = Rs. 117. Principal Sum = 815 - 117 = Rs. 698."
+      }
+    ];
+
+    // MCQ Question Data
+    const mcqQuestions = [
+      {
+        id: 1,
+        question: "Which of the following is not a Database Management System (DBMS)?",
+        options: ["PostgreSQL", "MongoDB", "Redux", "Cassandra"],
+        correct: "Redux",
+        explanation: "Redux is a JavaScript state management library, while PostgreSQL, MongoDB, and Cassandra are Database Management Systems."
+      },
+      {
+        id: 2,
+        question: "What is the primary function of an Operating System's kernel?",
+        options: [
+          "To render the graphical user interface components",
+          "To manage system resources and communication between hardware and software",
+          "To compile high-level programming language sources",
+          "To secure internet connections and cache web resources"
+        ],
+        correct: "To manage system resources and communication between hardware and software",
+        explanation: "The kernel is the core components of the OS that directly interacts with the hardware, allocating CPU time, memory, and devices."
+      }
+    ];
+
+    const handleSubmitAptitude = () => {
+      let correctCount = 0;
+      aptitudeQuestions.forEach(q => {
+        if (aptitudeAnswers[q.id] === q.correct) correctCount++;
+      });
+      const pct = Math.round((correctCount / aptitudeQuestions.length) * 100);
+      setScoreResult(pct);
+      setAptitudeSubmitted(true);
+      setTestCompleted(true);
+      
+      // Update history & stats
+      const newTest = {
+        id: Date.now(),
+        type: 'aptitude',
+        title: `Aptitude Practice - Log`,
+        date: 'Today',
+        score: pct
+      };
+      setTestHistory(prev => [newTest, ...prev]);
+      setCategoryScores(prev => ({
+        ...prev,
+        aptitude: Math.round((prev.aptitude + pct) / 2)
+      }));
+    };
+
+    const handleRunCode = () => {
+      try {
+        // Safe evaluation simulation for testing
+        // Build user function
+        const userFnCode = codingCode + "\nreturn fizzBuzz(n);";
+        const testFn = new Function('n', userFnCode);
+        
+        // Execute test cases
+        const tc1 = testFn(3);
+        const tc2 = testFn(5);
+        const tc3 = testFn(15);
+        
+        const passed1 = Array.isArray(tc1) && tc1[2] === 'Fizz';
+        const passed2 = Array.isArray(tc2) && tc2[4] === 'Buzz';
+        const passed3 = Array.isArray(tc3) && tc3[14] === 'FizzBuzz' && tc3[13] === '14';
+        
+        const results = [
+          { input: "n = 3", expected: "['1', '2', 'Fizz']", actual: JSON.stringify(tc1), passed: passed1 },
+          { input: "n = 5", expected: "['1', '2', 'Fizz', '4', 'Buzz']", actual: JSON.stringify(tc2), passed: passed2 },
+          { input: "n = 15", expected: "fizzBuzz(15)[14] == 'FizzBuzz'", actual: tc3 ? tc3[14] : 'undefined', passed: passed3 }
+        ];
+
+        setCodingTestResults(results);
+        
+        if (passed1 && passed2 && passed3) {
+          setScoreResult(100);
+          setTestCompleted(true);
+          const newTest = {
+            id: Date.now(),
+            type: 'coding',
+            title: 'Coding Test - FizzBuzz',
+            date: 'Today',
+            score: 100
+          };
+          setTestHistory(prev => [newTest, ...prev]);
+          setCategoryScores(prev => ({
+            ...prev,
+            coding: Math.round((prev.coding + 100) / 2)
+          }));
+        } else {
+          setScoreResult(50);
+        }
+      } catch (err) {
+        setCodingTestResults([
+          { input: "Runtime check", expected: "No errors", actual: `Error: ${err.message}`, passed: false }
+        ]);
+        setScoreResult(0);
+      }
+    };
+
+    const handleRunSQL = () => {
+      const isSelect = sqlQuery.toLowerCase().includes("select");
+      const hasEmployees = sqlQuery.toLowerCase().includes("employees");
+      const hasFilter = sqlQuery.toLowerCase().includes("it") && sqlQuery.toLowerCase().includes("60000");
+
+      if (isSelect && hasEmployees && hasFilter) {
+        setSqlTestResults({
+          status: "success",
+          message: "Query executed successfully. 2 rows returned.",
+          rows: [
+            { name: "Jayasurya K", department: "IT", salary: 75000 },
+            { name: "Abishek R", department: "IT", salary: 65000 }
+          ]
+        });
+        setScoreResult(100);
+        setTestCompleted(true);
+        const newTest = {
+          id: Date.now(),
+          type: 'sql',
+          title: 'SQL Test - Employees',
+          date: 'Today',
+          score: 100
+        };
+        setTestHistory(prev => [newTest, ...prev]);
+        setCategoryScores(prev => ({
+          ...prev,
+          sql: Math.round((prev.sql + 100) / 2)
+        }));
+      } else {
+        setSqlTestResults({
+          status: "error",
+          message: "Query compilation failed or filters did not return IT employees with salary > 60000. Double check your query syntax and constraints.",
+          rows: []
+        });
+        setScoreResult(30);
+      }
+    };
+
+    const handleSubmitMcq = () => {
+      let correctCount = 0;
+      mcqQuestions.forEach(q => {
+        if (mcqAnswers[q.id] === q.correct) correctCount++;
+      });
+      const pct = Math.round((correctCount / mcqQuestions.length) * 100);
+      setScoreResult(pct);
+      setMcqSubmitted(true);
+      setTestCompleted(true);
+      
+      const newTest = {
+        id: Date.now(),
+        type: 'mcq',
+        title: 'MCQ Placement - OS/DBMS',
+        date: 'Today',
+        score: pct
+      };
+      setTestHistory(prev => [newTest, ...prev]);
+      setCategoryScores(prev => ({
+        ...prev,
+        mcq: Math.round((prev.mcq + pct) / 2)
+      }));
+    };
+
+    const handleResetTest = () => {
+      setPracticeMode(false);
+      setTestCompleted(false);
+      setScoreResult(null);
+      setAptitudeAnswers({});
+      setAptitudeSubmitted(false);
+      setCodingTestResults(null);
+      setSqlTestResults(null);
+      setMcqAnswers({});
+      setMcqSubmitted(false);
+    };
+
+    return (
+      <div className="feature-page-container">
+        <div className="training-workspace">
+          {/* Header & Sub-Tabs */}
+          <div className="resume-workspace-header" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+            <div>
+              <h2 style={{ fontSize: '20px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <TrainingIcon style={{ color: 'var(--primary-maroon)' }} /> 9. Aptitude & Coding Practice
+              </h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>
+                Test and optimize your placement potential with interactive training modules.
+              </p>
+            </div>
+            
+            <div className="resume-tabs">
+              <button 
+                className={`resume-tab-btn ${subTab === 'aptitude' ? 'active' : ''}`}
+                onClick={() => { setSubTab('aptitude'); handleResetTest(); }}
+              >
+                Aptitude
+              </button>
+              <button 
+                className={`resume-tab-btn ${subTab === 'coding' ? 'active' : ''}`}
+                onClick={() => { setSubTab('coding'); handleResetTest(); }}
+              >
+                Coding
+              </button>
+              <button 
+                className={`resume-tab-btn ${subTab === 'sql' ? 'active' : ''}`}
+                onClick={() => { setSubTab('sql'); handleResetTest(); }}
+              >
+                SQL
+              </button>
+              <button 
+                className={`resume-tab-btn ${subTab === 'mcq' ? 'active' : ''}`}
+                onClick={() => { setSubTab('mcq'); handleResetTest(); }}
+              >
+                MCQ
+              </button>
+            </div>
+          </div>
+
+          {/* Practice Arena Mode */}
+          {practiceMode ? (
+            <div className="practice-arena">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '17px', fontWeight: '800', textTransform: 'capitalize' }}>
+                  Interactive Practice: {subTab} Arena
+                </h3>
+                <button className="api-settings-btn" onClick={handleResetTest}>
+                  Back to Dashboard
+                </button>
+              </div>
+
+              {subTab === 'aptitude' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {aptitudeQuestions.map((q, idx) => (
+                    <div key={q.id} className="question-card">
+                      <div style={{ fontWeight: '800', fontSize: '14.5px', marginBottom: '14px' }}>
+                        Q{idx+1}. {q.question}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {q.options.map(opt => {
+                          const isSelected = aptitudeAnswers[q.id] === opt;
+                          let btnClass = "option-button";
+                          if (isSelected) btnClass += " selected";
+                          if (aptitudeSubmitted) {
+                            if (opt === q.correct) btnClass += " correct";
+                            else if (isSelected) btnClass += " incorrect";
+                          }
+                          return (
+                            <button
+                              key={opt}
+                              className={btnClass}
+                              disabled={aptitudeSubmitted}
+                              onClick={() => setAptitudeAnswers(prev => ({ ...prev, [q.id]: opt }))}
+                            >
+                              {opt}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {aptitudeSubmitted && (
+                        <div style={{ marginTop: '14px', fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: '1.4', padding: '10px 14px', borderRadius: '10px', backgroundColor: '#F3F4F6' }}>
+                          💡 <strong>Explanation:</strong> {q.explanation}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  
+                  {!aptitudeSubmitted ? (
+                    <button className="btn-apply" style={{ alignSelf: 'flex-end' }} onClick={handleSubmitAptitude}>
+                      Submit Test answers
+                    </button>
+                  ) : (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--primary-maroon-light)', padding: '16px 24px', borderRadius: '16px' }}>
+                      <span style={{ fontWeight: '800', color: 'var(--primary-maroon)' }}>
+                        Test score: {scoreResult}%
+                      </span>
+                      <button className="btn-apply" onClick={handleResetTest}>
+                        Finish & View Dashboard
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {subTab === 'coding' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div className="question-card">
+                    <div style={{ fontWeight: '800', fontSize: '15px', marginBottom: '10px' }}>
+                      Problem Statement: FizzBuzz
+                    </div>
+                    <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+                      Write a function <code style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>fizzBuzz(n)</code> that returns an array of strings representing numbers from 1 to <code style={{ fontFamily: 'monospace' }}>n</code>. 
+                      For multiples of three, append <code style={{ color: 'var(--primary-maroon)' }}>"Fizz"</code> instead of the number, and for multiples of five, append <code style={{ color: 'var(--primary-maroon)' }}>"Buzz"</code>. 
+                      For numbers which are multiples of both three and five, append <code style={{ color: 'var(--primary-maroon)' }}>"FizzBuzz"</code>.
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label className="builder-label">Code Editor (JavaScript)</label>
+                    <textarea
+                      className="code-editor-textarea"
+                      value={codingCode}
+                      onChange={(e) => setCodingCode(e.target.value)}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                    <button className="btn-apply" onClick={handleRunCode}>
+                      🚀 Run Code & Verify
+                    </button>
+                  </div>
+
+                  {codingTestResults && (
+                    <div className="test-case-panel">
+                      <div style={{ fontWeight: '800', marginBottom: '10px' }}>Test Case Execution:</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {codingTestResults.map((tc, idx) => (
+                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #E5E7EB', paddingBottom: '6px' }}>
+                            <div>
+                              <strong>Case {idx+1}:</strong> {tc.input} <br/>
+                              <span style={{ fontSize: '11px', color: '#6B7280' }}>Expected: {tc.expected}</span> <br/>
+                              <span style={{ fontSize: '11px', color: '#6B7280' }}>Actual: {tc.actual}</span>
+                            </div>
+                            <span style={{
+                              fontWeight: '800',
+                              color: tc.passed ? '#10B981' : '#EF4444'
+                            }}>
+                              {tc.passed ? "PASSED ✓" : "FAILED ✕"}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      {testCompleted && (
+                        <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ color: '#16A34A', fontWeight: '800' }}>🎉 All test cases passed! Category score updated.</span>
+                          <button className="btn-apply" onClick={handleResetTest}>
+                            Finish
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {subTab === 'sql' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div className="question-card">
+                    <div style={{ fontWeight: '800', fontSize: '15px', marginBottom: '10px' }}>
+                      Task: Filter IT Salaries
+                    </div>
+                    <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+                      Write an SQL query to retrieve the names and salaries of all employees working in the <code style={{ fontWeight: 'bold' }}>'IT'</code> department whose salary is strictly greater than <code style={{ fontWeight: 'bold' }}>60000</code>.
+                    </p>
+                    <div style={{ marginTop: '12px' }}>
+                      <strong style={{ fontSize: '12px' }}>Schema Definition:</strong>
+                      <pre style={{ margin: '4px 0 0 0', padding: '6px', fontSize: '11.5px', backgroundColor: '#F3F4F6', borderRadius: '6px' }}>
+                        employees (id INT, name VARCHAR, department VARCHAR, salary INT)
+                      </pre>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label className="builder-label">SQL Console Query</label>
+                    <input 
+                      type="text" 
+                      className="builder-input" 
+                      style={{ fontFamily: 'monospace' }}
+                      value={sqlQuery}
+                      onChange={(e) => setSqlQuery(e.target.value)}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                    <button className="btn-apply" onClick={handleRunSQL}>
+                      ⚡ Execute SQL Query
+                    </button>
+                  </div>
+
+                  {sqlTestResults && (
+                    <div className="test-case-panel">
+                      <div style={{ fontWeight: '800', color: sqlTestResults.status === 'success' ? '#16A34A' : '#EF4444', marginBottom: '10px' }}>
+                        {sqlTestResults.status === 'success' ? "Compilation Success ✓" : "SQL Error ✕"}
+                      </div>
+                      <p style={{ fontSize: '12px', marginBottom: '10px' }}>{sqlTestResults.message}</p>
+                      
+                      {sqlTestResults.rows.length > 0 && (
+                        <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'white', border: '1px solid var(--border-light)' }}>
+                          <thead>
+                            <tr style={{ backgroundColor: '#F9FAFB' }}>
+                              <th style={{ padding: '8px', border: '1px solid #E5E7EB', textAlign: 'left' }}>name</th>
+                              <th style={{ padding: '8px', border: '1px solid #E5E7EB', textAlign: 'left' }}>department</th>
+                              <th style={{ padding: '8px', border: '1px solid #E5E7EB', textAlign: 'left' }}>salary</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {sqlTestResults.rows.map((row, idx) => (
+                              <tr key={idx}>
+                                <td style={{ padding: '8px', border: '1px solid #E5E7EB' }}>{row.name}</td>
+                                <td style={{ padding: '8px', border: '1px solid #E5E7EB' }}>{row.department}</td>
+                                <td style={{ padding: '8px', border: '1px solid #E5E7EB' }}>${row.salary.toLocaleString()}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
+                      
+                      {testCompleted && (
+                        <button className="btn-apply" style={{ marginTop: '16px' }} onClick={handleResetTest}>
+                          Finish Practice
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {subTab === 'mcq' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {mcqQuestions.map((q, idx) => (
+                    <div key={q.id} className="question-card">
+                      <div style={{ fontWeight: '800', fontSize: '14.5px', marginBottom: '14px' }}>
+                        Q{idx+1}. {q.question}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {q.options.map(opt => {
+                          const isSelected = mcqAnswers[q.id] === opt;
+                          let btnClass = "option-button";
+                          if (isSelected) btnClass += " selected";
+                          if (mcqSubmitted) {
+                            if (opt === q.correct) btnClass += " correct";
+                            else if (isSelected) btnClass += " incorrect";
+                          }
+                          return (
+                            <button
+                              key={opt}
+                              className={btnClass}
+                              disabled={mcqSubmitted}
+                              onClick={() => setMcqAnswers(prev => ({ ...prev, [q.id]: opt }))}
+                            >
+                              {opt}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {mcqSubmitted && (
+                        <div style={{ marginTop: '14px', fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: '1.4', padding: '10px 14px', borderRadius: '10px', backgroundColor: '#F3F4F6' }}>
+                          💡 <strong>Explanation:</strong> {q.explanation}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {!mcqSubmitted ? (
+                    <button className="btn-apply" style={{ alignSelf: 'flex-end' }} onClick={handleSubmitMcq}>
+                      Submit MCQ Test
+                    </button>
+                  ) : (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--primary-maroon-light)', padding: '16px 24px', borderRadius: '16px' }}>
+                      <span style={{ fontWeight: '800', color: 'var(--primary-maroon)' }}>
+                        Test score: {scoreResult}%
+                      </span>
+                      <button className="btn-apply" onClick={handleResetTest}>
+                        Finish
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            // Dashboard Mode
+            <div className="training-dashboard">
+              {/* Left Progress Card */}
+              <div className="training-card">
+                <h3 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '24px', color: 'var(--text-main)' }}>
+                  Your Progress
+                </h3>
+                
+                <div className="donut-chart-box">
+                  <svg viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
+                    {/* Background ring */}
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="var(--border-light)" strokeWidth="8" />
+                    
+                    {/* Segment 1: Aptitude (Green) */}
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="#10B981" strokeWidth="8"
+                      strokeDasharray={`${dashApt} ${circ}`} strokeDashoffset="0" strokeLinecap="round" />
+                    
+                    {/* Segment 2: Coding (Purple) */}
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="#8B5CF6" strokeWidth="8"
+                      strokeDasharray={`${dashCod} ${circ}`} strokeDashoffset={`-${qtr}`} strokeLinecap="round" />
+                      
+                    {/* Segment 3: SQL (Orange) */}
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="#F59E0B" strokeWidth="8"
+                      strokeDasharray={`${dashSql} ${circ}`} strokeDashoffset={`-${qtr * 2}`} strokeLinecap="round" />
+                      
+                    {/* Segment 4: MCQ (Blue) */}
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="#3B82F6" strokeWidth="8"
+                      strokeDasharray={`${dashMcq} ${circ}`} strokeDashoffset={`-${qtr * 3}`} strokeLinecap="round" />
+                  </svg>
+                  
+                  <div className="donut-inner-text">
+                    <span className="donut-percentage">{overallProgress}%</span>
+                    <span className="donut-label">Overall Progress</span>
+                  </div>
+                </div>
+
+                <div className="legend-list">
+                  <div className="legend-item">
+                    <span>
+                      <span className="legend-color-dot" style={{ backgroundColor: '#10B981' }}></span>
+                      Aptitude
+                    </span>
+                    <span>{categoryScores.aptitude}%</span>
+                  </div>
+                  <div className="legend-item">
+                    <span>
+                      <span className="legend-color-dot" style={{ backgroundColor: '#8B5CF6' }}></span>
+                      Coding
+                    </span>
+                    <span>{categoryScores.coding}%</span>
+                  </div>
+                  <div className="legend-item">
+                    <span>
+                      <span className="legend-color-dot" style={{ backgroundColor: '#F59E0B' }}></span>
+                      SQL
+                    </span>
+                    <span>{categoryScores.sql}%</span>
+                  </div>
+                  <div className="legend-item">
+                    <span>
+                      <span className="legend-color-dot" style={{ backgroundColor: '#3B82F6' }}></span>
+                      MCQ
+                    </span>
+                    <span>{categoryScores.mcq}%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Recent Tests Card */}
+              <div className="training-card">
+                <h3 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '20px', color: 'var(--text-main)' }}>
+                  Recent Tests
+                </h3>
+                
+                <div className="test-history-list">
+                  {testHistory.map(item => (
+                    <div key={item.id} className="test-history-item">
+                      <div className="test-info-group">
+                        <div className="test-icon-wrapper">
+                          {item.type === 'aptitude' && <AssessmentsIcon style={{ width: '18px', height: '18px' }} />}
+                          {item.type === 'coding' && <CodeIcon style={{ width: '18px', height: '18px' }} />}
+                          {item.type === 'sql' && <DocumentsIcon style={{ width: '18px', height: '18px' }} />}
+                          {item.type === 'mcq' && <MockInterviewIcon style={{ width: '18px', height: '18px' }} />}
+                        </div>
+                        <div>
+                          <div className="test-title-text">{item.title}</div>
+                          <div className="test-date-text">{item.date}</div>
+                        </div>
+                      </div>
+                      <span className="test-score-badge">{item.score}%</span>
+                    </div>
+                  ))}
+                </div>
+
+                <button 
+                  className="btn-apply" 
+                  style={{ width: '100%', padding: '14px', fontSize: '13.5px' }}
+                  onClick={() => setPracticeMode(true)}
+                >
+                  Start New Test
+                </button>
               </div>
             </div>
           )}

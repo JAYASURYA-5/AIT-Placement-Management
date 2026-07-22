@@ -1263,6 +1263,231 @@ body {
   letter-spacing: 0.5px;
 }
 
+/* Training Workspace Styles */
+.training-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.training-dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.training-card {
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-light);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+}
+
+.donut-chart-box {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 20px auto;
+}
+
+.donut-inner-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.donut-percentage {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1;
+}
+
+.donut-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+.legend-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+  border-top: 1px solid var(--border-light);
+  padding-top: 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.legend-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.test-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.test-history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 1px solid var(--border-light);
+  background-color: var(--bg-card);
+  transition: all 0.2s ease;
+}
+
+.test-history-item:hover {
+  border-color: var(--border-medium);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.test-info-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.test-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background-color: white;
+  border: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-maroon);
+}
+
+.test-title-text {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.test-date-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.test-score-badge {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--primary-maroon);
+}
+
+/* Practice Interactive Arena */
+.practice-arena {
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-light);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+}
+
+.question-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.option-button {
+  width: 100%;
+  text-align: left;
+  padding: 14px 20px;
+  border-radius: 14px;
+  border: 1px solid var(--border-medium);
+  background-color: white;
+  font-size: 13.5px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.option-button:hover:not(:disabled) {
+  border-color: var(--primary-maroon);
+  background-color: var(--primary-maroon-light);
+  color: var(--primary-maroon);
+}
+
+.option-button.selected {
+  border-color: var(--primary-maroon);
+  background-color: var(--primary-maroon);
+  color: white;
+}
+
+.option-button.correct {
+  border-color: #10B981;
+  background-color: #D1F2D9;
+  color: #065F46;
+}
+
+.option-button.incorrect {
+  border-color: #EF4444;
+  background-color: #FEE2E2;
+  color: #991B1B;
+}
+
+.code-editor-textarea {
+  width: 100%;
+  min-height: 200px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13.5px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border-medium);
+  background-color: #1F2937;
+  color: #F9FAFB;
+  outline: none;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.code-editor-textarea:focus {
+  border-color: var(--primary-maroon);
+}
+
+.test-case-panel {
+  background-color: #F3F4F6;
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 16px;
+  font-size: 12.5px;
+}
+
 /* Responsive fixes for Dashboard and Builder */
 @media (max-width: 1024px) {
   .analysis-dashboard {
