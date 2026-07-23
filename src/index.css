@@ -4753,7 +4753,6 @@ body:has(.auth-page-root) #root {
   }
 }
 
-<<<<<<< HEAD
 /* ════════════════════════════════════════════════════════════
    DASHBOARD EXTRAS — Extra Detail Widgets
    ════════════════════════════════════════════════════════════ */
@@ -5169,7 +5168,7 @@ body:has(.auth-page-root) #root {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-=======
+
 /* Content Area */
 .content {
   flex: 1;
@@ -6654,5 +6653,3 @@ body:has(.auth-page-root) #root {
   color: #ffffff;
   border-color: var(--color-plum);
 }
-
->>>>>>> 28e015eda777310d4bd6b30dcebc07b3e347ea0d

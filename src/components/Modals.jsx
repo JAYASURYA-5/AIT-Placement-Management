@@ -91,7 +91,7 @@ export function CalendarModal({ onClose }) {
   );
 }
 
-export function PrepModal({ module, onClose }) {
+export function PrepModal({ module, onClose, onStartPractice }) {
   if (!module) return null;
 
   return (
@@ -118,7 +118,16 @@ export function PrepModal({ module, onClose }) {
         </div>
 
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-          <button className="btn-apply" onClick={onClose}>
+          <button 
+            className="btn-apply" 
+            onClick={() => {
+              if (onStartPractice) {
+                onStartPractice();
+              } else {
+                onClose();
+              }
+            }}
+          >
             Start Practice Session
           </button>
         </div>
