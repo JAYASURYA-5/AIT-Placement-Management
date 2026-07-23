@@ -148,7 +148,7 @@ export default function Applications() {
 
   return (
     <div className="applications-page-wrapper">
-  
+      <h1 className="page-title"></h1>
 
       <div className="profile-page-content">
         <div className="profile-card profile-details-card">
