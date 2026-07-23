@@ -6,6 +6,7 @@ import StatCards from './components/StatCards';
 import UpcomingDrives, { initialDrivesData } from './components/UpcomingDrives';
 import PlacementPrep from './components/PlacementPrep';
 import FeatureView from './components/FeatureViews';
+import DashboardExtras from './components/DashboardExtras';
 import { ApplyModal, CalendarModal, PrepModal } from './components/Modals';
 import ChatbotView from './components/ChatbotWidget';
 import { RobotIcon } from './components/Icons';
@@ -166,6 +167,7 @@ export default function App() {
             <PlacementPrep
               onSelectPrep={(module) => setSelectedPrepModule(module)}
             />
+            <DashboardExtras setActiveTab={setActiveTab} />
           </>
         ) : (
           <FeatureView
