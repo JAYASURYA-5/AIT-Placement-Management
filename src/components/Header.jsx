@@ -8,7 +8,7 @@ export default function Header({ searchQuery, setSearchQuery, notifications, set
     try {
       const raw = localStorage.getItem('ait-profile')
       if (raw) return JSON.parse(raw).name || 'Jayasurya K'
-    } catch (e) {}
+    } catch {}
     return 'Jayasurya K'
   })
   const [profileRole, setProfileRole] = useState(() => {
@@ -31,7 +31,7 @@ export default function Header({ searchQuery, setSearchQuery, notifications, set
         const dept = branch.includes('Information') ? 'IT' : branch.split(' ').slice(-1)[0]
         return `${yearRoman} - ${dept}`
       }
-    } catch (e) {}
+    } catch {}
     return 'IV - IT'
   })
 
@@ -149,7 +149,6 @@ export default function Header({ searchQuery, setSearchQuery, notifications, set
               className="profile-avatar"
               onError={(e) => {
                 // Fallback avatar if image offline
-                const initials = (profileName || 'Jayasurya K').split(' ').slice(0,2).map(n=>n[0]).join('')
                 e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profileName)}&background=4C1536&color=fff`;
               }}
             />

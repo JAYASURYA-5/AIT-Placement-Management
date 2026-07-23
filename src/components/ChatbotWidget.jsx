@@ -164,9 +164,6 @@ export default function ChatbotView({ userName = 'Jayasurya K' }) {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
-  // Unused state kept for potential future toggle UI — tracks whether Gemini API is active
-  const [isApiMode, setIsApiMode] = useState(!!GEMINI_API_KEY);
-
   // Initial greeting message shown when the chatbot opens
   const [messages, setMessages] = useState([
     {
