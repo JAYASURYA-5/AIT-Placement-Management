@@ -28,6 +28,846 @@ import {
   BellIcon
 } from './Icons';
 
+// ─── Standalone Certificates Component ─────────────────────────────────
+function CertificatesView() {
+  const [activeFilter, setActiveFilter] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
+  const [showAll, setShowAll] = useState(false);
+  const [toastMsg, setToastMsg] = useState(null);
+
+  // Modals
+  const [selectedCert, setSelectedCert] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // New Certificate Form State
+  const [newCert, setNewCert] = useState({
+    title: '',
+    issuer: '',
+    date: new Date().toISOString().split('T')[0],
+    category: 'Courses',
+    skills: '',
+    credentialUrl: '',
+  });
+
+  const filters = ['All', 'Achievements', 'Courses', 'Internships'];
+
+  const [certificatesList, setCertificatesList] = useState([
+    {
+      id: 1,
+      title: 'Python Programming',
+      issuer: 'Coursera',
+      date: '10 Jun 2025',
+      category: 'Courses',
+      iconBg: '#3B82F6',
+      iconColor: '#fff',
+      iconSvg: 'python',
+      credentialUrl: 'https://coursera.org',
+      skills: ['Python', 'Data Analysis', 'OOP'],
+      credentialId: 'COUR-PY-84920',
+      timestamp: new Date('2025-06-10').getTime(),
+    },
+    {
+      id: 2,
+      title: 'Data Structures',
+      issuer: 'Udemy',
+      date: '25 May 2025',
+      category: 'Courses',
+      iconBg: '#F59E0B',
+      iconColor: '#fff',
+      iconSvg: 'bulb',
+      credentialUrl: 'https://udemy.com',
+      skills: ['DSA', 'Trees', 'Graphs', 'C++'],
+      credentialId: 'UDE-DSA-99124',
+      timestamp: new Date('2025-05-25').getTime(),
+    },
+    {
+      id: 3,
+      title: 'Web Development',
+      issuer: 'Udemy',
+      date: '16 Apr 2025',
+      category: 'Courses',
+      iconBg: '#8B5CF6',
+      iconColor: '#fff',
+      iconSvg: 'code',
+      credentialUrl: 'https://udemy.com',
+      skills: ['HTML5', 'CSS3', 'JavaScript', 'React'],
+      credentialId: 'UDE-WEB-77312',
+      timestamp: new Date('2025-04-16').getTime(),
+    },
+    {
+      id: 4,
+      title: 'SQL for Data Science',
+      issuer: 'Coursera',
+      date: '30 Mar 2025',
+      category: 'Courses',
+      iconBg: '#10B981',
+      iconColor: '#fff',
+      iconSvg: 'db',
+      credentialUrl: 'https://coursera.org',
+      skills: ['SQL', 'PostgreSQL', 'Database Design'],
+      credentialId: 'COUR-SQL-10293',
+      timestamp: new Date('2025-03-30').getTime(),
+    },
+    {
+      id: 5,
+      title: 'Hackathon Winner 2025',
+      issuer: 'AIT College',
+      date: '15 Feb 2025',
+      category: 'Achievements',
+      iconBg: '#EF4444',
+      iconColor: '#fff',
+      iconSvg: 'trophy',
+      credentialUrl: 'https://ait.edu',
+      skills: ['Problem Solving', 'Teamwork', 'Fullstack'],
+      credentialId: 'AIT-HACK-0012',
+      timestamp: new Date('2025-02-15').getTime(),
+    },
+    {
+      id: 6,
+      title: 'React Developer Certification',
+      issuer: 'freeCodeCamp',
+      date: '01 Jan 2025',
+      category: 'Courses',
+      iconBg: '#0EA5E9',
+      iconColor: '#fff',
+      iconSvg: 'react',
+      credentialUrl: 'https://freecodecamp.org',
+      skills: ['React.js', 'Redux', 'JSX', 'REST API'],
+      credentialId: 'FCC-REACT-5510',
+      timestamp: new Date('2025-01-01').getTime(),
+    },
+    {
+      id: 7,
+      title: 'Internship - Frontend Dev',
+      issuer: 'Zoho Corp',
+      date: '30 Nov 2024',
+      category: 'Internships',
+      iconBg: '#D97706',
+      iconColor: '#fff',
+      iconSvg: 'intern',
+      credentialUrl: 'https://zoho.com',
+      skills: ['Frontend', 'UI Design', 'Product Testing'],
+      credentialId: 'ZOHO-INT-8831',
+      timestamp: new Date('2024-11-30').getTime(),
+    },
+    {
+      id: 8,
+      title: 'Best Outgoing Student',
+      issuer: 'AIT College',
+      date: '10 Oct 2024',
+      category: 'Achievements',
+      iconBg: '#EC4899',
+      iconColor: '#fff',
+      iconSvg: 'star',
+      credentialUrl: 'https://ait.edu',
+      skills: ['Leadership', 'Academic Excellence'],
+      credentialId: 'AIT-AWARD-2024',
+      timestamp: new Date('2024-10-10').getTime(),
+    },
+  ]);
+
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3500);
+  };
+
+  // Filter & Search & Sort Logic
+  const filtered = certificatesList
+    .filter(c => {
+      const matchesFilter = activeFilter === 'All' || c.category === activeFilter;
+      const matchesSearch =
+        c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.issuer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (c.skills && c.skills.some(s => s.toLowerCase().includes(searchQuery.toLowerCase())));
+      return matchesFilter && matchesSearch;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'newest') return b.timestamp - a.timestamp;
+      if (sortBy === 'oldest') return a.timestamp - b.timestamp;
+      if (sortBy === 'alphabetical') return a.title.localeCompare(b.title);
+      return 0;
+    });
+
+  const displayed = showAll ? filtered : filtered.slice(0, 6);
+
+  const handleDownload = (cert) => {
+    showToast(`⬇️ Downloading "${cert.title}" certificate...`);
+
+    const certificateHTML = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${cert.title} - Certificate of Completion</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+    body {
+      margin: 0;
+      padding: 40px;
+      background: #f4f4f7;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .cert-box {
+      width: 900px;
+      padding: 50px 60px;
+      background: #ffffff;
+      border: 12px solid #4C1536;
+      outline: 3px solid #D97706;
+      outline-offset: -18px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+      position: relative;
+      text-align: center;
+      box-sizing: border-box;
+    }
+    .header-logo {
+      font-family: 'Cinzel', serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #4C1536;
+      letter-spacing: 4px;
+      margin-bottom: 5px;
+    }
+    .sub-header {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: #7D7378;
+      text-transform: uppercase;
+      margin-bottom: 30px;
+    }
+    .cert-title-label {
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #7D7378;
+    }
+    .student-name {
+      font-family: 'Cinzel', serif;
+      font-size: 38px;
+      color: #4C1536;
+      margin: 15px 0;
+      border-bottom: 2px solid #EFE8E1;
+      display: inline-block;
+      padding-bottom: 8px;
+    }
+    .cert-description {
+      font-size: 16px;
+      color: #2D2529;
+      line-height: 1.6;
+      max-width: 680px;
+      margin: 15px auto 30px;
+    }
+    .course-name {
+      font-size: 24px;
+      font-weight: 800;
+      color: #D97706;
+    }
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px dashed #E3D9CF;
+    }
+    .sig-block {
+      text-align: center;
+    }
+    .sig-line {
+      width: 180px;
+      border-bottom: 1.5px solid #2D2529;
+      margin-bottom: 6px;
+    }
+    .badge {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4C1536, #9B1B30);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 15px rgba(76,21,54,0.3);
+      margin: 0 auto;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="cert-box">
+    <div class="header-logo">AIT PLACEMENT PORTAL</div>
+    <div class="sub-header">Official Verified Certificate</div>
+    <div class="cert-title-label">This certificate is proudly awarded to</div>
+    <div class="student-name">Jayasurya K</div>
+    <div class="cert-description">
+      For successfully completing the certified program in <br>
+      <span class="course-name">${cert.title}</span><br>
+      issued by <strong>${cert.issuer}</strong> on <strong>${cert.date}</strong>.
+    </div>
+    <div class="footer-row">
+      <div class="sig-block">
+        <div class="sig-line"></div>
+        <div style="font-size: 12px; font-weight: 700; color: #7D7378;">${cert.issuer} Representative</div>
+      </div>
+      <div class="badge">VERIFIED<br>AIT</div>
+      <div class="sig-block">
+        <div class="sig-line"></div>
+        <div style="font-size: 12px; font-weight: 700; color: #7D7378;">Placement Director</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([certificateHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${cert.title.replace(/\s+/g, '_')}_Certificate.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleAddCertificateSubmit = (e) => {
+    e.preventDefault();
+    if (!newCert.title || !newCert.issuer) {
+      alert('Please fill in the Certificate Title and Issuer.');
+      return;
+    }
+
+    const categoryIcons = {
+      Courses: 'code',
+      Achievements: 'trophy',
+      Internships: 'intern',
+    };
+
+    const createdCert = {
+      id: Date.now(),
+      title: newCert.title,
+      issuer: newCert.issuer,
+      date: newCert.date || 'Today',
+      category: newCert.category,
+      iconBg: newCert.category === 'Achievements' ? '#EF4444' : newCert.category === 'Internships' ? '#D97706' : '#4C1536',
+      iconColor: '#fff',
+      iconSvg: categoryIcons[newCert.category] || 'bulb',
+      credentialUrl: newCert.credentialUrl || 'https://ait.edu',
+      skills: newCert.skills ? newCert.skills.split(',').map(s => s.trim()) : ['Verified Skill'],
+      credentialId: `CERT-${Math.floor(10000 + Math.random() * 90000)}`,
+      timestamp: new Date(newCert.date || Date.now()).getTime(),
+    };
+
+    setCertificatesList([createdCert, ...certificatesList]);
+    setIsAddModalOpen(false);
+    setNewCert({ title: '', issuer: '', date: new Date().toISOString().split('T')[0], category: 'Courses', skills: '', credentialUrl: '' });
+    showToast(`🎉 "${createdCert.title}" added to your certificates!`);
+  };
+
+  const handleDeleteCert = (certId) => {
+    if (window.confirm('Are you sure you want to remove this certificate?')) {
+      setCertificatesList(certificatesList.filter(c => c.id !== certId));
+      setSelectedCert(null);
+      showToast('🗑️ Certificate removed successfully.');
+    }
+  };
+
+  const handleCopyLink = (cert) => {
+    navigator.clipboard.writeText(cert.credentialUrl);
+    showToast(`📋 Copied credential link for "${cert.title}"!`);
+  };
+
+  const handleShareLinkedIn = (cert) => {
+    const text = encodeURIComponent(`I'm excited to share my certification in ${cert.title} issued by ${cert.issuer}! #AITPlacements #SkillBuilding`);
+    window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${text}`, '_blank');
+  };
+
+  const renderCertIcon = (type, bg, color) => {
+    const icons = {
+      python: (
+        <svg viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '26px', height: '26px' }}>
+          <path d="M12 2C8.13 2 8 4.5 8 6v2h8V6c0-1.5-.13-4-4-4z" fill="rgba(255,255,255,0.25)" />
+          <path d="M8 8H4C2.9 8 2 8.9 2 10v6c0 1.1.9 2 2 2h4V8z" fill="rgba(255,255,255,0.15)" />
+          <path d="M16 8h4c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2h-4V8z" fill="rgba(255,255,255,0.15)" />
+          <circle cx="9.5" cy="6" r="1" fill={color} />
+          <circle cx="14.5" cy="18" r="1" fill={color} />
+        </svg>
+      ),
+      bulb: (
+        <svg viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '26px', height: '26px' }}>
+          <line x1="9" y1="18" x2="15" y2="18" />
+          <line x1="10" y1="22" x2="14" y2="22" />
+          <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14" />
+        </svg>
+      ),
+      code: (
+        <svg viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '26px', height: '26px' }}>
+          <polyline points="16 18 22 12 16 6" />
+          <polyline points="8 6 2 12 8 18" />
+        </svg>
+      ),
+      db: (
+        <svg viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '26px', height: '26px' }}>
+          <ellipse cx="12" cy="5" rx="9" ry="3" />
+          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+        </svg>
+      ),
+      trophy: (
+        <svg viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '26px', height: '26px' }}>
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+          <path d="M4 22h16" />
+          <path d="M10 14.66V17c0 .55-.47 1-1 1H7c-.55 0-1-.45-1-1v-2.34" />
+          <path d="M14 14.66V17c0 .55.47 1 1 1h2c.55 0 1-.45 1-1v-2.34" />
+          <path d="M18 2H6v7a6 6 0 0 0 12 0V2z" />
+        </svg>
+      ),
+      react: (
+        <svg viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '26px', height: '26px' }}>
+          <circle cx="12" cy="12" r="2" />
+          <path d="M12 2c5.5 0 10 4.5 10 10S17.5 22 12 22 2 17.5 2 12 22 2 17.5 2 12 6.5 2 12 2" />
+          <path d="M2.5 12h19M12 2.5c2 3.5 2 8 0 11M12 2.5c-2 3.5-2 8 0 11" />
+        </svg>
+      ),
+      intern: (
+        <svg viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '26px', height: '26px' }}>
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+        </svg>
+      ),
+      star: (
+        <svg viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '26px', height: '26px' }}>
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      ),
+    };
+    return (
+      <div style={{
+        width: '56px', height: '56px', borderRadius: '14px',
+        backgroundColor: bg, display: 'flex', alignItems: 'center',
+        justifyContent: 'center', flexShrink: 0,
+        boxShadow: `0 4px 12px ${bg}55`,
+      }}>
+        {icons[type] || icons.code}
+      </div>
+    );
+  };
+
+  // Metrics counters
+  const totalCount = certificatesList.length;
+  const coursesCount = certificatesList.filter(c => c.category === 'Courses').length;
+  const achievementsCount = certificatesList.filter(c => c.category === 'Achievements').length;
+  const internshipsCount = certificatesList.filter(c => c.category === 'Internships').length;
+
+  return (
+    <div className="cert-page-wrapper">
+      {/* Toast */}
+      {toastMsg && (
+        <div style={{
+          position: 'fixed', bottom: '28px', right: '100px',
+          backgroundColor: 'var(--primary-maroon)', color: '#fff',
+          padding: '12px 20px', borderRadius: '14px',
+          fontWeight: '700', fontSize: '13.5px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+          zIndex: 3000, animation: 'fadeIn 0.2s ease-out',
+        }}>
+          {toastMsg}
+        </div>
+      )}
+
+      <div className="cert-layout">
+        {/* ── Main Panel ──────────────────── */}
+        <div className="cert-main-panel">
+          {/* Section header & Add Button */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
+            <div>
+              <h2 className="cert-section-title" style={{ margin: 0 }}>Certificates</h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '4px', fontWeight: '500' }}>
+                Verified credentials and certifications awarded to Jayasurya K
+              </p>
+            </div>
+
+            <button
+              className="cert-btn-download"
+              onClick={() => setIsAddModalOpen(true)}
+              style={{
+                padding: '10px 20px', borderRadius: '12px',
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                fontSize: '13.5px', fontWeight: '700',
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Add Certificate
+            </button>
+          </div>
+
+          {/* ── Summary Stats Bar ── */}
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+            gap: '12px', marginBottom: '24px', padding: '16px',
+            backgroundColor: '#F9F7FC', borderRadius: '16px', border: '1px solid #EDE8F5'
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '11.5px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Total Earned</span>
+              <span style={{ fontSize: '20px', fontWeight: '800', color: 'var(--primary-maroon)' }}>{totalCount}</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '11.5px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Courses</span>
+              <span style={{ fontSize: '20px', fontWeight: '800', color: '#3B82F6' }}>{coursesCount}</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '11.5px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Achievements</span>
+              <span style={{ fontSize: '20px', fontWeight: '800', color: '#EF4444' }}>{achievementsCount}</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '11.5px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Internships</span>
+              <span style={{ fontSize: '20px', fontWeight: '800', color: '#D97706' }}>{internshipsCount}</span>
+            </div>
+          </div>
+
+          {/* ── Filter Tabs & Controls Row ── */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '14px' }}>
+            {/* Filter Tabs */}
+            <div className="cert-filter-tabs" style={{ marginBottom: 0 }}>
+              {filters.map(f => (
+                <button
+                  key={f}
+                  className={`cert-filter-tab ${activeFilter === f ? 'active' : ''}`}
+                  onClick={() => { setActiveFilter(f); setShowAll(false); }}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+
+            {/* Search + Sort */}
+            <div style={{ display: 'flex', gap: '10px', flex: '1', maxWidth: '420px', justifyContent: 'flex-end' }}>
+              <div style={{ position: 'relative', flex: '1' }}>
+                <input
+                  type="text"
+                  placeholder="Search certificate or skill..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    width: '100%', padding: '8px 14px 8px 36px', borderRadius: '10px',
+                    border: '1px solid var(--border-medium)', fontSize: '13px',
+                    outline: 'none', backgroundColor: '#FAF6F0'
+                  }}
+                />
+                <svg
+                  style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '15px', height: '15px', stroke: 'var(--text-muted)' }}
+                  viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </div>
+
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                style={{
+                  padding: '8px 12px', borderRadius: '10px',
+                  border: '1px solid var(--border-medium)', fontSize: '12.5px',
+                  fontWeight: '600', color: 'var(--text-main)', backgroundColor: '#FAF6F0',
+                  outline: 'none', cursor: 'pointer'
+                }}
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="alphabetical">Title A-Z</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Certificate Grid */}
+          {filtered.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
+              <CertificatesIcon style={{ width: '40px', height: '40px', margin: '0 auto 12px', display: 'block', stroke: 'var(--border-medium)' }} />
+              <p style={{ fontWeight: '700', fontSize: '15px' }}>No certificates match "{searchQuery || activeFilter}"</p>
+              <p style={{ fontSize: '13px', marginTop: '4px' }}>Try adjusting your search query or filter tab.</p>
+            </div>
+          ) : (
+            <div className="cert-grid">
+              {displayed.map(cert => (
+                <div key={cert.id} className="cert-card">
+                  {/* Icon + Info */}
+                  <div className="cert-card-top">
+                    {renderCertIcon(cert.iconSvg, cert.iconBg, cert.iconColor)}
+                    <div className="cert-card-info">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <h4 className="cert-card-title">{cert.title}</h4>
+                        <span style={{
+                          fontSize: '10.5px', fontWeight: '800', color: '#16A34A',
+                          backgroundColor: '#DCFCE7', padding: '2px 7px', borderRadius: '6px'
+                        }}>✓ Verified</span>
+                      </div>
+                      <p className="cert-card-issuer">{cert.issuer}</p>
+                      <p className="cert-card-date">Issued: {cert.date}</p>
+
+                      {/* Skill tags */}
+                      {cert.skills && (
+                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '8px' }}>
+                          {cert.skills.slice(0, 3).map((skill, sIdx) => (
+                            <span key={sIdx} style={{
+                              fontSize: '10px', fontWeight: '700', color: 'var(--primary-maroon)',
+                              backgroundColor: 'var(--primary-maroon-light)', padding: '2px 6px', borderRadius: '4px'
+                            }}>
+                              #{skill}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {/* Action Buttons */}
+                  <div className="cert-card-actions">
+                    <button
+                      className="cert-btn cert-btn-view"
+                      onClick={() => setSelectedCert(cert)}
+                    >
+                      View Details
+                    </button>
+                    <button
+                      className="cert-btn cert-btn-download"
+                      onClick={() => handleDownload(cert)}
+                    >
+                      Download
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* View All / Show Less */}
+          {filtered.length > 6 && (
+            <div style={{ textAlign: 'center', marginTop: '24px' }}>
+              <button
+                className="cert-view-all-btn"
+                onClick={() => setShowAll(prev => !prev)}
+              >
+                {showAll ? 'Show Less' : `View All Certificates (${filtered.length})`}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── View Details Modal ── */}
+      {selectedCert && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', zIndex: 3500, padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff', borderRadius: '24px', padding: '32px',
+            maxWidth: '540px', width: '100%', boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+            border: '1px solid var(--border-light)', animation: 'fadeIn 0.2s ease-out'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border-light)', paddingBottom: '16px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                {renderCertIcon(selectedCert.iconSvg, selectedCert.iconBg, selectedCert.iconColor)}
+                <div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>{selectedCert.title}</h3>
+                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0, fontWeight: '600' }}>Issued by {selectedCert.issuer}</p>
+                </div>
+              </div>
+              <button
+                style={{ border: 'none', background: 'transparent', fontSize: '20px', fontWeight: '800', cursor: 'pointer', color: 'var(--text-muted)' }}
+                onClick={() => setSelectedCert(null)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '13.5px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: '#FAF6F0', borderRadius: '10px' }}>
+                <span style={{ fontWeight: '700', color: 'var(--text-muted)' }}>Credential ID:</span>
+                <span style={{ fontWeight: '800', color: 'var(--primary-maroon)', fontFamily: 'monospace' }}>{selectedCert.credentialId || 'CERT-AIT-9921'}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: '#FAF6F0', borderRadius: '10px' }}>
+                <span style={{ fontWeight: '700', color: 'var(--text-muted)' }}>Issue Date:</span>
+                <span style={{ fontWeight: '700', color: 'var(--text-main)' }}>{selectedCert.date}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: '#FAF6F0', borderRadius: '10px' }}>
+                <span style={{ fontWeight: '700', color: 'var(--text-muted)' }}>Verification Status:</span>
+                <span style={{ fontWeight: '800', color: '#16A34A' }}>✓ Authenticated & Linked</span>
+              </div>
+
+              {selectedCert.skills && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '6px' }}>Mastered Competencies:</label>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {selectedCert.skills.map((s, idx) => (
+                      <span key={idx} style={{
+                        fontSize: '12px', fontWeight: '700', color: 'var(--primary-maroon)',
+                        backgroundColor: 'var(--primary-maroon-light)', padding: '4px 10px', borderRadius: '8px'
+                      }}>
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons inside View Modal */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '24px' }}>
+              <button
+                className="cert-btn cert-btn-download"
+                onClick={() => handleDownload(selectedCert)}
+              >
+                ⬇️ Download Certificate
+              </button>
+              <button
+                className="cert-btn cert-btn-view"
+                onClick={() => handleShareLinkedIn(selectedCert)}
+              >
+                💼 Share on LinkedIn
+              </button>
+              <button
+                className="cert-btn cert-btn-view"
+                onClick={() => handleCopyLink(selectedCert)}
+              >
+                🔗 Copy Link
+              </button>
+              <button
+                style={{
+                  padding: '8px 10px', borderRadius: '8px', border: '1px solid #FCA5A5',
+                  backgroundColor: '#FEF2F2', color: '#DC2626', fontWeight: '700', fontSize: '12.5px', cursor: 'pointer'
+                }}
+                onClick={() => handleDeleteCert(selectedCert.id)}
+              >
+                🗑️ Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Add New Certificate Modal ── */}
+      {isAddModalOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', zIndex: 3500, padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff', borderRadius: '24px', padding: '32px',
+            maxWidth: '500px', width: '100%', boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+            border: '1px solid var(--border-light)', animation: 'fadeIn 0.2s ease-out'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '14px', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--primary-maroon)', margin: 0 }}>Add New Certificate</h3>
+              <button
+                style={{ border: 'none', background: 'transparent', fontSize: '20px', fontWeight: '800', cursor: 'pointer', color: 'var(--text-muted)' }}
+                onClick={() => setIsAddModalOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleAddCertificateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '4px' }}>Certificate Title *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. AWS Certified Developer"
+                  required
+                  value={newCert.title}
+                  onChange={(e) => setNewCert({ ...newCert, title: e.target.value })}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-medium)', fontSize: '13.5px', outline: 'none' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '4px' }}>Issuing Organization *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Amazon Web Services"
+                    required
+                    value={newCert.issuer}
+                    onChange={(e) => setNewCert({ ...newCert, issuer: e.target.value })}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-medium)', fontSize: '13.5px', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '4px' }}>Category</label>
+                  <select
+                    value={newCert.category}
+                    onChange={(e) => setNewCert({ ...newCert, category: e.target.value })}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-medium)', fontSize: '13.5px', outline: 'none', backgroundColor: 'white' }}
+                  >
+                    <option value="Courses">Courses</option>
+                    <option value="Achievements">Achievements</option>
+                    <option value="Internships">Internships</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '4px' }}>Issue Date</label>
+                  <input
+                    type="date"
+                    value={newCert.date}
+                    onChange={(e) => setNewCert({ ...newCert, date: e.target.value })}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-medium)', fontSize: '13.5px', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '4px' }}>Skills (comma separated)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Cloud, Docker, Node.js"
+                    value={newCert.skills}
+                    onChange={(e) => setNewCert({ ...newCert, skills: e.target.value })}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-medium)', fontSize: '13.5px', outline: 'none' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '4px' }}>Credential Verification URL</label>
+                <input
+                  type="url"
+                  placeholder="https://credential-verify-link.com"
+                  value={newCert.credentialUrl}
+                  onChange={(e) => setNewCert({ ...newCert, credentialUrl: e.target.value })}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-medium)', fontSize: '13.5px', outline: 'none' }}
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="cert-btn-download"
+                style={{ width: '100%', padding: '12px', marginTop: '10px', fontSize: '14px', fontWeight: '800', borderRadius: '12px' }}
+              >
+                Save & Publish Certificate
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Standalone Alumni Network Component ───────────────────────────────
 function AlumniView() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -3491,6 +4331,11 @@ Generated by AIT Placement Portal AI Engine
   // ─── Chatbot / Support View ────────────────────────────────
   if (activeTab === 'chatbot') {
     return <ChatbotView />;
+  }
+
+  // ─── Certificates View ──────────────────────────────────────
+  if (activeTab === 'certificates') {
+    return <CertificatesView />;
   }
 
   // ─── Alumni Network View ────────────────────────────────────
