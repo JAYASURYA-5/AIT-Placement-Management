@@ -8,8 +8,15 @@ import PlacementPrep, { prepModules } from './components/PlacementPrep';
 import FeatureView from './components/FeatureViews';
 import { ApplyModal, CalendarModal, PrepModal } from './components/Modals';
 import ChatbotView from './components/ChatbotWidget';
+import LandingPage from './pages/LandingPage';
+import AuthPage from './pages/AuthPage';
 
 export default function App() {
+  // Navigation Flow: 'landing' -> 'auth' -> 'app'
+  const [currentScreen, setCurrentScreen] = useState('landing');
+  const [authRole, setAuthRole] = useState('Student');
+  const [user, setUser] = useState({ name: 'Jayasurya', role: 'Student' });
+
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [drives, setDrives] = useState(initialDrivesData);
@@ -48,7 +55,29 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    setCurrentScreen('landing');
     showToast('👋 You have been logged out.');
+  };
+
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+    setCurrentScreen('app');
+
+    // Role-based view redirection:
+    if (userData.role === 'HR / Company') {
+      setActiveTab('applications');
+      showToast(`🏢 Welcome ${userData.name}! Redirected to Company & Applications View.`);
+    } else if (userData.role === 'Placement Officer') {
+      setActiveTab('calendar');
+      showToast(`🎓 Welcome ${userData.name}! Redirected to Placement Drives Calendar.`);
+    } else if (userData.role === 'Admin') {
+      setActiveTab('settings');
+      showToast(`⚙️ Welcome ${userData.name}! Redirected to Portal System Settings.`);
+    } else {
+      // Student default
+      setActiveTab('dashboard');
+      showToast(`✨ Welcome back, ${userData.name}!`);
+    }
   };
 
   // Filter drives according to top header search input
@@ -56,6 +85,31 @@ export default function App() {
     d.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
     d.role.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (currentScreen === 'landing') {
+    return (
+      <LandingPage
+        onStudentLogin={() => {
+          setAuthRole('Student');
+          setCurrentScreen('auth');
+        }}
+        onCompanyLogin={() => {
+          setAuthRole('HR / Company');
+          setCurrentScreen('auth');
+        }}
+      />
+    );
+  }
+
+  if (currentScreen === 'auth') {
+    return (
+      <AuthPage
+        initialRole={authRole}
+        onLoginSuccess={handleLoginSuccess}
+        onBackToHome={() => setCurrentScreen('landing')}
+      />
+    );
+  }
 
   return (
     <div className="app-container">
@@ -79,7 +133,7 @@ export default function App() {
         {/* Dynamic View rendering depending on active left feature menu */}
         {activeTab === 'dashboard' ? (
           <>
-            <WelcomeBanner userName="Jayasurya" />
+            <WelcomeBanner userName={user.name} />
             <StatCards
               stats={stats}
               onSelectStat={(key) => {
