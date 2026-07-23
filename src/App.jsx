@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import WelcomeBanner from './components/WelcomeBanner';
 import StatCards from './components/StatCards';
 import UpcomingDrives, { initialDrivesData } from './components/UpcomingDrives';
-import PlacementPrep, { prepModules } from './components/PlacementPrep';
+import PlacementPrep from './components/PlacementPrep';
 import FeatureView from './components/FeatureViews';
 import { ApplyModal, CalendarModal, PrepModal } from './components/Modals';
 import ChatbotView from './components/ChatbotWidget';
@@ -16,7 +16,24 @@ export default function App() {
   // Navigation Flow: 'landing' -> 'auth' -> 'app'
   const [currentScreen, setCurrentScreen] = useState('landing');
   const [authRole, setAuthRole] = useState('Student');
-  const [user, setUser] = useState({ name: 'Jayasurya', role: 'Student' });
+  const [user, setUser] = useState(() => {
+    try {
+      const savedProfile = JSON.parse(localStorage.getItem('ait-profile') || '{}');
+      return { name: savedProfile.name || 'Jayasurya', role: 'Student' };
+    } catch {
+      return { name: 'Jayasurya', role: 'Student' };
+    }
+  });
+
+  useEffect(() => {
+    const handleProfileUpdate = (event) => {
+      const name = event.detail?.name;
+      if (name) setUser((currentUser) => ({ ...currentUser, name }));
+    };
+
+    window.addEventListener('profile:update', handleProfileUpdate);
+    return () => window.removeEventListener('profile:update', handleProfileUpdate);
+  }, []);
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,7 +46,7 @@ export default function App() {
     offers: 0
   });
 
-  const [notifications, setNotifications] = useState([
+  const [notifications] = useState([
     { id: 1, title: 'Zoho Shortlist Announced', time: '10m ago', read: false },
     { id: 2, title: 'Infosys Drive Registration Closes Soon', time: '2h ago', read: false },
     { id: 3, title: 'Mock Interview Feedback Available', time: '1d ago', read: true }
@@ -156,6 +173,7 @@ export default function App() {
             drives={drives}
             setActiveTab={setActiveTab}
             onApplyDrive={(drive) => setSelectedDriveToApply(drive)}
+            userName={user.name}
           />
         )}
       </main>
@@ -283,7 +301,7 @@ export default function App() {
           </div>
           {/* Chatbot body */}
           <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-            <ChatbotView />
+            <ChatbotView userName={user.name} />
           </div>
         </div>
       )}

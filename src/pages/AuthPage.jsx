@@ -75,7 +75,14 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
 
     // Derive display name from credentials
     let displayName = 'User';
-    if (selectedRole === 'Student') displayName = 'Jayasurya K';
+    if (selectedRole === 'Student') {
+      try {
+        const savedProfile = JSON.parse(localStorage.getItem('ait-profile') || '{}');
+        displayName = savedProfile.name || 'Jayasurya K';
+      } catch {
+        displayName = 'Jayasurya K';
+      }
+    }
     else if (selectedRole === 'HR / Company') displayName = 'HR Manager (Google)';
     else if (selectedRole === 'Placement Officer') displayName = 'Dr. R. Placement Officer';
     else if (selectedRole === 'Admin') displayName = 'System Admin';

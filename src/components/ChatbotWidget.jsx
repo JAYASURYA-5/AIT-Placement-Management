@@ -38,8 +38,8 @@ const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
  * Defines the AI persona, scope, tone, and student context.
  * This ensures the AI stays focused on placement-related topics.
  */
-const SYSTEM_PROMPT = `You are "AIT Placement Assistant", an expert AI chatbot embedded inside the AIT College Placement Management Portal.
-You help students named Jayasurya K (B.Tech IT, IV Year, CGPA 8.74) with:
+const SYSTEM_PROMPT = (userName) => `You are "AIT Placement Assistant", an expert AI chatbot embedded inside the AIT College Placement Management Portal.
+You help the student named ${userName} (B.Tech IT, IV Year, CGPA 8.74) with:
 - Upcoming campus drive schedules (TCS on 20 Jul, Zoho on 25 Jul, Infosys on 30 Jul 2025)
 - Resume tips and ATS optimization
 - Interview preparation strategies
@@ -77,10 +77,14 @@ const FALLBACK_RESPONSES = {
  * @param {string} query - The raw user input string
  * @returns {string} - A relevant placement response
  */
-const getFallback = (query) => {
+const getFallback = (query, userName = 'Jayasurya K') => {
   const q = query.toLowerCase();
   for (const [key, response] of Object.entries(FALLBACK_RESPONSES)) {
-    if (q.includes(key)) return response;
+    if (q.includes(key)) {
+      return key === 'hello'
+        ? `👋 Hello ${userName}! Ask me about upcoming drives, resume tips, interview prep, or company eligibility!`
+        : response;
+    }
   }
   return `I understand you're asking about "${query}". Check the relevant section — Drive Calendar, Resume Workspace, Training, or Assessments. Feel free to ask me anything else! 💡`;
 };
@@ -153,7 +157,7 @@ const UserAvatar = () => (
  *  - sendMessage   : Handles both typed input and quick-prompt button clicks
  *  - renderText    : Converts **bold** markdown to <strong> tags in bot messages
  */
-export default function ChatbotView() {
+export default function ChatbotView({ userName = 'Jayasurya K' }) {
   const messagesEndRef = useRef(null); // Scroll anchor — always stays at bottom of message list
   const inputRef = useRef(null);       // Reference to the text input element
 
@@ -167,7 +171,7 @@ export default function ChatbotView() {
   const [messages, setMessages] = useState([
     {
       id: 1, sender: 'bot', time: '10:24 AM',
-      text: `Hello Jayasurya! 👋 I'm your **AIT Placement Assistant** powered by ${GEMINI_API_KEY ? 'Gemini AI' : 'Smart Responses'}.\n\nAsk me anything about upcoming drives, resume tips, interview prep, or company details!`,
+      text: `Hello ${userName}! 👋 I'm your **AIT Placement Assistant** powered by ${GEMINI_API_KEY ? 'Gemini AI' : 'Smart Responses'}.\n\nAsk me anything about upcoming drives, resume tips, interview prep, or company details!`,
     },
   ]);
 
@@ -202,7 +206,7 @@ export default function ChatbotView() {
     const requestBody = {
       contents: [
         // Inject system prompt as the first user turn (Gemini 1.5+ supports system role)
-        { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
+        { role: 'user', parts: [{ text: SYSTEM_PROMPT(userName) }] },
         // Acknowledge system prompt as model to complete the turn pair
         { role: 'model', parts: [{ text: 'Understood! I am the AIT Placement Assistant, ready to help Jayasurya with placement-related queries.' }] },
         // Append full past conversation for multi-turn memory
@@ -263,7 +267,7 @@ export default function ChatbotView() {
       } else {
         // Offline mode — simulate a short delay then use keyword-based response
         await new Promise(r => setTimeout(r, 1000 + Math.random() * 800));
-        botText = getFallback(trimmed);
+        botText = getFallback(trimmed, userName);
       }
       // Add successful bot reply to the message list
       setMessages(prev => [...prev, { id: Date.now() + 1, sender: 'bot', text: botText, time: getTimeString() }]);
@@ -272,7 +276,7 @@ export default function ChatbotView() {
       console.error('Gemini API Error:', err);
       setMessages(prev => [...prev, {
         id: Date.now() + 1, sender: 'bot', time: getTimeString(),
-        text: `⚠️ AI response unavailable (${err.message}). Falling back to smart responses.\n\n${getFallback(trimmed)}`,
+        text: `⚠️ AI response unavailable (${err.message}). Falling back to smart responses.\n\n${getFallback(trimmed, userName)}`,
       }]);
     } finally {
       setIsTyping(false); // Always hide the typing indicator when done
