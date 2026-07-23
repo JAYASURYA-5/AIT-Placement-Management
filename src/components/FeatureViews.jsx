@@ -1,8 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import DriveCalendarPage from '../pages/DriveCalendar';
-import ApplicationsPage from '../pages/Applications';
-import ExternalProfile from '../pages/Profile';
-import SettingsPage from '../pages/Settings';
 import {
   ProfileIcon,
   ApplicationsIcon,
@@ -41,14 +37,14 @@ function AlumniView() {
   const batches = ['All', '2017 Batch', '2018 Batch', '2019 Batch', '2020 Batch', '2021 Batch'];
 
   const allAlumni = [
-    { id: 1, name: 'Rahul R',     role: 'Software Engineer',  company: 'Google',        batch: '2019 Batch', avatarBg: '#4F46E5', tag: 'Featured' },
-    { id: 2, name: 'Sneha M',     role: 'Product Manager',    company: 'Amazon',        batch: '2018 Batch', avatarBg: '#D97706', tag: 'Featured' },
-    { id: 3, name: 'Arun Kumar',  role: 'Data Scientist',     company: 'Microsoft',     batch: '2020 Batch', avatarBg: '#0EA5E9', tag: 'Featured' },
-    { id: 4, name: 'Priya S',     role: 'Frontend Engineer',  company: 'Flipkart',      batch: '2021 Batch', avatarBg: '#EC4899', tag: '' },
-    { id: 5, name: 'Karthik V',   role: 'DevOps Engineer',    company: 'Zoho',          batch: '2020 Batch', avatarBg: '#10B981', tag: '' },
-    { id: 6, name: 'Deepika R',   role: 'ML Engineer',        company: 'Infosys AI Lab',batch: '2019 Batch', avatarBg: '#8B5CF6', tag: '' },
-    { id: 7, name: 'Vikram N',    role: 'Cloud Architect',    company: 'TCS',           batch: '2017 Batch', avatarBg: '#F59E0B', tag: '' },
-    { id: 8, name: 'Ananya K',    role: 'UX Designer',        company: 'Swiggy',        batch: '2021 Batch', avatarBg: '#EF4444', tag: '' },
+    { id: 1, name: 'Rahul R', role: 'Software Engineer', company: 'Google', batch: '2019 Batch', avatarBg: '#4F46E5', tag: 'Featured' },
+    { id: 2, name: 'Sneha M', role: 'Product Manager', company: 'Amazon', batch: '2018 Batch', avatarBg: '#D97706', tag: 'Featured' },
+    { id: 3, name: 'Arun Kumar', role: 'Data Scientist', company: 'Microsoft', batch: '2020 Batch', avatarBg: '#0EA5E9', tag: 'Featured' },
+    { id: 4, name: 'Priya S', role: 'Frontend Engineer', company: 'Flipkart', batch: '2021 Batch', avatarBg: '#EC4899', tag: '' },
+    { id: 5, name: 'Karthik V', role: 'DevOps Engineer', company: 'Zoho', batch: '2020 Batch', avatarBg: '#10B981', tag: '' },
+    { id: 6, name: 'Deepika R', role: 'ML Engineer', company: 'Infosys AI Lab', batch: '2019 Batch', avatarBg: '#8B5CF6', tag: '' },
+    { id: 7, name: 'Vikram N', role: 'Cloud Architect', company: 'TCS', batch: '2017 Batch', avatarBg: '#F59E0B', tag: '' },
+    { id: 8, name: 'Ananya K', role: 'UX Designer', company: 'Swiggy', batch: '2021 Batch', avatarBg: '#EF4444', tag: '' },
   ];
 
   const filtered = allAlumni.filter(a => {
@@ -90,8 +86,8 @@ function AlumniView() {
           style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', stroke: 'var(--text-muted)' }}
           viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
         >
-          <circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
         <input
           type="text"
@@ -160,15 +156,15 @@ function AlumniView() {
                 {connected[alumni.id] ? (
                   <>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: '14px', height: '14px' }}>
-                      <polyline points="20 6 9 17 4 12"/>
+                      <polyline points="20 6 9 17 4 12" />
                     </svg>
                     Connected
                   </>
                 ) : (
                   <>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '14px', height: '14px' }}>
-                      <path d="M16 11c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4 4 1.79 4 4z"/>
-                      <path d="M3 20c0-3.31 2.69-6 6-6h6c3.31 0 6 2.69 6 6"/>
+                      <path d="M16 11c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4 4 1.79 4 4z" />
+                      <path d="M3 20c0-3.31 2.69-6 6-6h6c3.31 0 6 2.69 6 6" />
                     </svg>
                     Connect
                   </>
@@ -263,10 +259,10 @@ function ChatbotView() {
 
   const BotSvg = ({ size = 16 }) => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: size, height: size }}>
-      <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7H3a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/>
-      <path d="M7 14v4"/><path d="M17 14v4"/><path d="M9 18h6"/>
-      <circle cx="9" cy="12" r="1" fill="currentColor" stroke="none"/>
-      <circle cx="15" cy="12" r="1" fill="currentColor" stroke="none"/>
+      <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7H3a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z" />
+      <path d="M7 14v4" /><path d="M17 14v4" /><path d="M9 18h6" />
+      <circle cx="9" cy="12" r="1" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="12" r="1" fill="currentColor" stroke="none" />
     </svg>
   );
 
@@ -304,20 +300,20 @@ function ChatbotView() {
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <button className="chatbot-header-icon-btn" title="Save conversation">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '17px', height: '17px' }}>
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                  <polyline points="14 2 14 8 20 8"/>
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                  <polyline points="14 2 14 8 20 8" />
                 </svg>
               </button>
               <button className="chatbot-header-icon-btn" title="Clear chat" onClick={() => setMessages([{ id: Date.now(), sender: 'bot', text: 'Hello Jayasurya! How can I help you today?', time: getTimeString() }])}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '17px', height: '17px' }}>
-                  <polyline points="3 6 5 6 21 6"/>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
                 </svg>
               </button>
               <button className="chatbot-header-icon-btn" title="Profile">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '17px', height: '17px' }}>
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
                 </svg>
               </button>
             </div>
@@ -335,8 +331,8 @@ function ChatbotView() {
                 {msg.sender === 'user' && (
                   <div className="chatbot-avatar-user chatbot-msg-avatar">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}>
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                      <circle cx="12" cy="7" r="4"/>
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
                     </svg>
                   </div>
                 )}
@@ -375,7 +371,7 @@ function ChatbotView() {
             />
             <button className="chatbot-send-btn" onClick={() => sendMessage(undefined)} disabled={!inputValue.trim() || isTyping} title="Send">
               <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: '18px', height: '18px' }}>
-                <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 19-7z"/>
+                <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 19-7z" />
               </svg>
             </button>
           </div>
@@ -415,85 +411,128 @@ function ChatbotView() {
 
 export default function FeatureView({ activeTab, drives, setActiveTab, onApplyDrive }) {
   if (activeTab === 'profile') {
-    return <ExternalProfile />;
+    return (
+      <div className="feature-page-container">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '32px' }}>
+          <img
+            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"
+            alt="Jayasurya K"
+            style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--primary-maroon)' }}
+            onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=Jayasurya+K&background=4C1536&color=fff'; }}
+          />
+          <div>
+            <h2 style={{ fontSize: '22px', fontWeight: '800' }}>Jayasurya K</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: '600' }}>B.Tech - Information Technology (IV Year)</p>
+            <p style={{ color: 'var(--primary-maroon)', fontSize: '13px', fontWeight: '700', marginTop: '4px' }}>Reg No: 717822IT045 | CGPA: 8.74</p>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+          <div style={{ padding: '20px', border: '1px solid var(--border-light)', borderRadius: '16px', backgroundColor: 'var(--bg-card)' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '14px', color: 'var(--primary-maroon)' }}>Academic Details</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
+              <div><strong>Department:</strong> Information Technology</div>
+              <div><strong>College:</strong> AIT Engineering College</div>
+              <div><strong>Batch:</strong> 2022 - 2026</div>
+              <div><strong>Arrears:</strong> 0 History of Arrears</div>
+            </div>
+          </div>
+
+          <div style={{ padding: '20px', border: '1px solid var(--border-light)', borderRadius: '16px', backgroundColor: 'var(--bg-card)' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '14px', color: 'var(--primary-maroon)' }}>Contact Details</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
+              <div><strong>Email:</strong> jayasurya.k@ait.edu.in</div>
+              <div><strong>Phone:</strong> +91 98765 43210</div>
+              <div><strong>LinkedIn:</strong> linkedin.com/in/jayasuryak</div>
+              <div><strong>GitHub:</strong> github.com/jayasuryak</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (activeTab === 'applications') {
-    return <ApplicationsPage />;
+    return (
+      <div className="feature-page-container">
+        <h2 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <ApplicationsIcon /> My Applications
+        </h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {drives.map(drive => (
+            <div key={drive.id} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '18px 24px', border: '1px solid var(--border-light)', borderRadius: '16px',
+              backgroundColor: 'var(--bg-card)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div className="company-logo" style={{ backgroundColor: drive.logoBg, color: drive.logoColor }}>
+                  {drive.logoText}
+                </div>
+                <div>
+                  <h4 style={{ fontSize: '16px', fontWeight: '800' }}>{drive.company}</h4>
+                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600' }}>{drive.role} • {drive.ctc}</p>
+                </div>
+              </div>
+
+              <div>
+                {drive.applied ? (
+                  <span style={{
+                    padding: '6px 14px', borderRadius: '12px', fontSize: '12px', fontWeight: '800',
+                    backgroundColor: '#DCFCE7', color: '#15803D', display: 'inline-flex', alignItems: 'center', gap: '4px'
+                  }}>
+                    <CheckIcon style={{ width: '14px', height: '14px' }} /> Applied & Under Review
+                  </span>
+                ) : (
+                  <button className="btn-apply" onClick={() => onApplyDrive(drive)}>Apply Now</button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (activeTab === 'calendar') {
-    return <DriveCalendarPage />;
+    return (
+      <div className="feature-page-container">
+        <h2 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <CalendarIcon /> Drive Calendar 2025
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+          {[
+            { date: '25 Jul 2025', company: 'Zoho Corporation', role: 'Software Developer', status: 'Upcoming' },
+            { date: '30 Jul 2025', company: 'Infosys', role: 'System Engineer', status: 'Upcoming' },
+            { date: '05 Aug 2025', company: 'TCS', role: 'Digital Engineer', status: 'Scheduled' },
+            { date: '12 Aug 2025', company: 'Accenture', role: 'Advanced App Engineering', status: 'Scheduled' },
+            { date: '18 Aug 2025', company: 'Cognizant', role: 'GenC Next Engineer', status: 'Scheduled' },
+            { date: '25 Aug 2025', company: 'Wipro', role: 'Elite Developer', status: 'Upcoming' },
+          ].map((item, idx) => (
+            <div key={idx} style={{
+              padding: '18px', border: '1px solid var(--border-light)', borderRadius: '16px',
+              backgroundColor: 'var(--bg-card)', display: 'flex', flexDirection: 'column', gap: '8px'
+            }}>
+              <span style={{ fontSize: '12px', fontWeight: '800', color: 'var(--primary-maroon)' }}>📅 {item.date}</span>
+              <span style={{ fontSize: '15px', fontWeight: '800' }}>{item.company}</span>
+              <span style={{ fontSize: '12.5px', color: 'var(--text-muted)', fontWeight: '600' }}>{item.role}</span>
+              <span style={{
+                fontSize: '11px', fontWeight: '800', padding: '4px 10px', borderRadius: '10px',
+                backgroundColor: '#EFF6FF', color: '#1D4ED8', alignSelf: 'flex-start', marginTop: '4px'
+              }}>{item.status}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (activeTab === 'resume') {
-    return <ResumeView setActiveTab={setActiveTab} />;
-  }
+    const [subTab, setSubTab] = useState('checker');
 
-  if (activeTab === 'training') {
-    return <TrainingView setActiveTab={setActiveTab} />;
-  }
-
-  if (activeTab === 'notifications') {
-    return <NotificationsView />;
-  }
-
-  if (activeTab === 'documents') {
-    return <DocumentsView />;
-  }
-
-  if (activeTab === 'resources') {
-    return <ResourcesView />;
-  }
-
-  if (activeTab === 'mock-interview') {
-    return <MockInterviewView setActiveTab={setActiveTab} />;
-  }
-
-  if (activeTab === 'chatbot') {
-    return <ChatbotView />;
-  }
-
-  if (activeTab === 'alumni') {
-    return <AlumniView />;
-  }
-
-  if (activeTab === 'settings') {
-    return <SettingsPage />;
-  }
-
-  // Fallback view for other left menu tabs
-  return (
-    <div className="feature-page-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-      <div style={{
-        width: '64px', height: '64px', borderRadius: '20px', backgroundColor: 'var(--primary-maroon-light)',
-        color: 'var(--primary-maroon)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px'
-      }}>
-        <AssessmentsIcon style={{ width: '32px', height: '32px' }} />
-      </div>
-      <h2 style={{ fontSize: '22px', fontWeight: '800', textTransform: 'capitalize' }}>
-        {activeTab.replace('-', ' ')}
-      </h2>
-      <p style={{ color: 'var(--text-muted)', fontSize: '14px', maxWidth: '400px', marginTop: '8px' }}>
-        Welcome to the {activeTab.replace('-', ' ')} module. Explore placement resources, tests, and active updates tailored for Jayasurya K.
-      </p>
-      <button
-        className="btn-apply"
-        style={{ marginTop: '24px' }}
-        onClick={() => setActiveTab('dashboard')}
-      >
-        Back to Dashboard
-      </button>
-    </div>
-  );
-}
-
-function ResumeView({ setActiveTab }) {
-  const [subTab, setSubTab] = useState('checker');
-    
     // Inbuilt Gemini API Key. Paste your key here or set VITE_GEMINI_API_KEY in your .env file
     const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
-    
+
     // Checker states
     const [dragActive, setDragActive] = useState(false);
     const [file, setFile] = useState(null);
@@ -590,7 +629,7 @@ function ResumeView({ setActiveTab }) {
 
     const handleUseSample = () => {
       setFile({ name: 'Jayasurya_K_IT_Resume.pdf', type: 'application/pdf', size: 124000 });
-      
+
       const dummyText = `JAYASURYA K
 jayasurya.k@ait.edu.in | +91 98765 43210 | linkedin.com/in/jayasuryak | github.com/jayasuryak
 
@@ -657,14 +696,14 @@ PROJECTS:
     const analyzeResume = async (content, mimeType, name) => {
       setLoading(true);
       setScanProgress(0);
-      
+
       const steps = [
         { text: "Extracting resume structure and typography...", delay: 600 },
         { text: "Analyzing ATS keywords and technical density...", delay: 1300 },
         { text: "Evaluating experience impact with STAR format...", delay: 2000 },
         { text: "Formulating critical scoring vectors...", delay: 2700 }
       ];
-      
+
       steps.forEach((step, idx) => {
         setTimeout(() => {
           setScanProgress(idx);
@@ -742,7 +781,7 @@ Do not return any markdown tags, trailing commas, or prefix commentary. Return O
 
         const data = await response.json();
         const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        
+
         if (!resultText) {
           throw new Error("Empty response from Gemini API");
         }
@@ -758,7 +797,7 @@ Do not return any markdown tags, trailing commas, or prefix commentary. Return O
             throw new Error("Failed to parse JSON response from Gemini API");
           }
         }
-        
+
         setTimeout(() => {
           setResults(parsed);
           setLoading(false);
@@ -800,7 +839,7 @@ KEYWORD ANALYSIS:
 - Missing: ${results.keywordAnalysis.missing.join(', ')}
 
 AI BULLET REWRITES (STAR METHOD):
-${results.rewrites.map((r, i) => `\nRewrite #${i+1}:\nOriginal: "${r.original}"\nRewritten: "${r.rewritten}"`).join('\n')}
+${results.rewrites.map((r, i) => `\nRewrite #${i + 1}:\nOriginal: "${r.original}"\nRewritten: "${r.rewritten}"`).join('\n')}
 
 =========================================
 Report generated via AIT AI Resume Workspace.
@@ -881,16 +920,16 @@ Report generated via AIT AI Resume Workspace.
                 Build an industry-standard resume and check its ATS score using advanced Gemini AI analysis.
               </p>
             </div>
-            
+
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <div className="resume-tabs">
-                <button 
+                <button
                   className={`resume-tab-btn ${subTab === 'checker' ? 'active' : ''}`}
                   onClick={() => setSubTab('checker')}
                 >
                   <SparklesIcon style={{ width: '15px', height: '15px' }} /> AI ATS Score Checker
                 </button>
-                <button 
+                <button
                   className={`resume-tab-btn ${subTab === 'builder' ? 'active' : ''}`}
                   onClick={() => setSubTab('builder')}
                 >
@@ -907,7 +946,7 @@ Report generated via AIT AI Resume Workspace.
               {!file && !loading && !results && (
                 // Dropzone area
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div 
+                  <div
                     className={`resume-upload-zone ${dragActive ? 'dragging' : ''}`}
                     onDragEnter={handleDrag}
                     onDragOver={handleDrag}
@@ -915,10 +954,10 @@ Report generated via AIT AI Resume Workspace.
                     onDrop={handleDrop}
                     onClick={() => document.getElementById('resume-file-picker').click()}
                   >
-                    <input 
-                      type="file" 
-                      id="resume-file-picker" 
-                      style={{ display: 'none' }} 
+                    <input
+                      type="file"
+                      id="resume-file-picker"
+                      style={{ display: 'none' }}
                       accept=".pdf,.txt"
                       onChange={handleFileSelect}
                     />
@@ -940,7 +979,7 @@ Report generated via AIT AI Resume Workspace.
 
                   {/* Actions Bar for Sample / Paste */}
                   <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', alignItems: 'center' }}>
-                    <button 
+                    <button
                       className="api-settings-btn"
                       onClick={() => setShowPasteArea(!showPasteArea)}
                     >
@@ -962,13 +1001,13 @@ Report generated via AIT AI Resume Workspace.
                         onChange={(e) => setPastedText(e.target.value)}
                       />
                       <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                        <button 
+                        <button
                           style={{ padding: '8px 16px', borderRadius: '10px', border: '1px solid var(--border-medium)', background: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}
                           onClick={() => setShowPasteArea(false)}
                         >
                           Cancel
                         </button>
-                        <button 
+                        <button
                           className="btn-apply"
                           onClick={handlePastedTextSubmit}
                           disabled={!pastedText.trim()}
@@ -1003,7 +1042,7 @@ Report generated via AIT AI Resume Workspace.
                     {scanProgress === 2 && "Validating action-oriented impact phrases..."}
                     {scanProgress === 3 && "Correlating scores with recruiting standard metrics..."}
                   </p>
-                  
+
                   <div style={{
                     width: '200px', height: '6px', backgroundColor: 'var(--border-light)', borderRadius: '3px', overflow: 'hidden', marginTop: '4px'
                   }}>
@@ -1025,7 +1064,7 @@ Report generated via AIT AI Resume Workspace.
                     <h3 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--primary-maroon)', marginTop: '8px', marginBottom: '24px' }}>
                       8. Resume Analyzer (AI)
                     </h3>
-                    
+
                     <div className="gauge-wrapper">
                       <svg viewBox="0 0 200 110" style={{ width: '100%', height: '100%' }}>
                         <path
@@ -1046,7 +1085,7 @@ Report generated via AIT AI Resume Workspace.
                           style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1)' }}
                         />
                       </svg>
-                      
+
                       <div className="gauge-score-text">
                         <span className="gauge-score-value">{animatedScore}</span>
                         <span className="gauge-score-max">/100</span>
@@ -1071,7 +1110,7 @@ Report generated via AIT AI Resume Workspace.
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '10px', marginTop: '24px' }}>
-                      <button 
+                      <button
                         className="btn-apply"
                         style={{ width: '100%', padding: '12px 18px', fontSize: '13px' }}
                         onClick={() => {
@@ -1083,14 +1122,14 @@ Report generated via AIT AI Resume Workspace.
                         Improve My Resume
                       </button>
                       <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-                        <button 
+                        <button
                           className="api-settings-btn"
                           style={{ flex: 1, justifyContent: 'center', padding: '10px' }}
                           onClick={handleDownloadReport}
                         >
                           <DownloadIcon style={{ width: '14px', height: '14px' }} /> Download PDF Report
                         </button>
-                        <button 
+                        <button
                           className="api-settings-btn"
                           style={{ flex: 1, justifyContent: 'center', padding: '10px', color: '#EF4444' }}
                           onClick={handleReset}
@@ -1104,19 +1143,19 @@ Report generated via AIT AI Resume Workspace.
                   {/* Right Column details tab card */}
                   <div className="analysis-details-card" id="suggestions-panel-details">
                     <div className="details-tab-nav">
-                      <button 
+                      <button
                         className={`details-tab-btn ${detailsTab === 'improvements' ? 'active' : ''}`}
                         onClick={() => setDetailsTab('improvements')}
                       >
                         Actionable Improvements
                       </button>
-                      <button 
+                      <button
                         className={`details-tab-btn ${detailsTab === 'keywords' ? 'active' : ''}`}
                         onClick={() => setDetailsTab('keywords')}
                       >
                         ATS Keyword Analysis
                       </button>
-                      <button 
+                      <button
                         className={`details-tab-btn ${detailsTab === 'rewriter' ? 'active' : ''}`}
                         onClick={() => setDetailsTab('rewriter')}
                       >
@@ -1132,7 +1171,7 @@ Report generated via AIT AI Resume Workspace.
                             🎯 {results.alignment}
                           </p>
                         </div>
-                        
+
                         <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '16px' }}>
                           <h4 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--primary-maroon)', marginBottom: '12px' }}>
                             Critical Improvements Checklist
@@ -1193,7 +1232,7 @@ Report generated via AIT AI Resume Workspace.
                             <strong>AI Rewriter Concept:</strong> Transforming passive statements into active results. The rewritten bullet points use action verbs and quantitative metrics (STAR method) to maximize recruiter engagement.
                           </p>
                         </div>
-                        
+
                         <div className="rewriter-list">
                           {results.rewrites.map((item, idx) => (
                             <div key={idx} className="rewriter-item">
@@ -1221,13 +1260,13 @@ Report generated via AIT AI Resume Workspace.
                   <h3 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--primary-maroon)', borderBottom: '1px solid var(--border-light)', paddingBottom: '8px', marginBottom: '8px' }}>
                     Resume Fields
                   </h3>
-                  
+
                   <div className="builder-form-grid">
                     <div className="builder-form-group">
                       <label className="builder-label">Full Name ({formData.name.length}/50)</label>
-                      <input 
-                        type="text" 
-                        className="builder-input" 
+                      <input
+                        type="text"
+                        className="builder-input"
                         maxLength={50}
                         value={formData.name}
                         onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
@@ -1235,9 +1274,9 @@ Report generated via AIT AI Resume Workspace.
                     </div>
                     <div className="builder-form-group">
                       <label className="builder-label">Target Role ({formData.role.length}/50)</label>
-                      <input 
-                        type="text" 
-                        className="builder-input" 
+                      <input
+                        type="text"
+                        className="builder-input"
                         maxLength={50}
                         value={formData.role}
                         onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
@@ -1245,9 +1284,9 @@ Report generated via AIT AI Resume Workspace.
                     </div>
                     <div className="builder-form-group">
                       <label className="builder-label">Email Address ({formData.email.length}/60)</label>
-                      <input 
-                        type="email" 
-                        className="builder-input" 
+                      <input
+                        type="email"
+                        className="builder-input"
                         maxLength={60}
                         value={formData.email}
                         onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
@@ -1255,9 +1294,9 @@ Report generated via AIT AI Resume Workspace.
                     </div>
                     <div className="builder-form-group">
                       <label className="builder-label">Phone Number ({formData.phone.length}/20)</label>
-                      <input 
-                        type="text" 
-                        className="builder-input" 
+                      <input
+                        type="text"
+                        className="builder-input"
                         maxLength={20}
                         value={formData.phone}
                         onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
@@ -1265,9 +1304,9 @@ Report generated via AIT AI Resume Workspace.
                     </div>
                     <div className="builder-form-group">
                       <label className="builder-label">LinkedIn URL ({formData.linkedin.length}/100)</label>
-                      <input 
-                        type="text" 
-                        className="builder-input" 
+                      <input
+                        type="text"
+                        className="builder-input"
                         maxLength={100}
                         value={formData.linkedin}
                         onChange={(e) => setFormData(prev => ({ ...prev, linkedin: e.target.value }))}
@@ -1275,20 +1314,20 @@ Report generated via AIT AI Resume Workspace.
                     </div>
                     <div className="builder-form-group">
                       <label className="builder-label">GitHub URL ({formData.github.length}/100)</label>
-                      <input 
-                        type="text" 
-                        className="builder-input" 
+                      <input
+                        type="text"
+                        className="builder-input"
                         maxLength={100}
                         value={formData.github}
                         onChange={(e) => setFormData(prev => ({ ...prev, github: e.target.value }))}
                       />
                     </div>
-                    
+
                     <div className="builder-form-group full-width">
                       <label className="builder-label">Education Details ({formData.education.length}/150)</label>
-                      <input 
-                        type="text" 
-                        className="builder-input" 
+                      <input
+                        type="text"
+                        className="builder-input"
                         maxLength={150}
                         value={formData.education}
                         onChange={(e) => setFormData(prev => ({ ...prev, education: e.target.value }))}
@@ -1297,8 +1336,8 @@ Report generated via AIT AI Resume Workspace.
 
                     <div className="builder-form-group full-width">
                       <label className="builder-label">Work Experience ({formData.experience.length}/500)</label>
-                      <textarea 
-                        className="builder-textarea" 
+                      <textarea
+                        className="builder-textarea"
                         maxLength={500}
                         value={formData.experience}
                         onChange={(e) => setFormData(prev => ({ ...prev, experience: e.target.value }))}
@@ -1307,8 +1346,8 @@ Report generated via AIT AI Resume Workspace.
 
                     <div className="builder-form-group full-width">
                       <label className="builder-label">Projects ({formData.projects.length}/500)</label>
-                      <textarea 
-                        className="builder-textarea" 
+                      <textarea
+                        className="builder-textarea"
                         maxLength={500}
                         value={formData.projects}
                         onChange={(e) => setFormData(prev => ({ ...prev, projects: e.target.value }))}
@@ -1318,17 +1357,17 @@ Report generated via AIT AI Resume Workspace.
                     <div className="builder-form-group full-width">
                       <label className="builder-label">Skills Checklist ({formData.skills.length}/15 skills)</label>
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        <input 
-                          type="text" 
-                          className="builder-input" 
+                        <input
+                          type="text"
+                          className="builder-input"
                           placeholder="e.g. TypeScript"
                           maxLength={30}
                           value={formData.newSkill}
                           onChange={(e) => setFormData(prev => ({ ...prev, newSkill: e.target.value }))}
                           onKeyDown={handleAddSkill}
                         />
-                        <button 
-                          className="btn-apply" 
+                        <button
+                          className="btn-apply"
                           style={{ height: '38px', padding: '0 16px' }}
                           onClick={handleAddSkill}
                         >
@@ -1339,7 +1378,7 @@ Report generated via AIT AI Resume Workspace.
                         {formData.skills.map((skill, index) => (
                           <span key={index} className="builder-skill-tag">
                             {skill}
-                            <button 
+                            <button
                               className="builder-skill-remove"
                               onClick={() => handleRemoveSkill(skill)}
                             >
@@ -1356,14 +1395,14 @@ Report generated via AIT AI Resume Workspace.
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', position: 'sticky', top: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h4 style={{ fontSize: '15px', fontWeight: '800' }}>Live Resume Preview</h4>
-                    <button 
+                    <button
                       className="btn-apply"
                       onClick={handlePrintResume}
                     >
                       🖨 Save PDF / Print
                     </button>
                   </div>
-                  
+
                   {/* Resume sheet */}
                   <div className="resume-preview-card">
                     <div className="preview-header">
@@ -1418,12 +1457,12 @@ Report generated via AIT AI Resume Workspace.
     );
   }
 
-function TrainingView({ setActiveTab }) {
-  const [subTab, setSubTab] = useState('aptitude');
+  if (activeTab === 'training') {
+    const [subTab, setSubTab] = useState('aptitude');
     const [practiceMode, setPracticeMode] = useState(false);
     const [testCompleted, setTestCompleted] = useState(false);
     const [scoreResult, setScoreResult] = useState(null);
-    
+
     // Donut Category scores
     const [categoryScores, setCategoryScores] = useState({
       aptitude: 70,
@@ -1445,7 +1484,7 @@ function TrainingView({ setActiveTab }) {
 
     // Practice States - Coding
     const [codingCode, setCodingCode] = useState(
-`function fizzBuzz(n) {
+      `function fizzBuzz(n) {
   let result = [];
   // Write your code here
   for (let i = 1; i <= n; i++) {
@@ -1475,7 +1514,7 @@ function TrainingView({ setActiveTab }) {
     // Donut SVG constants (Radius = 38, Circumference = 238.76)
     const circ = 238.76;
     const qtr = 59.69;
-    
+
     const dashApt = (categoryScores.aptitude / 100) * qtr;
     const dashCod = (categoryScores.coding / 100) * qtr;
     const dashSql = (categoryScores.sql / 100) * qtr;
@@ -1538,7 +1577,7 @@ function TrainingView({ setActiveTab }) {
       setScoreResult(pct);
       setAptitudeSubmitted(true);
       setTestCompleted(true);
-      
+
       // Update history & stats
       const newTest = {
         id: Date.now(),
@@ -1560,16 +1599,16 @@ function TrainingView({ setActiveTab }) {
         // Build user function
         const userFnCode = codingCode + "\nreturn fizzBuzz(n);";
         const testFn = new Function('n', userFnCode);
-        
+
         // Execute test cases
         const tc1 = testFn(3);
         const tc2 = testFn(5);
         const tc3 = testFn(15);
-        
+
         const passed1 = Array.isArray(tc1) && tc1[2] === 'Fizz';
         const passed2 = Array.isArray(tc2) && tc2[4] === 'Buzz';
         const passed3 = Array.isArray(tc3) && tc3[14] === 'FizzBuzz' && tc3[13] === '14';
-        
+
         const results = [
           { input: "n = 3", expected: "['1', '2', 'Fizz']", actual: JSON.stringify(tc1), passed: passed1 },
           { input: "n = 5", expected: "['1', '2', 'Fizz', '4', 'Buzz']", actual: JSON.stringify(tc2), passed: passed2 },
@@ -1577,7 +1616,7 @@ function TrainingView({ setActiveTab }) {
         ];
 
         setCodingTestResults(results);
-        
+
         if (passed1 && passed2 && passed3) {
           setScoreResult(100);
           setTestCompleted(true);
@@ -1651,7 +1690,7 @@ function TrainingView({ setActiveTab }) {
       setScoreResult(pct);
       setMcqSubmitted(true);
       setTestCompleted(true);
-      
+
       const newTest = {
         id: Date.now(),
         type: 'mcq',
@@ -1691,27 +1730,27 @@ function TrainingView({ setActiveTab }) {
                 Test and optimize your placement potential with interactive training modules.
               </p>
             </div>
-            
+
             <div className="resume-tabs">
-              <button 
+              <button
                 className={`resume-tab-btn ${subTab === 'aptitude' ? 'active' : ''}`}
                 onClick={() => { setSubTab('aptitude'); handleResetTest(); }}
               >
                 Aptitude
               </button>
-              <button 
+              <button
                 className={`resume-tab-btn ${subTab === 'coding' ? 'active' : ''}`}
                 onClick={() => { setSubTab('coding'); handleResetTest(); }}
               >
                 Coding
               </button>
-              <button 
+              <button
                 className={`resume-tab-btn ${subTab === 'sql' ? 'active' : ''}`}
                 onClick={() => { setSubTab('sql'); handleResetTest(); }}
               >
                 SQL
               </button>
-              <button 
+              <button
                 className={`resume-tab-btn ${subTab === 'mcq' ? 'active' : ''}`}
                 onClick={() => { setSubTab('mcq'); handleResetTest(); }}
               >
@@ -1737,7 +1776,7 @@ function TrainingView({ setActiveTab }) {
                   {aptitudeQuestions.map((q, idx) => (
                     <div key={q.id} className="question-card">
                       <div style={{ fontWeight: '800', fontSize: '14.5px', marginBottom: '14px' }}>
-                        Q{idx+1}. {q.question}
+                        Q{idx + 1}. {q.question}
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {q.options.map(opt => {
@@ -1767,7 +1806,7 @@ function TrainingView({ setActiveTab }) {
                       )}
                     </div>
                   ))}
-                  
+
                   {!aptitudeSubmitted ? (
                     <button className="btn-apply" style={{ alignSelf: 'flex-end' }} onClick={handleSubmitAptitude}>
                       Submit Test answers
@@ -1792,8 +1831,8 @@ function TrainingView({ setActiveTab }) {
                       Problem Statement: FizzBuzz
                     </div>
                     <p style={{ fontSize: '13.5px', color: 'var(--text-muted)', lineHeight: '1.5' }}>
-                      Write a function <code style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>fizzBuzz(n)</code> that returns an array of strings representing numbers from 1 to <code style={{ fontFamily: 'monospace' }}>n</code>. 
-                      For multiples of three, append <code style={{ color: 'var(--primary-maroon)' }}>"Fizz"</code> instead of the number, and for multiples of five, append <code style={{ color: 'var(--primary-maroon)' }}>"Buzz"</code>. 
+                      Write a function <code style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>fizzBuzz(n)</code> that returns an array of strings representing numbers from 1 to <code style={{ fontFamily: 'monospace' }}>n</code>.
+                      For multiples of three, append <code style={{ color: 'var(--primary-maroon)' }}>"Fizz"</code> instead of the number, and for multiples of five, append <code style={{ color: 'var(--primary-maroon)' }}>"Buzz"</code>.
                       For numbers which are multiples of both three and five, append <code style={{ color: 'var(--primary-maroon)' }}>"FizzBuzz"</code>.
                     </p>
                   </div>
@@ -1820,8 +1859,8 @@ function TrainingView({ setActiveTab }) {
                         {codingTestResults.map((tc, idx) => (
                           <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #E5E7EB', paddingBottom: '6px' }}>
                             <div>
-                              <strong>Case {idx+1}:</strong> {tc.input} <br/>
-                              <span style={{ fontSize: '11px', color: '#6B7280' }}>Expected: {tc.expected}</span> <br/>
+                              <strong>Case {idx + 1}:</strong> {tc.input} <br />
+                              <span style={{ fontSize: '11px', color: '#6B7280' }}>Expected: {tc.expected}</span> <br />
                               <span style={{ fontSize: '11px', color: '#6B7280' }}>Actual: {tc.actual}</span>
                             </div>
                             <span style={{
@@ -1865,9 +1904,9 @@ function TrainingView({ setActiveTab }) {
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <label className="builder-label">SQL Console Query</label>
-                    <input 
-                      type="text" 
-                      className="builder-input" 
+                    <input
+                      type="text"
+                      className="builder-input"
                       style={{ fontFamily: 'monospace' }}
                       value={sqlQuery}
                       onChange={(e) => setSqlQuery(e.target.value)}
@@ -1886,7 +1925,7 @@ function TrainingView({ setActiveTab }) {
                         {sqlTestResults.status === 'success' ? "Compilation Success ✓" : "SQL Error ✕"}
                       </div>
                       <p style={{ fontSize: '12px', marginBottom: '10px' }}>{sqlTestResults.message}</p>
-                      
+
                       {sqlTestResults.rows.length > 0 && (
                         <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'white', border: '1px solid var(--border-light)' }}>
                           <thead>
@@ -1907,7 +1946,7 @@ function TrainingView({ setActiveTab }) {
                           </tbody>
                         </table>
                       )}
-                      
+
                       {testCompleted && (
                         <button className="btn-apply" style={{ marginTop: '16px' }} onClick={handleResetTest}>
                           Finish Practice
@@ -1923,7 +1962,7 @@ function TrainingView({ setActiveTab }) {
                   {mcqQuestions.map((q, idx) => (
                     <div key={q.id} className="question-card">
                       <div style={{ fontWeight: '800', fontSize: '14.5px', marginBottom: '14px' }}>
-                        Q{idx+1}. {q.question}
+                        Q{idx + 1}. {q.question}
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {q.options.map(opt => {
@@ -1979,29 +2018,29 @@ function TrainingView({ setActiveTab }) {
                 <h3 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '24px', color: 'var(--text-main)' }}>
                   Your Progress
                 </h3>
-                
+
                 <div className="donut-chart-box">
                   <svg viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
                     {/* Background ring */}
                     <circle cx="50" cy="50" r="38" fill="transparent" stroke="var(--border-light)" strokeWidth="8" />
-                    
+
                     {/* Segment 1: Aptitude (Green) */}
                     <circle cx="50" cy="50" r="38" fill="transparent" stroke="#10B981" strokeWidth="8"
                       strokeDasharray={`${dashApt} ${circ}`} strokeDashoffset="0" strokeLinecap="round" />
-                    
+
                     {/* Segment 2: Coding (Purple) */}
                     <circle cx="50" cy="50" r="38" fill="transparent" stroke="#8B5CF6" strokeWidth="8"
                       strokeDasharray={`${dashCod} ${circ}`} strokeDashoffset={`-${qtr}`} strokeLinecap="round" />
-                      
+
                     {/* Segment 3: SQL (Orange) */}
                     <circle cx="50" cy="50" r="38" fill="transparent" stroke="#F59E0B" strokeWidth="8"
                       strokeDasharray={`${dashSql} ${circ}`} strokeDashoffset={`-${qtr * 2}`} strokeLinecap="round" />
-                      
+
                     {/* Segment 4: MCQ (Blue) */}
                     <circle cx="50" cy="50" r="38" fill="transparent" stroke="#3B82F6" strokeWidth="8"
                       strokeDasharray={`${dashMcq} ${circ}`} strokeDashoffset={`-${qtr * 3}`} strokeLinecap="round" />
                   </svg>
-                  
+
                   <div className="donut-inner-text">
                     <span className="donut-percentage">{overallProgress}%</span>
                     <span className="donut-label">Overall Progress</span>
@@ -2045,7 +2084,7 @@ function TrainingView({ setActiveTab }) {
                 <h3 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '20px', color: 'var(--text-main)' }}>
                   Recent Tests
                 </h3>
-                
+
                 <div className="test-history-list">
                   {testHistory.map(item => (
                     <div key={item.id} className="test-history-item">
@@ -2066,8 +2105,8 @@ function TrainingView({ setActiveTab }) {
                   ))}
                 </div>
 
-                <button 
-                  className="btn-apply" 
+                <button
+                  className="btn-apply"
                   style={{ width: '100%', padding: '14px', fontSize: '13.5px' }}
                   onClick={() => setPracticeMode(true)}
                 >
@@ -2081,49 +2120,49 @@ function TrainingView({ setActiveTab }) {
     );
   }
 
-// Notifications View
-function NotificationsView() {
-  const [filter, setFilter] = useState('all');
+  // Notifications View
+  if (activeTab === 'notifications') {
+    const [filter, setFilter] = useState('all');
     const [notifList, setNotifList] = useState([
-      { 
-        id: 1, 
-        title: "Zoho Drive Registration is Open", 
-        sub: "Register before 24 Jul 2025", 
-        time: "10:30 AM", 
-        iconType: "orange", 
+      {
+        id: 1,
+        title: "Zoho Drive Registration is Open",
+        sub: "Register before 24 Jul 2025",
+        time: "10:30 AM",
+        iconType: "orange",
         icon: <DocumentsIcon style={{ width: '20px', height: '20px' }} />,
         unread: true,
-        important: true 
+        important: true
       },
-      { 
-        id: 2, 
-        title: "TCS Online Test will be on 30 Jul 2025", 
-        sub: "Check your email for test link", 
-        time: "Yesterday", 
-        iconType: "purple", 
+      {
+        id: 2,
+        title: "TCS Online Test will be on 30 Jul 2025",
+        sub: "Check your email for test link",
+        time: "Yesterday",
+        iconType: "purple",
         icon: <AssessmentsIcon style={{ width: '20px', height: '20px' }} />,
         unread: true,
-        important: false 
+        important: false
       },
-      { 
-        id: 3, 
-        title: "Infosys Interview Shortlist Released", 
-        sub: "Check your dashboard", 
-        time: "19 Jul 2025", 
-        iconType: "blue", 
+      {
+        id: 3,
+        title: "Infosys Interview Shortlist Released",
+        sub: "Check your dashboard",
+        time: "19 Jul 2025",
+        iconType: "blue",
         icon: <ProfileIcon style={{ width: '20px', height: '20px' }} />,
         unread: false,
-        important: true 
+        important: true
       },
-      { 
-        id: 4, 
-        title: "Resume Writing Workshop on 25 Jul 2025", 
-        sub: "Venue: Seminar Hall", 
-        time: "19 Jul 2025", 
-        iconType: "green", 
+      {
+        id: 4,
+        title: "Resume Writing Workshop on 25 Jul 2025",
+        sub: "Venue: Seminar Hall",
+        time: "19 Jul 2025",
+        iconType: "green",
         icon: <ResumeIcon style={{ width: '20px', height: '20px' }} />,
         unread: false,
-        important: false 
+        important: false
       }
     ]);
 
@@ -2154,32 +2193,32 @@ function NotificationsView() {
                 Stay updated with critical alerts, interview results, and campus drive schedules.
               </p>
             </div>
-            
+
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               {notifList.some(n => n.unread) && (
-                <button 
-                  className="api-settings-btn" 
+                <button
+                  className="api-settings-btn"
                   style={{ fontSize: '12.5px', padding: '6px 12px' }}
                   onClick={handleMarkAllRead}
                 >
                   ✓ Mark all as read
                 </button>
               )}
-              
+
               <div className="resume-tabs" style={{ margin: 0 }}>
-                <button 
+                <button
                   className={`resume-tab-btn ${filter === 'all' ? 'active' : ''}`}
                   onClick={() => setFilter('all')}
                 >
                   All
                 </button>
-                <button 
+                <button
                   className={`resume-tab-btn ${filter === 'unread' ? 'active' : ''}`}
                   onClick={() => setFilter('unread')}
                 >
                   Unread
                 </button>
-                <button 
+                <button
                   className={`resume-tab-btn ${filter === 'important' ? 'active' : ''}`}
                   onClick={() => setFilter('important')}
                 >
@@ -2193,8 +2232,8 @@ function NotificationsView() {
           <div className="notifications-list">
             {filteredNotifs.length > 0 ? (
               filteredNotifs.map(notif => (
-                <div 
-                  key={notif.id} 
+                <div
+                  key={notif.id}
                   className={`notification-row-item ${notif.unread ? 'unread' : ''}`}
                   style={{ cursor: 'pointer' }}
                   onClick={() => handleToggleRead(notif.id)}
@@ -2209,15 +2248,15 @@ function NotificationsView() {
                       <div className="notification-text-sub">{notif.sub}</div>
                     </div>
                   </div>
-                  
+
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     {notif.important && (
-                      <span style={{ 
-                        fontSize: '10.5px', 
-                        fontWeight: '800', 
-                        color: 'var(--primary-maroon)', 
-                        backgroundColor: 'var(--primary-maroon-light)', 
-                        padding: '2px 8px', 
+                      <span style={{
+                        fontSize: '10.5px',
+                        fontWeight: '800',
+                        color: 'var(--primary-maroon)',
+                        backgroundColor: 'var(--primary-maroon-light)',
+                        padding: '2px 8px',
                         borderRadius: '8px'
                       }}>
                         Urgent
@@ -2238,7 +2277,7 @@ function NotificationsView() {
 
           {/* Footer Action Button */}
           <div className="notification-footer-btn-container">
-            <button 
+            <button
               className="btn-apply"
               style={{ width: '100%', maxWidth: '240px', padding: '12px', fontSize: '13px' }}
               onClick={() => alert("All catchable notifications loaded. You are viewing the latest status updates.")}
@@ -2251,9 +2290,9 @@ function NotificationsView() {
     );
   }
 
-// Documents View
-function DocumentsView() {
-  const [offerLetterUploaded, setOfferLetterUploaded] = useState(false);
+  // Documents View
+  if (activeTab === 'documents') {
+    const [offerLetterUploaded, setOfferLetterUploaded] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [showLetterModal, setShowLetterModal] = useState(false);
@@ -2261,7 +2300,7 @@ function DocumentsView() {
     const handleAdminUploadSimulation = () => {
       setIsUploading(true);
       setUploadProgress(10);
-      
+
       const interval = setInterval(() => {
         setUploadProgress(prev => {
           if (prev >= 100) {
@@ -2322,7 +2361,7 @@ Zoho Corporation`;
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            
+
             {/* Simulation panel */}
             <div className="admin-upload-simulation-panel">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', marginBottom: '8px' }}>
@@ -2343,7 +2382,7 @@ Zoho Corporation`;
                   </div>
                 </div>
               ) : !offerLetterUploaded ? (
-                <button 
+                <button
                   className="btn-apply"
                   style={{ backgroundColor: '#EAB308', color: '#451A03', border: '1px solid #CA8A04' }}
                   onClick={handleAdminUploadSimulation}
@@ -2353,7 +2392,7 @@ Zoho Corporation`;
               ) : (
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', alignItems: 'center' }}>
                   <span style={{ color: '#16A34A', fontSize: '13px', fontWeight: '800' }}>✓ Simulated Offer Letter Uploaded Successfully!</span>
-                  <button 
+                  <button
                     className="api-settings-btn"
                     style={{ padding: '4px 10px', fontSize: '11px' }}
                     onClick={() => setOfferLetterUploaded(false)}
@@ -2370,7 +2409,7 @@ Zoho Corporation`;
                 <h3 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '16px', color: 'var(--text-main)', textAlign: 'center' }}>
                   19. Offer Letter
                 </h3>
-                
+
                 <div className="offer-letter-card">
                   {/* Celebration graphic banner */}
                   <div className="celebration-banner">
@@ -2388,7 +2427,7 @@ Zoho Corporation`;
                       <path d="M62,48 Q70,43 72,50" fill="none" stroke="#F59E0B" strokeWidth="2" />
                       <path d="M48,35 Q50,28 58,32" fill="none" stroke="#8B5CF6" strokeWidth="2" />
                     </svg>
-                    
+
                     <div className="celebration-title">Congratulations! 🎉</div>
                     <div className="celebration-subtitle">You have been selected</div>
                   </div>
@@ -2464,7 +2503,7 @@ Zoho Corporation`;
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '16px', marginBottom: '20px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--primary-maroon)' }}>Zoho Corporation - Letter of Intent</h3>
-                <button 
+                <button
                   style={{ border: 'none', background: 'transparent', fontSize: '18px', fontWeight: '800', cursor: 'pointer', color: 'var(--text-light)' }}
                   onClick={() => setShowLetterModal(false)}
                 >
@@ -2490,13 +2529,13 @@ Zoho Corporation`;
               </div>
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' }}>
-                <button 
+                <button
                   className="api-settings-btn"
                   onClick={() => setShowLetterModal(false)}
                 >
                   Close
                 </button>
-                <button 
+                <button
                   className="btn-apply"
                   onClick={() => { alert("Offer Letter signed successfully!"); setShowLetterModal(false); }}
                 >
@@ -2510,248 +2549,8 @@ Zoho Corporation`;
     );
   }
 
-// Resources & Materials View
-function ResourcesView() {
-  const [searchQuery, setSearchQuery] = useState('');
-    const [activeCategory, setActiveCategory] = useState('All');
-    const [downloadingId, setDownloadingId] = useState(null);
-
-    const categories = ['All', 'Aptitude', 'Technical', 'Interview', 'Resume', 'Soft Skills'];
-
-    const resources = [
-      {
-        id: 1,
-        title: 'Aptitude Handbook',
-        category: 'Aptitude',
-        type: 'PDF',
-        size: '3.4 MB',
-        iconBg: '#E53E3E',
-        iconColor: '#fff',
-        iconLabel: 'PDF',
-        description: 'Comprehensive aptitude preparation guide covering quantitative, logical, and verbal reasoning.'
-      },
-      {
-        id: 2,
-        title: 'DSA Roadmap',
-        category: 'Technical',
-        type: 'PDF',
-        size: '1.8 MB',
-        iconBg: '#276749',
-        iconColor: '#fff',
-        iconLabel: 'XLS',
-        description: 'Step-by-step data structures & algorithms roadmap with curated problem sets and time complexity charts.'
-      },
-      {
-        id: 3,
-        title: 'HR Interview Q&A',
-        category: 'Interview',
-        type: 'PDF',
-        size: '1.2 MB',
-        iconBg: '#E53E3E',
-        iconColor: '#fff',
-        iconLabel: 'PDF',
-        description: 'Top 100 HR interview questions with model answers and tips for freshers.'
-      },
-      {
-        id: 4,
-        title: 'Resume Tips',
-        category: 'Resume',
-        type: 'PDF',
-        size: '856 KB',
-        iconBg: '#276749',
-        iconColor: '#fff',
-        iconLabel: 'DOC',
-        description: 'Expert resume writing tips, ATS optimization strategies, and before/after examples.'
-      },
-      {
-        id: 5,
-        title: 'Group Discussion Tips',
-        category: 'Soft Skills',
-        type: 'PDF',
-        size: '1.1 MB',
-        iconBg: '#6B46C1',
-        iconColor: '#fff',
-        iconLabel: 'PDF',
-        description: 'Effective GD strategies, body language tips, and sample topics with structured outlines.'
-      },
-      {
-        id: 6,
-        title: 'Communication Skills',
-        category: 'Soft Skills',
-        type: 'PDF',
-        size: '1.3 MB',
-        iconBg: '#D53F8C',
-        iconColor: '#fff',
-        iconLabel: 'PDF',
-        description: 'Verbal and non-verbal communication enhancement exercises and workplace etiquette guide.'
-      },
-      {
-        id: 7,
-        title: 'SQL Cheat Sheet',
-        category: 'Technical',
-        type: 'PDF',
-        size: '980 KB',
-        iconBg: '#E53E3E',
-        iconColor: '#fff',
-        iconLabel: 'PDF',
-        description: 'Concise reference for SQL queries — joins, subqueries, aggregates, and stored procedures.'
-      },
-      {
-        id: 8,
-        title: 'Technical Interview Guide',
-        category: 'Interview',
-        type: 'PDF',
-        size: '2.1 MB',
-        iconBg: '#2B6CB0',
-        iconColor: '#fff',
-        iconLabel: 'PDF',
-        description: 'End-to-end guide to technical rounds: coding, system design, and behavioral questions.'
-      },
-      {
-        id: 9,
-        title: 'Quantitative Aptitude',
-        category: 'Aptitude',
-        type: 'PDF',
-        size: '2.7 MB',
-        iconBg: '#E53E3E',
-        iconColor: '#fff',
-        iconLabel: 'PDF',
-        description: 'Practice sets for number systems, percentages, time & work, and data interpretation.'
-      },
-    ];
-
-    const filtered = resources.filter(r => {
-      const matchesCategory = activeCategory === 'All' || r.category === activeCategory;
-      const matchesSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.category.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    });
-
-    const handleDownload = (resource) => {
-      setDownloadingId(resource.id);
-      setTimeout(() => {
-        // Simulate download by creating a text blob
-        const content = `AIT Placement Portal\n\nResource: ${resource.title}\nCategory: ${resource.category}\nSize: ${resource.size}\n\nThis is a demo download for the placement preparation resource.\nIn production, this would download the actual ${resource.type} file.`;
-        const blob = new Blob([content], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${resource.title.replace(/\s+/g, '_')}.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
-        setDownloadingId(null);
-      }, 1200);
-    };
-
-    return (
-      <div className="feature-page-container">
-        {/* Header */}
-        <div style={{ marginBottom: '28px' }}>
-          <h2 style={{ fontSize: '22px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              width: '34px', height: '34px', borderRadius: '10px',
-              backgroundColor: 'var(--primary-maroon)', color: '#fff', fontSize: '14px', fontWeight: '800'
-            }}>17</span>
-            Resources &amp; Materials
-          </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', fontWeight: '500' }}>
-            Access all placement preparation materials in one place.
-          </p>
-        </div>
-
-        {/* Search Bar */}
-        <div style={{ position: 'relative', marginBottom: '20px' }}>
-          <svg
-            style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', stroke: 'var(--text-muted)' }}
-            viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-          >
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input
-            type="text"
-            placeholder="Search resources..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="resources-search-input"
-          />
-        </div>
-
-        {/* Category Filter Chips */}
-        <div className="resources-category-bar">
-          {categories.map(cat => (
-            <button
-              key={cat}
-              className={`resources-cat-chip ${activeCategory === cat ? 'active' : ''}`}
-              onClick={() => setActiveCategory(cat)}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        {/* Resource Cards Grid */}
-        {filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
-            <ResourcesIcon style={{ width: '40px', height: '40px', margin: '0 auto 12px', display: 'block', stroke: 'var(--border-medium)' }} />
-            <p style={{ fontWeight: '600', fontSize: '14px' }}>No resources found for <strong>"{searchQuery}"</strong></p>
-          </div>
-        ) : (
-          <div className="resources-grid">
-            {filtered.map(resource => (
-              <div key={resource.id} className="resource-card">
-                <div className="resource-card-info">
-                  {/* Icon */}
-                  <div
-                    className="resource-file-icon"
-                    style={{ backgroundColor: resource.iconBg, color: resource.iconColor }}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '22px', height: '22px', marginBottom: '2px' }}>
-                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                    </svg>
-                    <span style={{ fontSize: '9px', fontWeight: '800', letterSpacing: '0.5px' }}>{resource.iconLabel}</span>
-                  </div>
-
-                  {/* Details */}
-                  <div style={{ flex: 1 }}>
-                    <h4 className="resource-title">{resource.title}</h4>
-                    <p className="resource-meta">{resource.type} &bull; {resource.size}</p>
-                    <p className="resource-desc">{resource.description}</p>
-                  </div>
-                </div>
-
-                {/* Download Button */}
-                <button
-                  className={`resource-download-btn ${downloadingId === resource.id ? 'downloading' : ''}`}
-                  onClick={() => handleDownload(resource)}
-                  disabled={downloadingId === resource.id}
-                >
-                  {downloadingId === resource.id ? (
-                    <>
-                      <svg style={{ width: '15px', height: '15px', animation: 'spin 1s linear infinite' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-                      </svg>
-                      Downloading...
-                    </>
-                  ) : (
-                    <>
-                      <DownloadIcon style={{ width: '15px', height: '15px' }} />
-                      Download
-                    </>
-                  )}
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-function MockInterviewView({ setActiveTab }) {
-  const [interviewType, setInterviewType] = useState('Technical');
+  if (activeTab === 'mock-interview') {
+    const [interviewType, setInterviewType] = useState('Technical');
     const [difficulty, setDifficulty] = useState('Mid-Level');
     const [interviewStarted, setInterviewStarted] = useState(false);
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -2930,7 +2729,7 @@ function MockInterviewView({ setActiveTab }) {
         // Complete interview & Calculate detailed score
         setTimerActive(false);
         setInterviewCompleted(true);
-        
+
         let totalScore = 0;
         const qDetails = questions.map((q, idx) => {
           const userAns = updatedAnswers[idx] || '';
@@ -2995,7 +2794,7 @@ Questions Answered: ${interviewResult.answered} / ${interviewResult.totalQuestio
 
 QUESTION BREAKDOWN:
 ${interviewResult.questionDetails.map((q, i) => `
-Q${i+1}: ${q.question}
+Q${i + 1}: ${q.question}
 Score: ${q.score}/100 | Word Count: ${q.words} words
 Keywords Matched: ${q.matchedKeywords.join(', ') || 'None'}
 Keywords Missing: ${q.missingKeywords.join(', ') || 'None'}
@@ -3078,10 +2877,10 @@ Generated by AIT Placement Portal AI Engine
                     <div className="mock-feature-item" style={{ cursor: 'pointer' }} onClick={() => speakText("AI Voice Synthesis engine is active and ready for your interview session.")}>
                       <div className="mock-feature-icon" style={{ color: '#9333EA', backgroundColor: '#F3E8FF' }}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                          <line x1="12" y1="19" x2="12" y2="23"/>
-                          <line x1="8" y1="23" x2="16" y2="23"/>
+                          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                          <line x1="12" y1="19" x2="12" y2="23" />
+                          <line x1="8" y1="23" x2="16" y2="23" />
                         </svg>
                       </div>
                       <span className="mock-feature-label">AI Voice</span>
@@ -3089,9 +2888,9 @@ Generated by AIT Placement Portal AI Engine
                     <div className="mock-feature-item">
                       <div className="mock-feature-icon" style={{ color: '#DC2626', backgroundColor: '#FEE2E2' }}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M23 7l-7 5 7 5V7z"/>
-                          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
-                          <circle cx="8.5" cy="12" r="2.5" fill="none"/>
+                          <path d="M23 7l-7 5 7 5V7z" />
+                          <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                          <circle cx="8.5" cy="12" r="2.5" fill="none" />
                         </svg>
                       </div>
                       <span className="mock-feature-label">Real-time Feedback</span>
@@ -3099,9 +2898,9 @@ Generated by AIT Placement Portal AI Engine
                     <div className="mock-feature-item">
                       <div className="mock-feature-icon" style={{ color: '#16A34A', backgroundColor: '#DCFCE7' }}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                          <path d="M8 10h8"/>
-                          <path d="M8 14h4"/>
+                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                          <path d="M8 10h8" />
+                          <path d="M8 14h4" />
                         </svg>
                       </div>
                       <span className="mock-feature-label">Performance Analysis</span>
@@ -3193,8 +2992,8 @@ Generated by AIT Placement Portal AI Engine
                         onClick={toggleRecording}
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill={isRecording ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
-                          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                         </svg>
                         {isRecording ? 'Listening...' : 'Voice Input'}
                       </button>
@@ -3224,9 +3023,9 @@ Generated by AIT Placement Portal AI Engine
                     <p className="mock-question-text">{questions[currentQuestion].question}</p>
                     <p className="mock-question-hint">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="16" x2="12" y2="12"/>
-                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="16" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12.01" y2="8" />
                       </svg>
                       Hint: {questions[currentQuestion].hint}
                     </p>
@@ -3448,3 +3247,279 @@ Generated by AIT Placement Portal AI Engine
       </div>
     );
   }
+
+  // Resources & Materials View
+  if (activeTab === 'resources') {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [activeCategory, setActiveCategory] = useState('All');
+    const [downloadingId, setDownloadingId] = useState(null);
+
+    const categories = ['All', 'Aptitude', 'Technical', 'Interview', 'Resume', 'Soft Skills'];
+
+    const resources = [
+      {
+        id: 1,
+        title: 'Aptitude Handbook',
+        category: 'Aptitude',
+        type: 'PDF',
+        size: '3.4 MB',
+        iconBg: '#E53E3E',
+        iconColor: '#fff',
+        iconLabel: 'PDF',
+        description: 'Comprehensive aptitude preparation guide covering quantitative, logical, and verbal reasoning.'
+      },
+      {
+        id: 2,
+        title: 'DSA Roadmap',
+        category: 'Technical',
+        type: 'PDF',
+        size: '1.8 MB',
+        iconBg: '#276749',
+        iconColor: '#fff',
+        iconLabel: 'XLS',
+        description: 'Step-by-step data structures & algorithms roadmap with curated problem sets and time complexity charts.'
+      },
+      {
+        id: 3,
+        title: 'HR Interview Q&A',
+        category: 'Interview',
+        type: 'PDF',
+        size: '1.2 MB',
+        iconBg: '#E53E3E',
+        iconColor: '#fff',
+        iconLabel: 'PDF',
+        description: 'Top 100 HR interview questions with model answers and tips for freshers.'
+      },
+      {
+        id: 4,
+        title: 'Resume Tips',
+        category: 'Resume',
+        type: 'PDF',
+        size: '856 KB',
+        iconBg: '#276749',
+        iconColor: '#fff',
+        iconLabel: 'DOC',
+        description: 'Expert resume writing tips, ATS optimization strategies, and before/after examples.'
+      },
+      {
+        id: 5,
+        title: 'Group Discussion Tips',
+        category: 'Soft Skills',
+        type: 'PDF',
+        size: '1.1 MB',
+        iconBg: '#6B46C1',
+        iconColor: '#fff',
+        iconLabel: 'PDF',
+        description: 'Effective GD strategies, body language tips, and sample topics with structured outlines.'
+      },
+      {
+        id: 6,
+        title: 'Communication Skills',
+        category: 'Soft Skills',
+        type: 'PDF',
+        size: '1.3 MB',
+        iconBg: '#D53F8C',
+        iconColor: '#fff',
+        iconLabel: 'PDF',
+        description: 'Verbal and non-verbal communication enhancement exercises and workplace etiquette guide.'
+      },
+      {
+        id: 7,
+        title: 'SQL Cheat Sheet',
+        category: 'Technical',
+        type: 'PDF',
+        size: '980 KB',
+        iconBg: '#E53E3E',
+        iconColor: '#fff',
+        iconLabel: 'PDF',
+        description: 'Concise reference for SQL queries — joins, subqueries, aggregates, and stored procedures.'
+      },
+      {
+        id: 8,
+        title: 'Technical Interview Guide',
+        category: 'Interview',
+        type: 'PDF',
+        size: '2.1 MB',
+        iconBg: '#2B6CB0',
+        iconColor: '#fff',
+        iconLabel: 'PDF',
+        description: 'End-to-end guide to technical rounds: coding, system design, and behavioral questions.'
+      },
+      {
+        id: 9,
+        title: 'Quantitative Aptitude',
+        category: 'Aptitude',
+        type: 'PDF',
+        size: '2.7 MB',
+        iconBg: '#E53E3E',
+        iconColor: '#fff',
+        iconLabel: 'PDF',
+        description: 'Practice sets for number systems, percentages, time & work, and data interpretation.'
+      },
+    ];
+
+    const filtered = resources.filter(r => {
+      const matchesCategory = activeCategory === 'All' || r.category === activeCategory;
+      const matchesSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.category.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+
+    const handleDownload = (resource) => {
+      setDownloadingId(resource.id);
+      setTimeout(() => {
+        // Simulate download by creating a text blob
+        const content = `AIT Placement Portal\n\nResource: ${resource.title}\nCategory: ${resource.category}\nSize: ${resource.size}\n\nThis is a demo download for the placement preparation resource.\nIn production, this would download the actual ${resource.type} file.`;
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${resource.title.replace(/\s+/g, '_')}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+        setDownloadingId(null);
+      }, 1200);
+    };
+
+    return (
+      <div className="feature-page-container">
+        {/* Header */}
+        <div style={{ marginBottom: '28px' }}>
+          <h2 style={{ fontSize: '22px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              width: '34px', height: '34px', borderRadius: '10px',
+              backgroundColor: 'var(--primary-maroon)', color: '#fff', fontSize: '14px', fontWeight: '800'
+            }}>17</span>
+            Resources &amp; Materials
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', fontWeight: '500' }}>
+            Access all placement preparation materials in one place.
+          </p>
+        </div>
+
+        {/* Search Bar */}
+        <div style={{ position: 'relative', marginBottom: '20px' }}>
+          <svg
+            style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '18px', height: '18px', stroke: 'var(--text-muted)' }}
+            viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search resources..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="resources-search-input"
+          />
+        </div>
+
+        {/* Category Filter Chips */}
+        <div className="resources-category-bar">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              className={`resources-cat-chip ${activeCategory === cat ? 'active' : ''}`}
+              onClick={() => setActiveCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Resource Cards Grid */}
+        {filtered.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
+            <ResourcesIcon style={{ width: '40px', height: '40px', margin: '0 auto 12px', display: 'block', stroke: 'var(--border-medium)' }} />
+            <p style={{ fontWeight: '600', fontSize: '14px' }}>No resources found for <strong>"{searchQuery}"</strong></p>
+          </div>
+        ) : (
+          <div className="resources-grid">
+            {filtered.map(resource => (
+              <div key={resource.id} className="resource-card">
+                <div className="resource-card-info">
+                  {/* Icon */}
+                  <div
+                    className="resource-file-icon"
+                    style={{ backgroundColor: resource.iconBg, color: resource.iconColor }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '22px', height: '22px', marginBottom: '2px' }}>
+                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                      <polyline points="14 2 14 8 20 8" />
+                    </svg>
+                    <span style={{ fontSize: '9px', fontWeight: '800', letterSpacing: '0.5px' }}>{resource.iconLabel}</span>
+                  </div>
+
+                  {/* Details */}
+                  <div style={{ flex: 1 }}>
+                    <h4 className="resource-title">{resource.title}</h4>
+                    <p className="resource-meta">{resource.type} &bull; {resource.size}</p>
+                    <p className="resource-desc">{resource.description}</p>
+                  </div>
+                </div>
+
+                {/* Download Button */}
+                <button
+                  className={`resource-download-btn ${downloadingId === resource.id ? 'downloading' : ''}`}
+                  onClick={() => handleDownload(resource)}
+                  disabled={downloadingId === resource.id}
+                >
+                  {downloadingId === resource.id ? (
+                    <>
+                      <svg style={{ width: '15px', height: '15px', animation: 'spin 1s linear infinite' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                      </svg>
+                      Downloading...
+                    </>
+                  ) : (
+                    <>
+                      <DownloadIcon style={{ width: '15px', height: '15px' }} />
+                      Download
+                    </>
+                  )}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ─── Chatbot / Support View ────────────────────────────────
+  if (activeTab === 'chatbot') {
+    return <ChatbotView />;
+  }
+
+  // ─── Alumni Network View ────────────────────────────────────
+  if (activeTab === 'alumni') {
+    return <AlumniView />;
+  }
+  // Fallback view for other left menu tabs
+  return (
+    <div className="feature-page-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+      <div style={{
+        width: '64px', height: '64px', borderRadius: '20px', backgroundColor: 'var(--primary-maroon-light)',
+        color: 'var(--primary-maroon)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px'
+      }}>
+        <AssessmentsIcon style={{ width: '32px', height: '32px' }} />
+      </div>
+      <h2 style={{ fontSize: '22px', fontWeight: '800', textTransform: 'capitalize' }}>
+        {activeTab.replace('-', ' ')}
+      </h2>
+      <p style={{ color: 'var(--text-muted)', fontSize: '14px', maxWidth: '400px', marginTop: '8px' }}>
+        Welcome to the {activeTab.replace('-', ' ')} module. Explore placement resources, tests, and active updates tailored for Jayasurya K.
+      </p>
+      <button
+        className="btn-apply"
+        style={{ marginTop: '24px' }}
+        onClick={() => setActiveTab('dashboard')}
+      >
+        Back to Dashboard
+      </button>
+    </div>
+  );
+
+}
