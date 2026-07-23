@@ -868,6 +868,398 @@ function CertificatesView() {
   );
 }
 
+// ─── Standalone Company Details Component ───────────────────────────────
+function CompanyDetailsView({ onApplyDrive }) {
+  const [selectedCompanyId, setSelectedCompanyId] = useState('zoho');
+  const [activeSubTab, setActiveSubTab] = useState('about');
+  const [appliedCompanies, setAppliedCompanies] = useState({});
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [toastMsg, setToastMsg] = useState(null);
+
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3500);
+  };
+
+  const companiesData = {
+    zoho: {
+      id: 'zoho',
+      name: 'Zoho Corporation',
+      logoText: 'zoho',
+      tags: ['IT Services', 'Product Based', 'Chennai'],
+      ctc: '12 LPA',
+      jobRole: 'Software Developer',
+      experience: '0 - 2 Years',
+      batch: '2023 - 2027',
+      aboutText: 'Zoho is a global technology company that builds business software to help organizations run their business better. We are leading the passionaries and innovators individuals to build the future with us.',
+      officeImageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80',
+      eligibility: {
+        minCgpa: '7.5 CGPA & above',
+        branches: ['CSE', 'IT', 'ECE', 'EEE', 'AIDS'],
+        backlogs: 'Max 0 Active Backlogs',
+        skills: ['Java / C++', 'Data Structures', 'OOP Concepts', 'RDBMS / SQL']
+      },
+      process: [
+        { round: 'Round 1', name: 'General Aptitude & C Programming', duration: '90 mins' },
+        { round: 'Round 2', name: 'Basic Programming (5 Problems)', duration: '120 mins' },
+        { round: 'Round 3', name: 'Advanced Programming & App Building', duration: '150 mins' },
+        { round: 'Round 4', name: 'Technical & HR Discussion', duration: '45 mins' }
+      ],
+      cutoffs: [
+        { year: '2024', placed: 42, avgCtc: '12.0 LPA', highestCtc: '15.0 LPA' },
+        { year: '2023', placed: 35, avgCtc: '10.5 LPA', highestCtc: '14.0 LPA' },
+        { year: '2022', placed: 28, avgCtc: '9.0 LPA', highestCtc: '12.0 LPA' }
+      ],
+      reviews: [
+        { name: 'Karthik Raja (Placed 2024)', rating: 5, comment: 'Focus heavily on Round 2 basic programming problems! Clean code and edge case coverage matter most.' },
+        { name: 'Sneha M (Placed 2023)', rating: 5, comment: 'Great product environment and learning curve for freshers. Interviewers are very supportive.' }
+      ]
+    },
+    amazon: {
+      id: 'amazon',
+      name: 'Amazon',
+      logoText: 'Amazon',
+      tags: ['E-Commerce', 'Product Based', 'Bengaluru'],
+      ctc: '28 LPA',
+      jobRole: 'Software Development Engineer (SDE-1)',
+      experience: '0 - 1 Years',
+      batch: '2023 - 2027',
+      aboutText: 'Amazon is guided by four principles: customer obsession rather than competitor focus, passion for invention, commitment to operational excellence, and long-term thinking.',
+      officeImageUrl: 'https://images.unsplash.com/photo-1554469384-e58fac16e23a?auto=format&fit=crop&w=800&q=80',
+      eligibility: {
+        minCgpa: '8.0 CGPA & above',
+        branches: ['CSE', 'IT', 'ECE'],
+        backlogs: 'No Standing Backlogs',
+        skills: ['Data Structures', 'Algorithms', 'System Design', 'Java / Python']
+      },
+      process: [
+        { round: 'Round 1', name: 'Online Assessment (Debugging & DSA)', duration: '100 mins' },
+        { round: 'Round 2', name: 'Technical Interview I (DSA & Coding)', duration: '60 mins' },
+        { round: 'Round 3', name: 'Technical Interview II (System Design)', duration: '60 mins' },
+        { round: 'Round 4', name: 'Bar Raiser & Leadership Principles', duration: '60 mins' }
+      ],
+      cutoffs: [
+        { year: '2024', placed: 12, avgCtc: '28.0 LPA', highestCtc: '44.0 LPA' },
+        { year: '2023', placed: 8, avgCtc: '26.0 LPA', highestCtc: '40.0 LPA' }
+      ],
+      reviews: [
+        { name: 'Arun Kumar (Placed 2024)', rating: 5, comment: 'Prepare Amazon Leadership Principles with STAR method stories thoroughly!' }
+      ]
+    },
+    microsoft: {
+      id: 'microsoft',
+      name: 'Microsoft',
+      logoText: 'Microsoft',
+      tags: ['Cloud & Software', 'Product Based', 'Hyderabad'],
+      ctc: '45 LPA',
+      jobRole: 'Software Engineer',
+      experience: '0 - 1 Years',
+      batch: '2023 - 2027',
+      aboutText: 'Microsoft enables digital transformation for the era of an intelligent cloud and an intelligent edge. Our mission is to empower every person and every organization on the planet to achieve more.',
+      officeImageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80',
+      eligibility: {
+        minCgpa: '8.5 CGPA & above',
+        branches: ['CSE', 'IT'],
+        backlogs: 'No Active Backlogs',
+        skills: ['DSA', 'Object Oriented Design', 'C# / C++', 'Cloud Concepts']
+      },
+      process: [
+        { round: 'Round 1', name: 'Online Coding Test (3 Medium/Hard DSA)', duration: '90 mins' },
+        { round: 'Round 2', name: 'Technical Round 1 (Data Structures)', duration: '60 mins' },
+        { round: 'Round 3', name: 'Technical Round 2 (System Architecture)', duration: '60 mins' },
+        { round: 'Round 4', name: 'AA Round (Appropriateness & Fit)', duration: '45 mins' }
+      ],
+      cutoffs: [
+        { year: '2024', placed: 6, avgCtc: '45.0 LPA', highestCtc: '51.0 LPA' }
+      ],
+      reviews: [
+        { name: 'Priya S (Placed 2024)', rating: 5, comment: 'Strong grasp of tree & graph algorithms is mandatory. Interviewers analyze code readability!' }
+      ]
+    }
+  };
+
+  const currentCompany = companiesData[selectedCompanyId] || companiesData.zoho;
+  const isApplied = appliedCompanies[currentCompany.id];
+
+  const handleApplyClick = () => {
+    if (isApplied) {
+      showToast(`ℹ️ You have already applied for ${currentCompany.name}.`);
+      return;
+    }
+    setAppliedCompanies(prev => ({ ...prev, [currentCompany.id]: true }));
+    showToast(`🎉 Application submitted successfully for ${currentCompany.name} (${currentCompany.jobRole})!`);
+    if (onApplyDrive) {
+      onApplyDrive({ company: currentCompany.name, role: currentCompany.jobRole, ctc: currentCompany.ctc });
+    }
+  };
+
+  const subTabs = [
+    { id: 'about', label: 'About' },
+    { id: 'eligibility', label: 'Eligibility' },
+    { id: 'process', label: 'Process' },
+    { id: 'cutoff', label: 'Previous Year Cutoff' },
+    { id: 'reviews', label: 'Reviews' },
+  ];
+
+  return (
+    <div className="company-details-container">
+      {/* Toast */}
+      {toastMsg && (
+        <div style={{
+          position: 'fixed', bottom: '28px', right: '100px',
+          backgroundColor: 'var(--primary-maroon)', color: '#fff',
+          padding: '12px 20px', borderRadius: '14px',
+          fontWeight: '700', fontSize: '13.5px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+          zIndex: 3000, animation: 'fadeIn 0.2s ease-out',
+        }}>
+          {toastMsg}
+        </div>
+      )}
+
+      {/* Main Company Card Panel */}
+      <div className="company-card-panel">
+        {/* Section title & Company switcher bar */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
+            Company Details
+          </h2>
+
+          {/* Selector to switch between companies */}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <span style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--text-muted)' }}>Select Drive:</span>
+            {Object.values(companiesData).map(comp => (
+              <button
+                key={comp.id}
+                onClick={() => setSelectedCompanyId(comp.id)}
+                style={{
+                  padding: '6px 14px', borderRadius: '8px', border: '1px solid',
+                  borderColor: selectedCompanyId === comp.id ? 'var(--primary-maroon)' : 'var(--border-medium)',
+                  backgroundColor: selectedCompanyId === comp.id ? 'var(--primary-maroon-light)' : 'white',
+                  color: selectedCompanyId === comp.id ? 'var(--primary-maroon)' : 'var(--text-muted)',
+                  fontSize: '12.5px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.18s ease'
+                }}
+              >
+                {comp.name.split(' ')[0]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Company Header Row */}
+        <div className="company-header-row">
+          {/* Logo badge */}
+          {currentCompany.id === 'zoho' ? (
+            <div style={{
+              width: '76px', height: '60px', borderRadius: '14px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              backgroundColor: '#fff', border: '1px solid #EDE8F5',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.06)', padding: '4px', flexShrink: 0
+            }}>
+              {/* ZOHO colorful letter logo box */}
+              <div style={{ display: 'flex', gap: '2px', fontWeight: '900', fontSize: '15px' }}>
+                <span style={{ backgroundColor: '#E11D48', color: '#fff', padding: '4px 6px', borderRadius: '6px' }}>Z</span>
+                <span style={{ backgroundColor: '#F59E0B', color: '#fff', padding: '4px 6px', borderRadius: '6px' }}>O</span>
+                <span style={{ backgroundColor: '#10B981', color: '#fff', padding: '4px 6px', borderRadius: '6px' }}>H</span>
+                <span style={{ backgroundColor: '#3B82F6', color: '#fff', padding: '4px 6px', borderRadius: '6px' }}>O</span>
+              </div>
+            </div>
+          ) : (
+            <div className="company-logo-box" style={{ backgroundColor: currentCompany.id === 'amazon' ? '#FF9900' : '#00A4EF' }}>
+              {currentCompany.name.slice(0, 2).toUpperCase()}
+            </div>
+          )}
+
+          {/* Name & Tags */}
+          <div className="company-title-area">
+            <h3 className="company-name-heading">{currentCompany.name}</h3>
+            <div className="company-tags-row">
+              {currentCompany.tags.map((tag, idx) => (
+                <span key={idx} className="company-tag-chip">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Bookmark Button */}
+          <button
+            onClick={() => {
+              setIsBookmarked(!isBookmarked);
+              showToast(isBookmarked ? `Removed ${currentCompany.name} from bookmarks` : `Saved ${currentCompany.name} to bookmarks!`);
+            }}
+            style={{
+              border: '1px solid var(--border-medium)', background: isBookmarked ? '#FEF3C7' : 'white',
+              borderRadius: '12px', padding: '10px 14px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '700',
+              color: isBookmarked ? '#D97706' : 'var(--text-muted)'
+            }}
+          >
+            {isBookmarked ? '★ Bookmarked' : '☆ Bookmark'}
+          </button>
+        </div>
+
+        {/* 4-Column Metric Summary Grid */}
+        <div className="company-metrics-grid">
+          <div className="company-metric-cell">
+            <span className="company-metric-label">CTC</span>
+            <span className="company-metric-value">{currentCompany.ctc}</span>
+          </div>
+          <div className="company-metric-cell">
+            <span className="company-metric-label">Job Role</span>
+            <span className="company-metric-value">{currentCompany.jobRole}</span>
+          </div>
+          <div className="company-metric-cell">
+            <span className="company-metric-label">Experience</span>
+            <span className="company-metric-value">{currentCompany.experience}</span>
+          </div>
+          <div className="company-metric-cell">
+            <span className="company-metric-label">Batch</span>
+            <span className="company-metric-value">{currentCompany.batch}</span>
+          </div>
+        </div>
+
+        {/* Sub Tabs Navigation */}
+        <div className="company-tabs-nav">
+          {subTabs.map(tab => (
+            <button
+              key={tab.id}
+              className={`company-tab-btn ${activeSubTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveSubTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Content */}
+        {activeSubTab === 'about' && (
+          <div>
+            <div className="company-about-content">
+              {/* About Text */}
+              <div className="company-about-text">
+                {currentCompany.aboutText}
+              </div>
+
+              {/* Office Image */}
+              <div className="company-office-image-box">
+                <img
+                  src={currentCompany.officeImageUrl}
+                  alt={`${currentCompany.name} office`}
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80';
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Apply Now Button */}
+            <div className="company-apply-btn-wrapper">
+              <button
+                className={`company-btn-apply-main ${isApplied ? 'applied' : ''}`}
+                onClick={handleApplyClick}
+              >
+                {isApplied ? '✓ Applied' : 'Apply Now'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {activeSubTab === 'eligibility' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: '#FAF6F0', border: '1px solid var(--border-light)' }}>
+              <h4 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--primary-maroon)', marginBottom: '12px' }}>Academic Requirements</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
+                <div><strong>CGPA Cutoff:</strong> {currentCompany.eligibility.minCgpa}</div>
+                <div><strong>Backlog Criteria:</strong> {currentCompany.eligibility.backlogs}</div>
+                <div><strong>Eligible Batches:</strong> {currentCompany.batch}</div>
+              </div>
+            </div>
+
+            <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: '#FAF6F0', border: '1px solid var(--border-light)' }}>
+              <h4 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--primary-maroon)', marginBottom: '12px' }}>Required Technical Skills</h4>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {currentCompany.eligibility.skills.map((skill, idx) => (
+                  <span key={idx} style={{ padding: '6px 12px', borderRadius: '8px', backgroundColor: 'var(--primary-maroon-light)', color: 'var(--primary-maroon)', fontWeight: '700', fontSize: '12.5px' }}>
+                    ✓ {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeSubTab === 'process' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {currentCompany.process.map((p, idx) => (
+              <div key={idx} style={{
+                padding: '16px 20px', borderRadius: '14px', backgroundColor: '#FAF6F0',
+                border: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <span style={{
+                    width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--primary-maroon)',
+                    color: '#fff', fontWeight: '800', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  }}>
+                    {idx + 1}
+                  </span>
+                  <div>
+                    <h5 style={{ fontSize: '14.5px', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>{p.round}: {p.name}</h5>
+                    <span style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>Duration: {p.duration}</span>
+                  </div>
+                </div>
+                <span style={{ fontSize: '12px', fontWeight: '700', color: '#16A34A', backgroundColor: '#DCFCE7', padding: '4px 10px', borderRadius: '6px' }}>
+                  Mandatory Round
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {activeSubTab === 'cutoff' && (
+          <div>
+            <h4 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--primary-maroon)', marginBottom: '16px' }}>Past Placement Records at AIT</h4>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13.5px' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#FAF6F0', borderBottom: '2px solid var(--border-light)' }}>
+                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: '800' }}>Year</th>
+                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: '800' }}>Students Placed</th>
+                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: '800' }}>Average Package</th>
+                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: '800' }}>Highest Package</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentCompany.cutoffs.map((row, idx) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid var(--border-light)' }}>
+                    <td style={{ padding: '12px', fontWeight: '700' }}>{row.year}</td>
+                    <td style={{ padding: '12px', fontWeight: '700', color: 'var(--primary-maroon)' }}>{row.placed} Students</td>
+                    <td style={{ padding: '12px' }}>{row.avgCtc}</td>
+                    <td style={{ padding: '12px', fontWeight: '800', color: '#16A34A' }}>{row.highestCtc}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {activeSubTab === 'reviews' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {currentCompany.reviews.map((rev, idx) => (
+              <div key={idx} style={{ padding: '18px', borderRadius: '14px', backgroundColor: '#FAF6F0', border: '1px solid var(--border-light)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontWeight: '800', fontSize: '14px', color: 'var(--primary-maroon)' }}>{rev.name}</span>
+                  <span style={{ color: '#F59E0B', fontWeight: '800' }}>{'★'.repeat(rev.rating)}</span>
+                </div>
+                <p style={{ fontSize: '13.5px', color: 'var(--text-main)', margin: 0, lineHeight: 1.5 }}>"{rev.comment}"</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Standalone Alumni Network Component ───────────────────────────────
 function AlumniView() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -4336,6 +4728,11 @@ Generated by AIT Placement Portal AI Engine
   // ─── Certificates View ──────────────────────────────────────
   if (activeTab === 'certificates') {
     return <CertificatesView />;
+  }
+
+  // ─── Company Details View ────────────────────────────────────
+  if (activeTab === 'company-details' || activeTab === 'company') {
+    return <CompanyDetailsView onApplyDrive={onApplyDrive} />;
   }
 
   // ─── Alumni Network View ────────────────────────────────────

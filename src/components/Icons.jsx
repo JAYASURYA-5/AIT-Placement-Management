@@ -240,3 +240,17 @@ export const AlumniIcon = ({ className = "w-5 h-5", ...props }) => (
     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
   </svg>
 );
+
+export const CompanyIcon = ({ className = "w-5 h-5", ...props }) => (
+  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M3 21h18"></path>
+    <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
+    <path d="M9 9h1.01"></path>
+    <path d="M9 13h1.01"></path>
+    <path d="M9 17h1.01"></path>
+    <path d="M14 9h1.01"></path>
+    <path d="M14 13h1.01"></path>
+    <path d="M14 17h1.01"></path>
+  </svg>
+);
+

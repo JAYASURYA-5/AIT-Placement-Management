@@ -16,6 +16,7 @@ import {
   LogoutIcon,
   ResourcesIcon,
   AlumniIcon,
+  CompanyIcon,
   BellIcon
 } from './Icons';
 
@@ -28,6 +29,7 @@ export const menuItems = [
   { id: 'training', label: 'Training', icon: TrainingIcon },
   { id: 'mock-interview', label: 'Mock Interview', icon: MockInterviewIcon },
   { id: 'certificates', label: 'Certificates', icon: CertificatesIcon },
+  { id: 'company-details', label: 'Company Details', icon: CompanyIcon },
   { id: 'resources', label: 'Resources', icon: ResourcesIcon },
   { id: 'alumni', label: 'Alumni Network', icon: AlumniIcon },
   { id: 'documents', label: 'Documents', icon: DocumentsIcon },
