@@ -223,14 +223,27 @@ export const ResourcesIcon = ({ className = "w-5 h-5", ...props }) => (
   </svg>
 );
 
-export const ChatbotIcon = ({ className = "w-5 h-5", ...props }) => (
-  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-    <path d="M8 10h.01"></path>
-    <path d="M12 10h.01"></path>
-    <path d="M16 10h.01"></path>
-  </svg>
-);
+export const RobotIcon = ({ className = "w-5 h-5", size, ...props }) => {
+  const width = size || 20;
+  const height = size || 20;
+  return (
+    <svg className={className} width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M12 2v3" />
+      <circle cx="12" cy="2" r="1" fill="currentColor" />
+      <rect x="4" y="5" width="16" height="13" rx="4" />
+      <path d="M1 11.5h3" />
+      <path d="M20 11.5h3" />
+      <circle cx="9" cy="10.5" r="1.5" fill="currentColor" />
+      <circle cx="15" cy="10.5" r="1.5" fill="currentColor" />
+      <path d="M9 14.5h6" />
+      <path d="M9 18v2.5" />
+      <path d="M15 18v2.5" />
+    </svg>
+  );
+};
+
+export const ChatbotIcon = RobotIcon;
+
 
 export const AlumniIcon = ({ className = "w-5 h-5", ...props }) => (
   <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>

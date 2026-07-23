@@ -1099,10 +1099,16 @@ function ChatbotView() {
 
   const BotSvg = ({ size = 16 }) => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: size, height: size }}>
-      <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7H3a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z" />
-      <path d="M7 14v4" /><path d="M17 14v4" /><path d="M9 18h6" />
-      <circle cx="9" cy="12" r="1" fill="currentColor" stroke="none" />
-      <circle cx="15" cy="12" r="1" fill="currentColor" stroke="none" />
+      <path d="M12 2v3" />
+      <circle cx="12" cy="2" r="1" fill="currentColor" />
+      <rect x="4" y="5" width="16" height="13" rx="4" />
+      <path d="M1 11.5h3" />
+      <path d="M20 11.5h3" />
+      <circle cx="9" cy="10.5" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="10.5" r="1.5" fill="currentColor" stroke="none" />
+      <path d="M9 14.5h6" />
+      <path d="M9 18v2.5" />
+      <path d="M15 18v2.5" />
     </svg>
   );
 

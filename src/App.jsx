@@ -8,6 +8,7 @@ import PlacementPrep, { prepModules } from './components/PlacementPrep';
 import FeatureView from './components/FeatureViews';
 import { ApplyModal, CalendarModal, PrepModal } from './components/Modals';
 import ChatbotView from './components/ChatbotWidget';
+import { RobotIcon } from './components/Icons';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 
@@ -226,13 +227,7 @@ export default function App() {
               <line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           ) : (
-            <>
-              {/* Sparkle / AI star icon */}
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: '26px', height: '26px' }}>
-                <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" fill="rgba(255,255,255,0.15)" stroke="white" strokeWidth="1.5"/>
-              </svg>
-              <span style={{ fontSize: '8px', fontWeight: '900', letterSpacing: '0.5px', lineHeight: 1, color: 'rgba(255,255,255,0.9)' }}>AI</span>
-            </>
+            <RobotIcon size={28} />
           )}
         </button>
       </div>
@@ -279,10 +274,7 @@ export default function App() {
               backgroundColor: 'rgba(255,255,255,0.2)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '20px', height: '20px' }}>
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 16v-4M12 8h.01"/>
-              </svg>
+              <RobotIcon size={22} />
             </div>
             <div>
               <div style={{ fontWeight: '800', fontSize: '14px' }}>AIT Placement Assistant</div>
