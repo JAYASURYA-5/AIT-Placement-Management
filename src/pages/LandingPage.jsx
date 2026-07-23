@@ -110,7 +110,6 @@ function StatCard({ value, suffix, label, color, started }) {
 
 /* ─── Main Landing Page ─── */
 export default function LandingPage({ onStudentLogin, onCompanyLogin }) {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [statsVisible, setStatsVisible] = useState(false);
   const statsRef = useRef(null);
   const [scrolled, setScrolled] = useState(false);
@@ -132,8 +131,6 @@ export default function LandingPage({ onStudentLogin, onCompanyLogin }) {
     return () => obs.disconnect();
   }, []);
 
-  const navLinks = ['Home', 'About Us', 'Companies', 'Placements', 'Training', 'Contact'];
-
   return (
     <div className="lp-root">
       {/* ── NAVBAR ── */}
@@ -153,35 +150,10 @@ export default function LandingPage({ onStudentLogin, onCompanyLogin }) {
             </div>
           </div>
 
-          <ul className="lp-nav-links">
-            {navLinks.map((link) => (
-              <li key={link}>
-                <a className={`lp-nav-link${link === 'Home' ? ' lp-nav-link--active' : ''}`} href="#">
-                  {link}
-                </a>
-              </li>
-            ))}
-          </ul>
-
           <button className="lp-btn lp-btn--primary lp-login-btn" onClick={onStudentLogin}>
             Login
           </button>
-
-          <button className="lp-hamburger" onClick={() => setMenuOpen((o) => !o)} aria-label="Toggle menu">
-            <span className={`lp-ham-line${menuOpen ? ' open-1' : ''}`} />
-            <span className={`lp-ham-line${menuOpen ? ' open-2' : ''}`} />
-            <span className={`lp-ham-line${menuOpen ? ' open-3' : ''}`} />
-          </button>
         </div>
-
-        {menuOpen && (
-          <div className="lp-mobile-menu">
-            {navLinks.map((link) => (
-              <a key={link} href="#" className="lp-mobile-link" onClick={() => setMenuOpen(false)}>{link}</a>
-            ))}
-            <button className="lp-btn lp-btn--primary lp-mobile-login" onClick={onStudentLogin}>Login</button>
-          </div>
-        )}
       </nav>
 
       {/* ── HERO ── */}

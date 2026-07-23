@@ -5,7 +5,7 @@ export default function WelcomeBanner({ userName = "Jayasurya" }) {
     try {
       const raw = localStorage.getItem('ait-profile')
       if (raw) return JSON.parse(raw).name || userName
-    } catch (e) {}
+    } catch {}
     return userName
   }, [userName])
 

@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-/* oxlint-disable react-hooks/rules-of-hooks */
-import ApplicationsPage from '../../../src/pages/Applications';
-import DriveCalendarPage from '../../../src/pages/DriveCalendar';
-import ProfilePage from '../../../src/pages/Profile';
-import '../../../src/index.css';
+import React, { useState, useEffect } from 'react';
+import ApplicationsPage from '../pages/Applications';
+import DriveCalendarPage from '../pages/DriveCalendar';
+import ProfilePage from '../pages/Profile';
+import SettingsPage from '../pages/Settings';
+import ChatbotView from './ChatbotWidget';
+import '../index.css';
 import {
   ProfileIcon,
   AssessmentsIcon,
@@ -11,21 +12,14 @@ import {
   TrainingIcon,
   MockInterviewIcon,
   CertificatesIcon,
-  LeaderboardIcon,
-  StatsIcon,
   DocumentsIcon,
-  SettingsIcon,
   SparklesIcon,
   UploadIcon,
-  FilePdfIcon,
-  KeyIcon,
   InfoIcon,
   RefreshIcon,
   DownloadIcon,
   CodeIcon,
   ResourcesIcon,
-  ChatbotIcon,
-  SparklesIcon as SparklesIconAlias,
   AlumniIcon,
   BellIcon
 } from './Icons';
@@ -1020,261 +1014,12 @@ function AlumniView() {
   );
 }
 
-// ─── Standalone Chatbot Component (separate to satisfy Rules of Hooks) ────────
-function ChatbotView({ userName = 'Jayasurya K' }) {
-  const messagesEndRef = useRef(null);
-  const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [messages, setMessages] = useState([
-    { id: 1, sender: 'bot', text: `Hello ${userName}! How can I help you today?`, time: '10:24 AM' },
-    { id: 2, sender: 'user', text: 'When is the next TCS drive?', time: '10:25 AM' },
-    { id: 3, sender: 'bot', text: 'The next TCS drive is on 20 July 2025. Online test will be conducted. Please check your dashboard for more details.', time: '10:25 AM' },
-    { id: 4, sender: 'user', text: 'How to improve my resume?', time: '10:26 AM' },
-    { id: 5, sender: 'bot', text: 'You can use our AI Resume Analyzer to get personalized suggestions.', time: '10:26 AM' }
-  ]);
+// ─── Standalone Resume View Component ─────────────────────────────────
+function ResumeView({ userName = 'Jayasurya K' }) {
+  const [subTab, setSubTab] = useState('checker');
 
-  const quickPrompts = [
-    'What is the next TCS drive?',
-    'How to improve my resume?',
-    'What companies are visiting this month?',
-    'How do I prepare for aptitude tests?',
-    'What is the cutoff CGPA for Infosys?'
-  ];
-
-  const getBotResponse = (query) => {
-    const q = query.toLowerCase();
-    if (q.includes('tcs') && (q.includes('drive') || q.includes('next') || q.includes('when')))
-      return 'The next TCS drive is on 20 July 2025. It includes an Online Test (Aptitude + Coding), TR, MR, and HR rounds. Registration closes on 18 July 2025.';
-    if (q.includes('resume') || q.includes('cv'))
-      return '🔍 Use the AI Resume Analyzer in the Resume Workspace tab! It gives ATS score, keyword analysis, and rewrites weak bullet points using the STAR method.';
-    if (q.includes('infosys') && (q.includes('cgpa') || q.includes('cutoff') || q.includes('eligibility')))
-      return '📋 Infosys eligibility: Minimum 6.5 CGPA, No active backlogs, 60% throughout academics. Drive is scheduled for 30 July 2025.';
-    if (q.includes('compan') || q.includes('visiting') || q.includes('this month'))
-      return '🏢 Companies visiting this month: TCS (20 Jul), Infosys (30 Jul), Zoho (25 Jul). Check Drive Calendar for full details and registration links.';
-    if (q.includes('aptitude') || q.includes('prepare') || q.includes('preparation'))
-      return '📚 To prepare for aptitude tests: (1) Practice on the Assessments tab, (2) Download the Aptitude Handbook from Resources, (3) Take the Daily MCQ test in Training. Aim for 80%+ accuracy!';
-    if (q.includes('zoho'))
-      return '🚀 Zoho drive is on 25 July 2025 for Software Developer roles. CTC: ₹6.5 LPA. Requirements: Strong coding skills, no arrears. Registration open on the dashboard!';
-    if (q.includes('wipro') || q.includes('elite'))
-      return '🔷 Wipro Elite drive is on 25 August 2025. Role: Elite Developer | CTC: ₹6.5 LPA. Rounds: Online Assessment → Technical Interview → HR Round.';
-    if (q.includes('mock interview') || q.includes('interview prep'))
-      return '🎤 Use the Mock Interview section to practice! It includes HR, Technical, and Behavioral question sets with top company-specific tips.';
-    if (q.includes('leaderboard') || q.includes('rank') || q.includes('ranking'))
-      return '🏆 Check the Leaderboard tab to see your ranking among peers based on training, assessments, and profile completeness.';
-    if (q.includes('hello') || q.includes('hi') || q.includes('hey'))
-      return `👋 Hello ${userName}! I am your Placement Assistant. Ask me about upcoming drives, resume tips, interview preparation, company details, or placement statistics!`;
-    if (q.includes('thank'))
-      return "😊 You're welcome! Best of luck with your placement journey. Feel free to ask anything anytime!";
-    return `I understand you're asking about "${query}". For detailed info, check the relevant section — Drives Calendar, Resume Workspace, Training, or Assessments. I'm also here for quick queries! 💡`;
-  };
-
-  const getTimeString = () =>
-    new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-
-  useEffect(() => {
-    if (messagesEndRef.current)
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
-
-  const sendMessage = (text) => {
-    const trimmed = (text !== undefined ? text : inputValue).trim();
-    if (!trimmed) return;
-    setMessages(prev => [...prev, { id: Date.now(), sender: 'user', text: trimmed, time: getTimeString() }]);
-    setInputValue('');
-    setIsTyping(true);
-    setTimeout(() => {
-      setMessages(prev => [...prev, { id: Date.now() + 1, sender: 'bot', text: getBotResponse(trimmed), time: getTimeString() }]);
-      setIsTyping(false);
-    }, 1200 + Math.random() * 600);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  };
-
-  const keyFeatures = [
-    'Placement Assistant chat interface with conversation history',
-    "Sample prompts: 'What is the next TCS drive?', 'How to improve my resume?'",
-    'AI response includes calendar data, drive details and resume tips inline',
-    'Type your message... input with send button; minimise / close controls'
-  ];
-
-  const BotSvg = ({ size = 16 }) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: size, height: size }}>
-      <path d="M12 2v3" />
-      <circle cx="12" cy="2" r="1" fill="currentColor" />
-      <rect x="4" y="5" width="16" height="13" rx="4" />
-      <path d="M1 11.5h3" />
-      <path d="M20 11.5h3" />
-      <circle cx="9" cy="10.5" r="1.5" fill="currentColor" stroke="none" />
-      <circle cx="15" cy="10.5" r="1.5" fill="currentColor" stroke="none" />
-      <path d="M9 14.5h6" />
-      <path d="M9 18v2.5" />
-      <path d="M15 18v2.5" />
-    </svg>
-  );
-
-  return (
-    <div className="feature-page-container">
-      {/* Page Header */}
-      <div className="chatbot-page-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span className="chatbot-badge-num">18</span>
-          <h2 style={{ fontSize: '22px', fontWeight: '800' }}>Chatbot / Support</h2>
-        </div>
-        <button className="chatbot-ai-tools-btn">
-          <SparklesIconAlias style={{ width: '15px', height: '15px' }} />
-          AI Tools
-        </button>
-      </div>
-
-      {/* Two-column layout */}
-      <div className="chatbot-layout">
-
-        {/* LEFT: Chat Panel */}
-        <div className="chatbot-panel">
-          {/* Panel Header */}
-          <div className="chatbot-header">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div className="chatbot-avatar-bot"><BotSvg size={20} /></div>
-              <div>
-                <div style={{ fontSize: '14px', fontWeight: '800', color: 'var(--text-main)' }}>Placement Assistant</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
-                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#22C55E', display: 'inline-block' }}></span>
-                  <span style={{ fontSize: '11px', fontWeight: '600', color: '#16A34A' }}>Online</span>
-                </div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <button className="chatbot-header-icon-btn" title="Save conversation">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '17px', height: '17px' }}>
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                  <polyline points="14 2 14 8 20 8" />
-                </svg>
-              </button>
-              <button className="chatbot-header-icon-btn" title="Clear chat" onClick={() => setMessages([{ id: Date.now(), sender: 'bot', text: `Hello ${userName}! How can I help you today?`, time: getTimeString() }])}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '17px', height: '17px' }}>
-                  <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                </svg>
-              </button>
-              <button className="chatbot-header-icon-btn" title="Profile">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '17px', height: '17px' }}>
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Messages */}
-          <div className="chatbot-messages">
-            {messages.map(msg => (
-              <div key={msg.id} className={`chatbot-msg-row ${msg.sender}`}>
-                {msg.sender === 'bot' && <div className="chatbot-avatar-bot chatbot-msg-avatar"><BotSvg size={16} /></div>}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '72%' }}>
-                  <div className={`chatbot-bubble ${msg.sender}`}>{msg.text}</div>
-                  <span className="chatbot-timestamp">{msg.time}</span>
-                </div>
-                {msg.sender === 'user' && (
-                  <div className="chatbot-avatar-user chatbot-msg-avatar">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}>
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                  </div>
-                )}
-              </div>
-            ))}
-            {isTyping && (
-              <div className="chatbot-msg-row bot">
-                <div className="chatbot-avatar-bot chatbot-msg-avatar"><BotSvg size={16} /></div>
-                <div className="chatbot-bubble bot chatbot-typing">
-                  <span className="chatbot-dot"></span>
-                  <span className="chatbot-dot"></span>
-                  <span className="chatbot-dot"></span>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Quick Prompts */}
-          <div className="chatbot-quick-prompts">
-            {quickPrompts.slice(0, 3).map((p, i) => (
-              <button key={i} className="chatbot-quick-chip" onClick={() => sendMessage(p)}>{p}</button>
-            ))}
-          </div>
-
-          {/* Input Bar */}
-          <div className="chatbot-input-bar">
-            <input
-              type="text"
-              className="chatbot-input"
-              placeholder="Type your message..."
-              value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={isTyping}
-            />
-            <button className="chatbot-send-btn" onClick={() => sendMessage(undefined)} disabled={!inputValue.trim() || isTyping} title="Send">
-              <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: '18px', height: '18px' }}>
-                <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 19-7z" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* RIGHT: Key Features Panel */}
-        <div className="chatbot-features-panel">
-          <h3 className="chatbot-features-title">Key Features</h3>
-          <div className="chatbot-features-divider"></div>
-          <div className="chatbot-features-list">
-            {keyFeatures.map((feat, idx) => (
-              <div key={idx} className="chatbot-feature-item">
-                <span className="chatbot-feature-dot"></span>
-                <p className="chatbot-feature-text">{feat}</p>
-              </div>
-            ))}
-          </div>
-          <div className="chatbot-tip-card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-              <SparklesIconAlias style={{ width: '16px', height: '16px', color: 'var(--primary-maroon)' }} />
-              <span style={{ fontWeight: '800', fontSize: '13px', color: 'var(--primary-maroon)' }}>Pro Tip</span>
-            </div>
-            <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: '1.5', fontWeight: '500' }}>
-              Ask me about <strong>specific companies</strong> like TCS, Infosys, Zoho, Wipro — I'll give you drive dates, eligibility, and preparation tips instantly!
-            </p>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
-            <button className="chatbot-action-btn" onClick={() => sendMessage('What companies are visiting this month?')}>📅 Upcoming Drives</button>
-            <button className="chatbot-action-btn" onClick={() => sendMessage('How to improve my resume?')}>📄 Resume Help</button>
-            <button className="chatbot-action-btn" onClick={() => sendMessage('How do I prepare for aptitude tests?')}>📚 Preparation Tips</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function FeatureViewPanel({ activeTab, drives, setActiveTab, onApplyDrive, userName = 'Jayasurya K' }) {
-  if (activeTab === 'profile') {
-    return <ProfilePage />;
-  }
-
-  if (activeTab === 'applications') {
-    return <ApplicationsPage />;
-  }
-
-  if (activeTab === 'calendar') {
-    return <DriveCalendarPage />;
-  }
-
-  if (activeTab === 'resume') {
-    const [subTab, setSubTab] = useState('checker');
-
-    // Inbuilt Gemini API Key. Paste your key here or set VITE_GEMINI_API_KEY in your .env file
-    const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
+  // Inbuilt Gemini API Key. Paste your key here or set VITE_GEMINI_API_KEY in your .env file
+  const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
 
     // Checker states
     const [dragActive, setDragActive] = useState(false);
@@ -2198,10 +1943,11 @@ Report generated via AIT AI Resume Workspace.
         </div>
       </div>
     );
-  }
+}
 
-  if (activeTab === 'training') {
-    const [subTab, setSubTab] = useState('aptitude');
+// ─── Standalone Training View Component ─────────────────────────────────
+function TrainingView() {
+  const [subTab, setSubTab] = useState('aptitude');
     const [practiceMode, setPracticeMode] = useState(false);
     const [testCompleted, setTestCompleted] = useState(false);
     const [scoreResult, setScoreResult] = useState(null);
@@ -2861,11 +2607,11 @@ Report generated via AIT AI Resume Workspace.
         </div>
       </div>
     );
-  }
+}
 
-  // Notifications View
-  if (activeTab === 'notifications') {
-    const [filter, setFilter] = useState('all');
+// ─── Standalone Notifications View Component ───────────────────────────
+function NotificationsView() {
+  const [filter, setFilter] = useState('all');
     const [notifList, setNotifList] = useState([
       {
         id: 1,
@@ -3031,11 +2777,11 @@ Report generated via AIT AI Resume Workspace.
         </div>
       </div>
     );
-  }
+}
 
-  // Documents View
-  if (activeTab === 'documents') {
-    const [offerLetterUploaded, setOfferLetterUploaded] = useState(false);
+// ─── Standalone Documents View Component ───────────────────────────────
+function DocumentsView() {
+  const [offerLetterUploaded, setOfferLetterUploaded] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [showLetterModal, setShowLetterModal] = useState(false);
@@ -3290,10 +3036,11 @@ Zoho Corporation`;
         )}
       </div>
     );
-  }
+}
 
-  if (activeTab === 'mock-interview') {
-    const [interviewType, setInterviewType] = useState('Technical');
+// ─── Standalone Mock Interview View Component ───────────────────────────
+function MockInterviewView() {
+  const [interviewType, setInterviewType] = useState('Technical');
     const [difficulty, setDifficulty] = useState('Mid-Level');
     const [interviewStarted, setInterviewStarted] = useState(false);
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -3989,11 +3736,11 @@ Generated by AIT Placement Portal AI Engine
         )}
       </div>
     );
-  }
+}
 
-  // Resources & Materials View
-  if (activeTab === 'resources') {
-    const [searchQuery, setSearchQuery] = useState('');
+// ─── Standalone Resources View Component ───────────────────────────────
+function ResourcesView() {
+  const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('All');
     const [downloadingId, setDownloadingId] = useState(null);
 
@@ -4229,22 +3976,23 @@ Generated by AIT Placement Portal AI Engine
         )}
       </div>
     );
-  }
+}
 
-  // ─── Chatbot / Support View ────────────────────────────────
-  if (activeTab === 'chatbot') {
-    return <ChatbotView userName={userName} />;
-  }
+function FeatureViewPanel({ activeTab, setActiveTab, userName = 'Jayasurya K' }) {
+  if (activeTab === 'profile') return <ProfilePage />;
+  if (activeTab === 'applications') return <ApplicationsPage />;
+  if (activeTab === 'calendar') return <DriveCalendarPage />;
+  if (activeTab === 'settings') return <SettingsPage />;
+  if (activeTab === 'resume') return <ResumeView userName={userName} />;
+  if (activeTab === 'training') return <TrainingView />;
+  if (activeTab === 'notifications') return <NotificationsView />;
+  if (activeTab === 'documents') return <DocumentsView />;
+  if (activeTab === 'mock-interview') return <MockInterviewView />;
+  if (activeTab === 'resources') return <ResourcesView />;
+  if (activeTab === 'chatbot') return <ChatbotView userName={userName} />;
+  if (activeTab === 'certificates') return <CertificatesView />;
+  if (activeTab === 'alumni') return <AlumniView />;
 
-  // ─── Certificates View ──────────────────────────────────────
-  if (activeTab === 'certificates') {
-    return <CertificatesView />;
-  }
-
-  // ─── Alumni Network View ────────────────────────────────────
-  if (activeTab === 'alumni') {
-    return <AlumniView />;
-  }
   // Fallback view for other left menu tabs
   return (
     <div className="feature-page-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
@@ -4269,7 +4017,6 @@ Generated by AIT Placement Portal AI Engine
       </button>
     </div>
   );
-
 }
 
 export default function FeatureView(props) {
