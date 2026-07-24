@@ -1143,7 +1143,7 @@ PROJECTS:
       }
     };
 
-    const getMockResult = (name) => {
+    const getMockResult = (_name) => {
       return {
         score: 78,
         rating: "Good",
@@ -1277,7 +1277,7 @@ Do not return any markdown tags, trailing commas, or prefix commentary. Return O
         let parsed;
         try {
           parsed = JSON.parse(resultText.trim());
-        } catch (err) {
+        } catch {
           const jsonMatch = resultText.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             parsed = JSON.parse(jsonMatch[0].trim());
@@ -1466,7 +1466,13 @@ Report generated via AIT AI Resume Workspace.
                   </div>
 
                   {/* Actions Bar for Sample / Paste */}
-                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <button
+                      className="api-settings-btn"
+                      onClick={handleUseSample}
+                    >
+                      <SparklesIcon style={{ width: '14px', height: '14px' }} /> Try Sample Resume
+                    </button>
                     <button
                       className="api-settings-btn"
                       onClick={() => setShowPasteArea(!showPasteArea)}

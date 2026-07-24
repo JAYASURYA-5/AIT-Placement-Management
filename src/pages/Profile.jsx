@@ -101,7 +101,7 @@ export default function Profile() {
         const parsed = JSON.parse(raw)
         setProfileData((prev) => ({ ...prev, ...parsed }))
       }
-    } catch (err) {
+    } catch {
       // ignore
     }
   }, [])
@@ -260,7 +260,7 @@ export default function Profile() {
                   <div className="resume-value-row">
                     {resumeUploaded ? (
                       <>
-                        <span className="badge-uploaded">Uploaded</span>
+                        <span className="badge-uploaded" title={resumeName}>Uploaded ({resumeName})</span>
                         <button className="btn-view" type="button" onClick={handleViewResume}>
                           View
                         </button>

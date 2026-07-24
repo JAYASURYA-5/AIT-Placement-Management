@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   DashboardIcon,
-  ProfileIcon,
   ApplicationsIcon,
   CalendarIcon,
   AssessmentsIcon,
@@ -9,14 +8,10 @@ import {
   TrainingIcon,
   MockInterviewIcon,
   CertificatesIcon,
-  LeaderboardIcon,
-  StatsIcon,
   DocumentsIcon,
-  SettingsIcon,
   LogoutIcon,
   ResourcesIcon,
-  AlumniIcon,
-  BellIcon
+  AlumniIcon
 } from './Icons';
 
 export const menuItems = [
