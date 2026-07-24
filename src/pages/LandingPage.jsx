@@ -204,7 +204,7 @@ export default function LandingPage({ onStudentLogin, onCompanyLogin }) {
 
         <div className="lp-hero-image-wrap">
           <div className="lp-hero-image-glow" />
-          <img src="/college-hero.png" alt="AIT College Campus" className="lp-hero-img" />
+          <img src="/college-hero.jpg" alt="AIT College Campus" className="lp-hero-img" />
           <div className="lp-hero-float-badge lp-hero-float-badge--top">
             <span className="lp-float-icon">🎓</span>
             <div>
