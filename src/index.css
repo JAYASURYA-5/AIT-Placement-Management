@@ -539,8 +539,12 @@ body {
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 16px;
+  font-size: 14px;
   flex-shrink: 0;
+  padding: 0 4px;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-align: center;
 }
 
 .drive-info {
@@ -4008,6 +4012,30 @@ body:has(.lp-root) #root {
   line-height: 1.65;
   max-width: 440px;
   margin-bottom: 32px;
+}
+
+.lp-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.lp-hero-trust {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.lp-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-muted);
 }
 
 .lp-hero-image-wrap {

@@ -12,7 +12,7 @@ export function ApplyModal({ drive, onClose, onConfirm }) {
         </button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
-          <div className="company-logo" style={{ backgroundColor: drive.logoBg, color: drive.logoColor, width: '54px', height: '54px', fontSize: '18px' }}>
+          <div className="company-logo" style={{ backgroundColor: drive.logoBg, color: drive.logoColor, width: '54px', height: '54px', fontSize: drive.logoText && drive.logoText.length > 5 ? '12px' : '18px', letterSpacing: drive.logoText && drive.logoText.length > 5 ? '-0.4px' : 'normal' }}>
             {drive.logoText}
           </div>
           <div>
