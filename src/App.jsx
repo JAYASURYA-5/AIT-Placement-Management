@@ -325,6 +325,10 @@ export default function App() {
         <PrepModal
           module={selectedPrepModule}
           onClose={() => setSelectedPrepModule(null)}
+          onStartPractice={() => {
+            setSelectedPrepModule(null);
+            setActiveTab('training');
+          }}
         />
       )}
 
