@@ -1,0 +1,45 @@
+# ── Python ────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# ── Virtual Environments ──────────────────
+venv/
+env/
+.venv/
+ENV/
+
+# ── Environment / Secrets ─────────────────
+.env
+.env.local
+.env.production
+
+# ── Databases ─────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ── IDE / OS ──────────────────────────────
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+
+# ── Logs ──────────────────────────────────
+*.log
+logs/
+
+# ── Node / Frontend ───────────────────────
+node_modules/
+dist/
+.cache/
+
+# ── Git ───────────────────────────────────
+*.orig
