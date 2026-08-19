@@ -12,7 +12,6 @@ import ChatbotView from './components/ChatbotWidget';
 import { RobotIcon } from './components/Icons';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
-import AdminDashboard from './admin/AdminDashboard';
 
 export default function App() {
   // Navigation Flow: 'landing' -> 'auth' -> 'app'
@@ -81,23 +80,22 @@ export default function App() {
 
   const handleLoginSuccess = (userData) => {
     setUser(userData);
-    if (userData.role === 'Admin') {
-      setCurrentScreen('admin');
-      showToast(`⚙️ Welcome ${userData.name}! Admin Portal loaded.`);
+    setCurrentScreen('app');
+
+    // Role-based view redirection:
+    if (userData.role === 'HR / Company') {
+      setActiveTab('applications');
+      showToast(`🏢 Welcome ${userData.name}! Redirected to Company & Applications View.`);
+    } else if (userData.role === 'Placement Officer') {
+      setActiveTab('calendar');
+      showToast(`🎓 Welcome ${userData.name}! Redirected to Placement Drives Calendar.`);
+    } else if (userData.role === 'Admin') {
+      setActiveTab('settings');
+      showToast(`⚙️ Welcome ${userData.name}! Redirected to Portal System Settings.`);
     } else {
-      setCurrentScreen('app');
-      // Role-based view redirection:
-      if (userData.role === 'HR / Company') {
-        setActiveTab('applications');
-        showToast(`🏢 Welcome ${userData.name}! Redirected to Company & Applications View.`);
-      } else if (userData.role === 'Placement Officer') {
-        setActiveTab('calendar');
-        showToast(`🎓 Welcome ${userData.name}! Redirected to Placement Drives Calendar.`);
-      } else {
-        // Student default
-        setActiveTab('dashboard');
-        showToast(`✨ Welcome back, ${userData.name}!`);
-      }
+      // Student default
+      setActiveTab('dashboard');
+      showToast(`✨ Welcome back, ${userData.name}!`);
     }
   };
 
@@ -128,17 +126,6 @@ export default function App() {
         initialRole={authRole}
         onLoginSuccess={handleLoginSuccess}
         onBackToHome={() => setCurrentScreen('landing')}
-      />
-    );
-  }
-
-  if (currentScreen === 'admin') {
-    return (
-      <AdminDashboard
-        onLogout={() => {
-          setCurrentScreen('landing');
-          showToast('👋 Logged out of Admin Portal.');
-        }}
       />
     );
   }
