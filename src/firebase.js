@@ -217,6 +217,53 @@ export async function batchAddStudentsToFirestore(studentsArray) {
 }
 
 /**
+ * Update an existing student or user document in Firestore database with full 26 attributes
+ */
+export async function updateStudentInFirestore(id, studentData) {
+  try {
+    if (!id) return { success: false, error: 'No document ID provided' };
+    const docRef = doc(db, 'users', id);
+    const dataToUpdate = {
+      regNo: studentData.regNo || '',
+      name: studentData.name || '',
+      department: studentData.department || studentData.branch || '',
+      tenthPercentage: studentData.tenthPercentage || '',
+      twelfthPercentage: studentData.twelfthPercentage || '',
+      cgpa: studentData.cgpa || '',
+      mobile: studentData.mobile || '',
+      email: studentData.email || '',
+      yearOfPassing: studentData.yearOfPassing || '',
+      historyOfArrears: studentData.historyOfArrears || '0',
+      currentArrears: studentData.currentArrears || '0',
+      permanentAddress: studentData.permanentAddress || '',
+      nativeDistrict: studentData.nativeDistrict || '',
+      parentMobile: studentData.parentMobile || '',
+      dob: studentData.dob || '',
+      gender: studentData.gender || '',
+      certifications: studentData.certifications || '',
+      technicalSkills: studentData.technicalSkills || '',
+      languagesKnown: studentData.languagesKnown || '',
+      wishToWork: studentData.wishToWork || '',
+      willingInterviewAnyLocation: studentData.willingInterviewAnyLocation || 'Yes',
+      willingWorkAnyLocation: studentData.willingWorkAnyLocation || 'Yes',
+      willingWorkTN: studentData.willingWorkTN || 'Yes',
+      willingWorkIndia: studentData.willingWorkIndia || 'Yes',
+      futurePlan: studentData.futurePlan || '',
+      resumeUrl: studentData.resumeUrl || '',
+      role: studentData.role || 'Student',
+      status: studentData.status || 'Active',
+      updatedAt: new Date().toISOString()
+    };
+    await updateDoc(docRef, dataToUpdate);
+    console.log('✅ Student updated in Firestore for ID:', id);
+    return { success: true, id, data: dataToUpdate };
+  } catch (error) {
+    console.error('Error updating student in Firestore:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Delete a single student/user document from Firestore database by document ID
  */
 export async function deleteStudentFromFirestore(id) {

@@ -16,8 +16,20 @@ import AdminDashboard from './admin/AdminDashboard';
 import { auth, onAuthStateChanged, logoutFirebase, fetchDrivesFromFirestore } from './firebase';
 
 export default function App() {
-  // Navigation Flow: 'landing' -> 'auth' -> 'app'
-  const [currentScreen, setCurrentScreen] = useState('landing');
+  // Navigation Flow: 'landing' -> 'auth' -> 'app' | 'admin' (Persisted in localStorage)
+  const [currentScreen, setCurrentScreen] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
+      return 'admin';
+    }
+    try {
+      const savedScreen = localStorage.getItem('ait-screen');
+      if (savedScreen) return savedScreen;
+      const savedProfile = JSON.parse(localStorage.getItem('ait-profile') || '{}');
+      if (savedProfile.role === 'Admin') return 'admin';
+    } catch {}
+    return 'landing';
+  });
+
   const [authRole, setAuthRole] = useState('Student');
   const [user, setUser] = useState(() => {
     try {
@@ -30,6 +42,17 @@ export default function App() {
 
   // Drives State initialized from Firestore database
   const [drives, setDrives] = useState([]);
+
+  // Sync current screen to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      if (currentScreen) {
+        localStorage.setItem('ait-screen', currentScreen);
+      }
+    } catch (e) {
+      console.warn('Unable to persist screen state:', e);
+    }
+  }, [currentScreen]);
 
   useEffect(() => {
     const handleProfileUpdate = (event) => {
@@ -47,6 +70,9 @@ export default function App() {
           const name = savedProfile.name || fbUser.displayName || fbUser.email?.split('@')[0] || 'User';
           const role = savedProfile.role || 'Student';
           setUser({ name, role, email: fbUser.email, uid: fbUser.uid, provider: 'firebase' });
+          if (role === 'Admin' && currentScreen !== 'admin') {
+            setCurrentScreen('admin');
+          }
         } catch {
           setUser({ name: fbUser.email?.split('@')[0] || 'User', role: 'Student', email: fbUser.email });
         }
@@ -120,6 +146,10 @@ export default function App() {
 
   const handleLogout = () => {
     logoutFirebase();
+    try {
+      localStorage.removeItem('ait-screen');
+      localStorage.removeItem('ait-profile');
+    } catch {}
     setCurrentScreen('landing');
     showToast('👋 You have been logged out.');
   };

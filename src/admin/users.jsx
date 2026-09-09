@@ -31,7 +31,7 @@ import {
   Filter
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { fetchUsersFromFirestore, addStudentToFirestore, batchAddStudentsToFirestore, deleteStudentFromFirestore, clearAllUsersFromFirestore } from '../firebase';
+import { fetchUsersFromFirestore, addStudentToFirestore, updateStudentInFirestore, batchAddStudentsToFirestore, deleteStudentFromFirestore, clearAllUsersFromFirestore } from '../firebase';
 
 export default function UsersPage({ onNavigate }) {
   const [activeNav, setActiveNav] = useState('Student');
@@ -127,14 +127,15 @@ export default function UsersPage({ onNavigate }) {
     setTimeout(() => setNotification(null), 3500);
   };
 
-  // Generate Initials
+  // Generate Initials safely preventing TypeError crash on irregular whitespace or missing names
   const getInitials = (name) => {
-    if (!name) return 'U';
-    const parts = name.trim().split(' ');
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
+    if (!name || typeof name !== 'string') return 'U';
+    const cleanParts = name.trim().split(/\s+/).filter(Boolean);
+    if (cleanParts.length === 0) return 'U';
+    if (cleanParts.length >= 2 && cleanParts[0] && cleanParts[1]) {
+      return (cleanParts[0][0] + cleanParts[1][0]).toUpperCase();
     }
-    return parts[0].substring(0, 2).toUpperCase();
+    return cleanParts[0].substring(0, 2).toUpperCase();
   };
 
   // Format student records from Firestore with avatars & initials
@@ -297,26 +298,36 @@ export default function UsersPage({ onNavigate }) {
     });
   };
 
-  // CRUD: Update User
-  const handleUpdateUser = (e) => {
+  // CRUD: Update User in Firebase Firestore Database & Local State
+  const handleUpdateUser = async (e) => {
     e.preventDefault();
     if (!editingUser) return;
 
-    const updated = users.map(u => {
-      if (u.id === editingUser.id) {
-        return {
-          ...u,
-          ...formData,
-          initials: getInitials(formData.name)
-        };
-      }
-      return u;
-    });
+    setIsSaving(true);
+    showToast('Updating student profile in Firebase Database...', 'info');
 
-    setUsers(updated);
-    setEditingUser(null);
-    setFormData(initialFormState);
-    showToast(`User "${formData.name}" updated successfully!`);
+    const updateRes = await updateStudentInFirestore(editingUser.id, formData);
+    setIsSaving(false);
+
+    if (updateRes && updateRes.success) {
+      const updated = users.map(u => {
+        if (u.id === editingUser.id) {
+          return {
+            ...u,
+            ...formData,
+            initials: getInitials(formData.name)
+          };
+        }
+        return u;
+      });
+
+      setUsers(updated);
+      setEditingUser(null);
+      setFormData(initialFormState);
+      showToast(`🎉 Student "${formData.name}" updated successfully in Firebase Database!`);
+    } else {
+      showToast(`Error updating student in Firebase: ${updateRes?.error || 'Unknown error'}`, 'error');
+    }
   };
 
   // CRUD: Delete User from Firestore

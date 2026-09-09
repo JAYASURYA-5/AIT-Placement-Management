@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { fetchDrivesFromFirestore } from '../../src/firebase';
 import UsersPage from './users.jsx';
 import PlacementStatistics from './Placement Statistics.jsx';
 import SettingsPage from './settings.jsx';
@@ -25,21 +26,6 @@ export default function AdminDashboard() {
 
   const chartSvgRef = useRef(null);
 
-  if (activeNav === 'Student' || activeNav === 'Students' || activeNav === 'Users') {
-    return <UsersPage onNavigate={setActiveNav} />;
-  }
-  if (activeNav === 'Reports') {
-    return <PlacementStatistics onNavigate={setActiveNav} />;
-  }
-  if (activeNav === 'Settings') {
-    return <SettingsPage onNavigate={setActiveNav} />;
-  }
-  if (activeNav === 'Drives') {
-    return <DriveManagement onNavigate={setActiveNav} />;
-  }
-  if (activeNav === 'Companies') {
-    return <CompanyManagement onNavigate={setActiveNav} />;
-  }
 
   // Sidebar navigation items matching reference image
   const navItems = [
@@ -51,49 +37,12 @@ export default function AdminDashboard() {
     { label: 'Settings', icon: Settings },
   ];
 
-  // Stats data
-  const statCards = [
-    { title: 'Total Users', value: '1,500' },
-    { title: 'Students', value: '1,248' },
-    { title: 'Companies', value: '120' },
-    { title: 'Drives', value: '75' },
-  ];
+  const [drivesCount, setDrivesCount] = useState(75);
 
-  // System Overview chart data
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
-  const chartSeries = [
+  // Recent Activities list state
+  const [activities, setActivities] = useState([
     {
-      name: 'Users',
-      color: '#3b82f6', // Blue
-      data: [200, 480, 460, 610, 660, 580, 740, 710, 860]
-    },
-    {
-      name: 'Students',
-      color: '#8b5cf6', // Purple
-      data: [100, 180, 160, 380, 420, 330, 470, 460, 620]
-    },
-    {
-      name: 'Companies',
-      color: '#10b981', // Green
-      data: [30, 50, 60, 80, 110, 100, 130, 160, 200]
-    }
-  ];
-
-  // Top Departments Donut Data - IT First
-  const departments = [
-    { name: 'IT', percentage: 25, color: '#7c3aed' },
-    { name: 'CSE', percentage: 20, color: '#2563eb' },
-    { name: 'ECE', percentage: 15, color: '#10b981' },
-    { name: 'MECH', percentage: 10, color: '#f59e0b' },
-    { name: 'EEE', percentage: 10, color: '#e11d48' },
-    { name: 'Civil', percentage: 10, color: '#d97706' },
-    { name: 'AI&DS', percentage: 10, color: '#06b6d4' },
-  ];
-
-  // Recent Activities list
-  const recentActivities = [
-    {
-      id: 1,
+      id: 'default-1',
       text: 'New company Zoho added',
       date: '20 Jul 2025',
       icon: Bookmark,
@@ -101,7 +50,7 @@ export default function AdminDashboard() {
       iconColor: '#be185d'
     },
     {
-      id: 2,
+      id: 'default-2',
       text: 'TCS drive scheduled',
       date: '19 Jul 2025',
       icon: Calendar,
@@ -109,13 +58,85 @@ export default function AdminDashboard() {
       iconColor: '#2563eb'
     },
     {
-      id: 3,
+      id: 'default-3',
       text: 'System backup completed',
       date: '10 Jul 2025',
       icon: Database,
       iconBg: '#dcfce7',
       iconColor: '#16a34a'
     }
+  ]);
+
+  // Load live placement drives from Cloud Firestore for Recent Activities
+  useEffect(() => {
+    async function loadLiveDrives() {
+      const fsDrives = await fetchDrivesFromFirestore();
+      if (fsDrives && fsDrives.length > 0) {
+        setDrivesCount(fsDrives.length);
+        const driveActivities = fsDrives.map(drive => ({
+          id: drive.id,
+          text: `${drive.company} drive scheduled (${drive.role || 'Campus Drive'})`,
+          date: drive.date || (drive.createdAt ? new Date(drive.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Recently'),
+          icon: Calendar,
+          iconBg: '#dbeafe',
+          iconColor: '#2563eb'
+        }));
+
+        setActivities([
+          ...driveActivities,
+          {
+            id: 'default-1',
+            text: 'New company Zoho added',
+            date: '20 Jul 2025',
+            icon: Bookmark,
+            iconBg: '#fce7f3',
+            iconColor: '#be185d'
+          },
+          {
+            id: 'default-3',
+            text: 'System backup completed',
+            date: '10 Jul 2025',
+            icon: Database,
+            iconBg: '#dcfce7',
+            iconColor: '#16a34a'
+          }
+        ]);
+      }
+    }
+    loadLiveDrives();
+  }, []);
+
+  // Chart & Metric Data Definitions
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
+
+  const chartSeries = [
+    {
+      name: 'Students',
+      color: '#8b5cf6',
+      gradId: 'gradStudents',
+      data: [350, 420, 500, 610, 720, 850, 920, 1000, 1050]
+    },
+    {
+      name: 'Companies',
+      color: '#10b981',
+      gradId: 'gradCompanies',
+      data: [15, 28, 42, 55, 70, 88, 98, 110, 120]
+    }
+  ];
+
+  const departments = [
+    { name: 'CSE', percentage: 42, color: '#be185d' },
+    { name: 'ECE', percentage: 28, color: '#3b82f6' },
+    { name: 'EEE', percentage: 18, color: '#10b981' },
+    { name: 'Mech', percentage: 12, color: '#f59e0b' }
+  ];
+
+  // Stats data
+  const statCards = [
+    { title: 'Students Registered', value: '1,248' },
+    { title: 'Companies Visited', value: '120' },
+    { title: 'Placement Drives', value: String(drivesCount) },
+    { title: 'Students Placed', value: '1,050' },
   ];
 
   // SVG Line Chart Helpers
@@ -231,6 +252,23 @@ export default function AdminDashboard() {
     boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.04), 0 2px 10px 0 rgba(0, 0, 0, 0.02)',
     transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
   };
+
+  // Render active subpages unconditionally after all hook declarations
+  if (activeNav === 'Student' || activeNav === 'Students' || activeNav === 'Users') {
+    return <UsersPage onNavigate={setActiveNav} />;
+  }
+  if (activeNav === 'Reports') {
+    return <PlacementStatistics onNavigate={setActiveNav} />;
+  }
+  if (activeNav === 'Settings') {
+    return <SettingsPage onNavigate={setActiveNav} />;
+  }
+  if (activeNav === 'Drives') {
+    return <DriveManagement onNavigate={setActiveNav} />;
+  }
+  if (activeNav === 'Companies') {
+    return <CompanyManagement onNavigate={setActiveNav} />;
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', minHeight: '100vh', backgroundColor: '#f6f4ee', fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
@@ -469,9 +507,9 @@ export default function AdminDashboard() {
                   })}
 
                   {/* Soft Gradient Area Fills */}
-                  <path className="area-fill-anim" d={getAreaPath(chartSeries[0].data)} fill="url(#gradUsers)" />
-                  <path className="area-fill-anim" d={getAreaPath(chartSeries[1].data)} fill="url(#gradStudents)" />
-                  <path className="area-fill-anim" d={getAreaPath(chartSeries[2].data)} fill="url(#gradCompanies)" />
+                  {chartSeries.map((series) => (
+                    <path key={`fill-${series.name}`} className="area-fill-anim" d={getAreaPath(series.data)} fill={`url(#${series.gradId})`} />
+                  ))}
 
                   {/* Moving Dashed Guide Line Following Cursor */}
                   {hoveredPoint && (
@@ -714,7 +752,7 @@ export default function AdminDashboard() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {recentActivities.map((act, index) => {
+              {activities.map((act, index) => {
                 const Icon = act.icon;
                 return (
                   <React.Fragment key={act.id}>
@@ -742,7 +780,7 @@ export default function AdminDashboard() {
                         {act.date}
                       </span>
                     </div>
-                    {index < recentActivities.length - 1 && (
+                    {index < activities.length - 1 && (
                       <div style={{ height: '1px', backgroundColor: 'rgba(226, 232, 240, 0.7)', margin: '2px 0' }} />
                     )}
                   </React.Fragment>
