@@ -13,6 +13,7 @@ import { RobotIcon } from './components/Icons';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import AdminDashboard from './admin/AdminDashboard';
+import { auth, onAuthStateChanged, logoutFirebase, fetchDrivesFromFirestore } from './firebase';
 
 export default function App() {
   // Navigation Flow: 'landing' -> 'auth' -> 'app'
@@ -21,11 +22,14 @@ export default function App() {
   const [user, setUser] = useState(() => {
     try {
       const savedProfile = JSON.parse(localStorage.getItem('ait-profile') || '{}');
-      return { name: savedProfile.name || 'Jayasurya', role: 'Student' };
+      return { name: savedProfile.name || 'Jayasurya', role: savedProfile.role || 'Student' };
     } catch {
       return { name: 'Jayasurya', role: 'Student' };
     }
   });
+
+  // Drives State initialized from Firestore database
+  const [drives, setDrives] = useState([]);
 
   useEffect(() => {
     const handleProfileUpdate = (event) => {
@@ -34,12 +38,52 @@ export default function App() {
     };
 
     window.addEventListener('profile:update', handleProfileUpdate);
-    return () => window.removeEventListener('profile:update', handleProfileUpdate);
-  }, []);
 
+    // Listen to Firebase auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+      if (fbUser) {
+        try {
+          const savedProfile = JSON.parse(localStorage.getItem('ait-profile') || '{}');
+          const name = savedProfile.name || fbUser.displayName || fbUser.email?.split('@')[0] || 'User';
+          const role = savedProfile.role || 'Student';
+          setUser({ name, role, email: fbUser.email, uid: fbUser.uid, provider: 'firebase' });
+        } catch {
+          setUser({ name: fbUser.email?.split('@')[0] || 'User', role: 'Student', email: fbUser.email });
+        }
+      }
+    });
+
+    async function loadFirestoreDrives() {
+      const fsDrives = await fetchDrivesFromFirestore();
+      if (fsDrives && fsDrives.length > 0) {
+        const bgColors = ['#FEF2F2', '#EFF6FF', '#FAF5FF', '#F0FDF4', '#FEF3C7'];
+        const textColors = ['#DC2626', '#0284C7', '#7C3AED', '#166534', '#B45309'];
+        const formatted = fsDrives.map((d, idx) => ({
+          id: d.id,
+          company: d.company || 'Company',
+          logoBg: bgColors[idx % bgColors.length],
+          logoText: d.company ? d.company.substring(0, 4) : 'COMP',
+          logoColor: textColors[idx % textColors.length],
+          role: d.role || 'Software Engineer',
+          ctc: d.package ? (d.package.toLowerCase().includes('ctc') || d.package.toLowerCase().includes('lpa') ? d.package : `CTC: ${d.package}`) : 'CTC: Market Standard',
+          date: d.date || 'TBA',
+          applied: false
+        }));
+        setDrives(formatted);
+      } else {
+        setDrives([]);
+      }
+    }
+
+    loadFirestoreDrives();
+
+    return () => {
+      window.removeEventListener('profile:update', handleProfileUpdate);
+      unsubscribe();
+    };
+  }, []);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
-  const [drives, setDrives] = useState(initialDrivesData);
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [stats, setStats] = useState({
     applied: 5,
@@ -75,6 +119,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    logoutFirebase();
     setCurrentScreen('landing');
     showToast('👋 You have been logged out.');
   };
@@ -115,7 +160,7 @@ export default function App() {
           setCurrentScreen('auth');
         }}
         onCompanyLogin={() => {
-          setAuthRole('HR / Company');
+          setAuthRole('Student');
           setCurrentScreen('auth');
         }}
       />

@@ -4,6 +4,7 @@ import DriveCalendarPage from '../pages/DriveCalendar';
 import ProfilePage from '../pages/Profile';
 import SettingsPage from '../pages/Settings';
 import ChatbotView from './ChatbotWidget';
+import { fetchUsersFromFirestore } from '../firebase';
 import '../index.css';
 import {
   ProfileIcon,
@@ -869,19 +870,34 @@ function AlumniView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeBatch, setActiveBatch] = useState('All');
   const [connected, setConnected] = useState({});
+  const [allAlumni, setAllAlumni] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const batches = ['All', '2017 Batch', '2018 Batch', '2019 Batch', '2020 Batch', '2021 Batch'];
+  const batches = ['All', '2017 Batch', '2018 Batch', '2019 Batch', '2020 Batch', '2021 Batch', '2022 Batch', '2023 Batch', '2024 Batch', '2025 Batch'];
 
-  const allAlumni = [
-    { id: 1, name: 'Rahul R', role: 'Software Engineer', company: 'Google', batch: '2019 Batch', avatarBg: '#4F46E5', tag: 'Featured' },
-    { id: 2, name: 'Sneha M', role: 'Product Manager', company: 'Amazon', batch: '2018 Batch', avatarBg: '#D97706', tag: 'Featured' },
-    { id: 3, name: 'Arun Kumar', role: 'Data Scientist', company: 'Microsoft', batch: '2020 Batch', avatarBg: '#0EA5E9', tag: 'Featured' },
-    { id: 4, name: 'Priya S', role: 'Frontend Engineer', company: 'Flipkart', batch: '2021 Batch', avatarBg: '#EC4899', tag: '' },
-    { id: 5, name: 'Karthik V', role: 'DevOps Engineer', company: 'Zoho', batch: '2020 Batch', avatarBg: '#10B981', tag: '' },
-    { id: 6, name: 'Deepika R', role: 'ML Engineer', company: 'Infosys AI Lab', batch: '2019 Batch', avatarBg: '#8B5CF6', tag: '' },
-    { id: 7, name: 'Vikram N', role: 'Cloud Architect', company: 'TCS', batch: '2017 Batch', avatarBg: '#F59E0B', tag: '' },
-    { id: 8, name: 'Ananya K', role: 'UX Designer', company: 'Swiggy', batch: '2021 Batch', avatarBg: '#EF4444', tag: '' },
-  ];
+  useEffect(() => {
+    async function loadAlumni() {
+      setLoading(true);
+      const fsUsers = await fetchUsersFromFirestore();
+      if (fsUsers && fsUsers.length > 0) {
+        const bgColors = ['#4F46E5', '#D97706', '#0EA5E9', '#EC4899', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'];
+        const formatted = fsUsers.map((u, idx) => ({
+          id: u.id,
+          name: u.name || 'Alumni Member',
+          role: u.wishToWork || u.role || 'Software Engineer',
+          company: u.department || 'AIT Placements',
+          batch: u.yearOfPassing ? `${u.yearOfPassing} Batch` : 'Alumni',
+          avatarBg: bgColors[idx % bgColors.length],
+          tag: u.status === 'Active' ? 'Verified' : ''
+        }));
+        setAllAlumni(formatted);
+      } else {
+        setAllAlumni([]);
+      }
+      setLoading(false);
+    }
+    loadAlumni();
+  }, []);
 
   const filtered = allAlumni.filter(a => {
     const matchesBatch = activeBatch === 'All' || a.batch === activeBatch;

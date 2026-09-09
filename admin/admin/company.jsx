@@ -207,7 +207,7 @@ export default function CompanyManagement({ onNavigate }) {
 
   const navItems = [
     { label: 'Dashboard', icon: LayoutDashboard },
-    { label: 'Users', icon: Users },
+    { label: 'Student', icon: Users },
     { label: 'Companies', icon: Building2 },
     { label: 'Drives', icon: Briefcase },
     { label: 'Reports', icon: FileText },

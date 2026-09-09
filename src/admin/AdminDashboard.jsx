@@ -26,7 +26,7 @@ export default function AdminDashboard({ onLogout }) {
 
   const chartSvgRef = useRef(null);
 
-  if (activeNav === 'Users') {
+  if (activeNav === 'Student' || activeNav === 'Students' || activeNav === 'Users') {
     return <UsersPage onNavigate={setActiveNav} onLogout={onLogout} />;
   }
   if (activeNav === 'Reports') {
@@ -45,7 +45,7 @@ export default function AdminDashboard({ onLogout }) {
   // Sidebar navigation items matching reference image
   const navItems = [
     { label: 'Dashboard', icon: LayoutDashboard },
-    { label: 'Users', icon: Users },
+    { label: 'Student', icon: Users },
     { label: 'Companies', icon: Building2 },
     { label: 'Drives', icon: Briefcase },
     { label: 'Reports', icon: FileText },
