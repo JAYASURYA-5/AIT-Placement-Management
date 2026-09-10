@@ -16,17 +16,11 @@ import AdminDashboard from './admin/AdminDashboard';
 import { auth, onAuthStateChanged, logoutFirebase, fetchDrivesFromFirestore } from './firebase';
 
 export default function App() {
-  // Navigation Flow: 'landing' -> 'auth' -> 'app' | 'admin' (Persisted in localStorage)
+  // Navigation Flow: 'landing' -> 'auth' -> 'app' | 'admin'
   const [currentScreen, setCurrentScreen] = useState(() => {
     if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
       return 'admin';
     }
-    try {
-      const savedScreen = localStorage.getItem('ait-screen');
-      if (savedScreen) return savedScreen;
-      const savedProfile = JSON.parse(localStorage.getItem('ait-profile') || '{}');
-      if (savedProfile.role === 'Admin') return 'admin';
-    } catch {}
     return 'landing';
   });
 
@@ -70,9 +64,6 @@ export default function App() {
           const name = savedProfile.name || fbUser.displayName || fbUser.email?.split('@')[0] || 'User';
           const role = savedProfile.role || 'Student';
           setUser({ name, role, email: fbUser.email, uid: fbUser.uid, provider: 'firebase' });
-          if (role === 'Admin' && currentScreen !== 'admin') {
-            setCurrentScreen('admin');
-          }
         } catch {
           setUser({ name: fbUser.email?.split('@')[0] || 'User', role: 'Student', email: fbUser.email });
         }

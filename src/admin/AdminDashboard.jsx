@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { fetchDrivesFromFirestore } from '../firebase';
+import AITLogo from '../components/AITLogo';
 import UsersPage from './users.jsx';
 import PlacementStatistics from './PlacementStatistics.jsx';
 import SettingsPage from './settings.jsx';
@@ -371,7 +372,7 @@ export default function AdminDashboard({ onLogout }) {
         }}>
           {/* Logo / Title */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '0 8px 42px 8px' }}>
-            <Crown size={26} color="#ffffff" strokeWidth={2.5} />
+            <AITLogo size={32} />
             <span style={{ fontSize: '21px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.01em' }}>
               Admin Panel
             </span>

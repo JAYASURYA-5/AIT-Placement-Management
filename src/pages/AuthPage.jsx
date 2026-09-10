@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import AITLogo from '../components/AITLogo';
 import {
   loginWithFirebase,
   registerWithFirebase,
@@ -178,12 +179,8 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
         </button>
 
         <div className="auth-portal-title">
-          <div className="auth-brand-icon">
-            <svg viewBox="0 0 36 36" fill="none">
-              <rect width="36" height="36" rx="8" fill="#4C1536" />
-              <path d="M8 26L18 10l10 16H8z" fill="white" fillOpacity="0.9" />
-              <circle cx="18" cy="14" r="3" fill="#F6EBF1" />
-            </svg>
+          <div className="auth-brand-icon" style={{ background: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <AITLogo size={32} />
           </div>
           <span>AIT Placement Portal</span>
         </div>
@@ -194,28 +191,8 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
         <div className="auth-card">
           {/* Left Decorative Welcome Panel */}
           <div className="auth-left-panel">
-            <div className="auth-illustration-wrap">
-              <svg className="auth-mortarboard-icon" viewBox="0 0 64 64" fill="none">
-                <path
-                  d="M32 8L4 22L32 36L60 22L32 8Z"
-                  fill="var(--primary-maroon)"
-                />
-                <path
-                  d="M12 28V44C12 44 20 52 32 52C44 52 52 44 52 44V28"
-                  stroke="var(--primary-maroon)"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill="none"
-                />
-                <path
-                  d="M52 24V42"
-                  stroke="var(--primary-maroon)"
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                />
-                <circle cx="52" cy="45" r="3.5" fill="var(--primary-maroon)" />
-              </svg>
+            <div className="auth-illustration-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px' }}>
+              <AITLogo size={84} />
             </div>
 
             <h2 className="auth-welcome-title">

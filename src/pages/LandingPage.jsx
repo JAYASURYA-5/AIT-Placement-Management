@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import AITLogo from '../components/AITLogo';
 
 /* ─── Recruiter logos (inline SVG / text badges) ─── */
 const recruiters = [
@@ -137,12 +138,8 @@ export default function LandingPage({ onStudentLogin, onCompanyLogin }) {
       <nav className={`lp-nav${scrolled ? ' lp-nav--scrolled' : ''}`}>
         <div className="lp-nav-inner">
           <div className="lp-brand">
-            <div className="lp-brand-icon">
-              <svg viewBox="0 0 36 36" fill="none">
-                <rect width="36" height="36" rx="8" fill="#4C1536" />
-                <path d="M8 26L18 10l10 16H8z" fill="white" fillOpacity="0.9" />
-                <circle cx="18" cy="14" r="3" fill="#F6EBF1" />
-              </svg>
+            <div className="lp-brand-icon" style={{ background: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <AITLogo size={36} />
             </div>
             <div className="lp-brand-text">
               <span className="lp-brand-name">AIT</span>
@@ -283,12 +280,8 @@ export default function LandingPage({ onStudentLogin, onCompanyLogin }) {
       <footer className="lp-footer">
         <div className="lp-footer-inner">
           <div className="lp-footer-brand">
-            <div className="lp-brand-icon lp-brand-icon--sm">
-              <svg viewBox="0 0 36 36" fill="none">
-                <rect width="36" height="36" rx="8" fill="#4C1536" />
-                <path d="M8 26L18 10l10 16H8z" fill="white" fillOpacity="0.9" />
-                <circle cx="18" cy="14" r="3" fill="#F6EBF1" />
-              </svg>
+            <div className="lp-brand-icon lp-brand-icon--sm" style={{ background: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <AITLogo size={28} />
             </div>
             <div>
               <div className="lp-footer-brand-name">AIT Placement Portal</div>

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import * as XLSX from 'xlsx';
+import AITLogo from '../components/AITLogo';
 import {
   Crown,
   LayoutDashboard,
@@ -748,7 +749,7 @@ export default function DriveManagement({ onNavigate }) {
           boxShadow: '0 12px 36px rgba(0,0,0,0.22)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '0 8px 42px 8px' }}>
-            <Crown size={26} color="#ffffff" strokeWidth={2.5} />
+            <AITLogo size={32} />
             <span style={{ fontSize: '21px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.01em' }}>
               Admin Panel
             </span>

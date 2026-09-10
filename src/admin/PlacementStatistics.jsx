@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import AITLogo from '../components/AITLogo';
 import {
   Crown,
   LayoutDashboard,
@@ -217,7 +218,7 @@ export default function PlacementStatistics({ onNavigate }) {
         }}>
           {/* Logo / Title */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '0 8px 42px 8px' }}>
-            <Crown size={26} color="#ffffff" strokeWidth={2.5} />
+            <AITLogo size={32} />
             <span style={{ fontSize: '21px', fontWeight: 800, color: '#ffffff', letterSpacing: '0.01em' }}>
               Admin Panel
             </span>
