@@ -389,9 +389,6 @@ export default function DriveManagement({ onNavigate }) {
           <div style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
             Drive Management
           </div>
-          <div style={{ fontSize: '15px', color: '#64748b', marginTop: '2px', fontWeight: 500 }}>
-            Manage campus placement drives, CGPA eligibility, service bonds, and hiring status
-          </div>
         </div>
 
         {/* Action Buttons Group */}

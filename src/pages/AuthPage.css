@@ -83,17 +83,12 @@
 }
 
 .auth-illustration-wrap {
-  background: white;
   width: 90px;
   height: 90px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 
-    0 0 0 12px #FDF9FA,
-    0 0 0 16px #F6EBF1,
-    0 0 0 28px rgba(246, 235, 241, 0.5);
   margin-bottom: 48px;
 }
 
@@ -106,8 +101,9 @@
 }
 
 .auth-welcome-subtitle {
-  display: none; /* Hidden in image */
+  display: none;
 }
+
 
 .auth-right-panel {
   flex: 1.1;

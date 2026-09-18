@@ -9,7 +9,6 @@ import FeatureView from './components/FeatureViews';
 import DashboardExtras from './components/DashboardExtras';
 import { ApplyModal, CalendarModal, PrepModal } from './components/Modals';
 import ChatbotView from './components/ChatbotWidget';
-<<<<<<< HEAD
 import { RobotIcon } from './components/Icons';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
@@ -26,33 +25,6 @@ export default function App() {
     } catch {
       return { name: 'Jayasurya', role: 'Student' };
     }
-=======
-
-import LandingPage from './pages/LandingPage';
-import AuthPage from './pages/AuthPage';
-
-import avatarMale   from './assets/avatar_male.jpg';
-import avatarFemale from './assets/avatar_female.jpg';
-import avatarOther  from './assets/avatar_other.jpg';
-
-// Gender-based passport-style avatar photos
-export const AVATARS = {
-  male:   avatarMale,
-  female: avatarFemale,
-  other:  avatarOther,
-};
-
-export default function App() {
-  const [currentPage, setCurrentPage] = useState('landing'); // 'landing', 'auth', 'dashboard'
-  const [authRole, setAuthRole] = useState('Student');
-  
-  const [activeTab, setActiveTab] = useState('dashboard');
-
-  // Shared profile state — drives both the header chip and the profile page
-  const [sharedProfile, setSharedProfile] = useState({
-    name: 'Jayasurya K',
-    gender: 'male',
->>>>>>> eaf6cf4 (add the new elemnt)
   });
 
   useEffect(() => {
@@ -103,7 +75,6 @@ export default function App() {
   };
 
   const handleLogout = () => {
-<<<<<<< HEAD
     setCurrentScreen('landing');
     showToast('👋 You have been logged out.');
   };
@@ -128,16 +99,6 @@ export default function App() {
         showToast(`✨ Welcome back, ${userData.name}!`);
       }
     }
-=======
-    setCurrentPage('landing');
-    showToast('👋 You have been logged out.');
-  };
-
-  const handleLoginSuccess = (user) => {
-    setSharedProfile(prev => ({ ...prev, name: user.name }));
-    setCurrentPage('dashboard');
-    showToast(`👋 Welcome back, ${user.name}!`);
->>>>>>> eaf6cf4 (add the new elemnt)
   };
 
   // Filter drives according to top header search input
@@ -146,7 +107,6 @@ export default function App() {
     d.role.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-<<<<<<< HEAD
   if (currentScreen === 'landing') {
     return (
       <LandingPage
@@ -158,27 +118,15 @@ export default function App() {
           setAuthRole('HR / Company');
           setCurrentScreen('auth');
         }}
-=======
-  if (currentPage === 'landing') {
-    return (
-      <LandingPage
-        onStudentLogin={() => { setAuthRole('Student'); setCurrentPage('auth'); }}
-        onCompanyLogin={() => { setAuthRole('Admin'); setCurrentPage('auth'); }}
->>>>>>> eaf6cf4 (add the new elemnt)
       />
     );
   }
 
-<<<<<<< HEAD
   if (currentScreen === 'auth') {
-=======
-  if (currentPage === 'auth') {
->>>>>>> eaf6cf4 (add the new elemnt)
     return (
       <AuthPage
         initialRole={authRole}
         onLoginSuccess={handleLoginSuccess}
-<<<<<<< HEAD
         onBackToHome={() => setCurrentScreen('landing')}
       />
     );
@@ -191,9 +139,6 @@ export default function App() {
           setCurrentScreen('landing');
           showToast('👋 Logged out of Admin Portal.');
         }}
-=======
-        onBackToHome={() => setCurrentPage('landing')}
->>>>>>> eaf6cf4 (add the new elemnt)
       />
     );
   }

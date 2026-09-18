@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-<<<<<<< HEAD
-=======
-import AITLogo from '../components/AITLogo';
 import './LandingPage.css';
->>>>>>> eaf6cf4 (add the new elemnt)
 
 /* ─── Recruiter logos (inline SVG / text badges) ─── */
 const recruiters = [

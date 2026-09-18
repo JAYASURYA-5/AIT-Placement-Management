@@ -1,17 +1,6 @@
 import React, { useState } from 'react';
-<<<<<<< HEAD
 import uploadedLogo from '../assets/auth_logo.jpg';
-=======
-import AITLogo from '../components/AITLogo';
 import './AuthPage.css';
-import {
-  loginWithFirebase,
-  getFirebaseProjectInfo,
-  isFirebaseRealApiKey,
-  saveFirebaseApiKey
-} from '../firebase';
-
->>>>>>> eaf6cf4 (add the new elemnt)
 export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBackToHome }) {
   const [selectedRole, setSelectedRole] = useState(initialRole);
   const [showPassword, setShowPassword] = useState(false);
@@ -123,7 +112,7 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
           {/* Left Decorative Welcome Panel */}
           <div className="auth-left-panel">
             <div className="auth-illustration-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <img src={uploadedLogo} alt="AIT Logo" style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'contain', backgroundColor: '#fff', padding: '10px' }} />
+              <img src={uploadedLogo} alt="AIT Logo" style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'contain', mixBlendMode: 'multiply' }} />
             </div>
 
             <h2 className="auth-welcome-title">Welcome Back!</h2>
