@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import uploadedLogo from '../assets/auth_logo.jpg';
 export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBackToHome }) {
   const [selectedRole, setSelectedRole] = useState(initialRole);
   const [showPassword, setShowPassword] = useState(false);
@@ -12,18 +12,6 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
       placeholder: 'Enter Student Reg No. / Email',
       label: 'Email / Register Number',
       hint: 'Demo: student@ait.edu.in',
-    },
-    'HR / Company': {
-      email: 'recruiter@google.com',
-      placeholder: 'Enter Work Email / Company ID',
-      label: 'Work Email / Company ID',
-      hint: 'Demo: recruiter@google.com',
-    },
-    'Placement Officer': {
-      email: 'officer@ait.edu.in',
-      placeholder: 'Enter Officer Email / ID',
-      label: 'Officer Email / Employee ID',
-      hint: 'Demo: officer@ait.edu.in',
     },
     Admin: {
       email: 'admin@ait.edu.in',
@@ -43,8 +31,6 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
 
   const roles = [
     { id: 'Student', label: 'Student' },
-    { id: 'HR / Company', label: 'HR / Company' },
-    { id: 'Placement Officer', label: 'Placement Officer' },
     { id: 'Admin', label: 'Admin' },
   ];
 
@@ -83,8 +69,6 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
         displayName = 'Jayasurya K';
       }
     }
-    else if (selectedRole === 'HR / Company') displayName = 'HR Manager (Google)';
-    else if (selectedRole === 'Placement Officer') displayName = 'Dr. R. Placement Officer';
     else if (selectedRole === 'Admin') displayName = 'System Admin';
 
     // Trigger login redirection
@@ -126,39 +110,11 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
         <div className="auth-card">
           {/* Left Decorative Welcome Panel */}
           <div className="auth-left-panel">
-            <div className="auth-illustration-wrap">
-              <svg className="auth-mortarboard-icon" viewBox="0 0 64 64" fill="none">
-                <path
-                  d="M32 8L4 22L32 36L60 22L32 8Z"
-                  fill="var(--primary-maroon)"
-                />
-                <path
-                  d="M12 28V44C12 44 20 52 32 52C44 52 52 44 52 44V28"
-                  stroke="var(--primary-maroon)"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill="none"
-                />
-                <path
-                  d="M52 24V42"
-                  stroke="var(--primary-maroon)"
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                />
-                <circle cx="52" cy="45" r="3.5" fill="var(--primary-maroon)" />
-              </svg>
+            <div className="auth-illustration-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src={uploadedLogo} alt="AIT Logo" style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'contain', backgroundColor: '#fff', padding: '10px' }} />
             </div>
 
             <h2 className="auth-welcome-title">Welcome Back!</h2>
-            <p className="auth-welcome-subtitle">
-              Login to access your role-specific dashboard & placement management tools.
-            </p>
-
-            <div className="auth-left-footer-badge">
-              <span className="auth-badge-icon">🔐</span>
-              <span>Single Sign-On Portal</span>
-            </div>
           </div>
 
           {/* Right Form Panel */}

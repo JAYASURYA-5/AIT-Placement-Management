@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import authLogo from '../assets/auth_logo.jpg';
 
 // ── Flask backend base URL ────────────────────────────────────────────────────
 const API_BASE = 'http://localhost:5000';
@@ -19,18 +20,6 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
       label: 'Email / Register Number',
       hint: 'Demo: student@ait.edu.in',
     },
-    'HR / Company': {
-      email: 'recruiter@google.com',
-      placeholder: 'Enter Work Email / Company ID',
-      label: 'Work Email / Company ID',
-      hint: 'Demo: recruiter@google.com',
-    },
-    'Placement Officer': {
-      email: 'officer@ait.edu.in',
-      placeholder: 'Enter Officer Email / ID',
-      label: 'Officer Email / Employee ID',
-      hint: 'Demo: officer@ait.edu.in',
-    },
     Admin: {
       email: 'admin@ait.edu.in',
       placeholder: 'Enter Admin Email / ID',
@@ -46,8 +35,6 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
 
   const roles = [
     { id: 'Student', label: 'Student' },
-    { id: 'HR / Company', label: 'HR / Company' },
-    { id: 'Placement Officer', label: 'Placement Officer' },
     { id: 'Admin', label: 'Admin' },
   ];
 
@@ -169,19 +156,11 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
 
           {/* Left Panel */}
           <div className="auth-left-panel">
-            <div className="auth-illustration-wrap">
-              <svg className="auth-mortarboard-icon" viewBox="0 0 64 64" fill="none">
-                <path d="M32 8L4 22L32 36L60 22L32 8Z" fill="var(--primary-maroon)" />
-                <path d="M12 28V44C12 44 20 52 32 52C44 52 52 44 52 44V28" stroke="var(--primary-maroon)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                <path d="M52 24V42" stroke="var(--primary-maroon)" strokeWidth="3.5" strokeLinecap="round" />
-                <circle cx="52" cy="45" r="3.5" fill="var(--primary-maroon)" />
-              </svg>
+            <div className="auth-illustration-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src={authLogo} alt="AIT Logo" style={{ width: '130px', height: '130px', objectFit: 'contain', borderRadius: '50%', backgroundColor: 'transparent' }} />
             </div>
 
             <h2 className="auth-welcome-title">Welcome Back!</h2>
-            <p className="auth-welcome-subtitle">
-              Login to access your role-specific dashboard &amp; placement management tools.
-            </p>
 
             {/* Flask status badge */}
             <div style={{

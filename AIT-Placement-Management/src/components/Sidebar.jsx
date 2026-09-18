@@ -1,4 +1,5 @@
 import React from 'react';
+import sidebarLogo from '../assets/sidebar_logo.jpg';
 import {
   DashboardIcon,
   ApplicationsIcon,
@@ -31,10 +32,8 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
     <aside className="sidebar">
       {/* Brand Header */}
       <div className="brand-header">
-        <div className="brand-logo-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+        <div className="brand-logo-icon" style={{ background: 'transparent', padding: 0 }}>
+          <img src={sidebarLogo} alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'contain' }} />
         </div>
         <div className="brand-info">
           <span className="brand-title">AIT</span>
