@@ -65,7 +65,7 @@ export default function DriveManagement({ onNavigate }) {
 
   // Placement Drives Dataset from Firestore
   const [drives, setDrives] = useState([]);
-  
+
   // All Students Dataset loaded from Firestore for eligibility evaluation
   const [allStudents, setAllStudents] = useState([]);
 
@@ -99,6 +99,7 @@ export default function DriveManagement({ onNavigate }) {
   const [eligibleCandidates, setEligibleCandidates] = useState([]);
   const [selectedCandidateIds, setSelectedCandidateIds] = useState(new Set());
   const [candidateSearchTerm, setCandidateSearchTerm] = useState('');
+  const [nominationDriveUrl, setNominationDriveUrl] = useState('');
 
   // Email Notification Dispatch State
   const [emailSendingStatus, setEmailSendingStatus] = useState(null);
@@ -177,7 +178,7 @@ export default function DriveManagement({ onNavigate }) {
       if (!branchesStr.includes('all') && branchesStr.trim() !== '') {
         const dept = (student.department || student.branch || '').toLowerCase().trim();
         if (!dept) return false;
-        
+
         // Match against list of allowed branches
         const allowedList = branchesStr.split(',').map(b => b.trim());
         const isMatch = allowedList.some(b => b === dept || dept.includes(b) || b.includes(dept));
@@ -192,6 +193,7 @@ export default function DriveManagement({ onNavigate }) {
   const handleOpenEligibleCandidatesModal = (drive) => {
     setSelectedDriveForCandidates(drive);
     setCandidateSearchTerm('');
+    setNominationDriveUrl(drive.url || drive.driveUrl || '');
 
     const suggested = computeEligibleCandidates(drive, allStudents);
     setEligibleCandidates(suggested);
@@ -209,7 +211,7 @@ export default function DriveManagement({ onNavigate }) {
   // Helper to open modal showing all selected candidate names & details for a drive
   const handleOpenSelectedCandidatesViewModal = (drive) => {
     const nominatedList = Array.isArray(drive.nominatedStudents) ? drive.nominatedStudents : [];
-    
+
     // Match against all loaded student records
     const matchedStudents = allStudents.filter(student =>
       nominatedList.includes(student.id) || nominatedList.includes(student.uid)
@@ -251,10 +253,15 @@ export default function DriveManagement({ onNavigate }) {
     showToast('Saving nominated candidates & generating student logins in Firebase...', 'info');
 
     const nominatedList = Array.from(selectedCandidateIds);
-    const driveDetails = selectedDriveForCandidates;
+    const driveDetails = {
+      ...selectedDriveForCandidates,
+      url: nominationDriveUrl,
+      driveUrl: nominationDriveUrl
+    };
 
     const res = await updateDriveInFirestore(driveDetails.id, {
-      nominatedStudents: nominatedList
+      nominatedStudents: nominatedList,
+      url: nominationDriveUrl
     });
 
     if (res && res.success) {
@@ -270,7 +277,7 @@ export default function DriveManagement({ onNavigate }) {
       }
 
       setIsSaving(false);
-      setDrives(prev => prev.map(d => d.id === driveDetails.id ? { ...d, nominatedStudents: nominatedList } : d));
+      setDrives(prev => prev.map(d => d.id === driveDetails.id ? { ...d, nominatedStudents: nominatedList, url: nominationDriveUrl, driveUrl: nominationDriveUrl } : d));
       showToast(`🎉 ${nominatedList.length} candidate(s) nominated! Created student logins & sent notifications to Firebase.`, 'success');
       setSelectedDriveForCandidates(null);
     } else {
@@ -289,13 +296,18 @@ export default function DriveManagement({ onNavigate }) {
 
     const selectedCandidates = eligibleCandidates.filter(c => selectedCandidateIds.has(c.id));
     const nominatedList = Array.from(selectedCandidateIds);
-    const driveDetails = selectedDriveForCandidates;
+    const driveDetails = {
+      ...selectedDriveForCandidates,
+      url: nominationDriveUrl,
+      driveUrl: nominationDriveUrl
+    };
 
     setIsSaving(true);
     showToast('Saving candidates & setting up student logins in Firebase...', 'info');
 
     const res = await updateDriveInFirestore(driveDetails.id, {
-      nominatedStudents: nominatedList
+      nominatedStudents: nominatedList,
+      url: nominationDriveUrl
     });
 
     if (res && res.success) {
@@ -308,7 +320,7 @@ export default function DriveManagement({ onNavigate }) {
       }
 
       setIsSaving(false);
-      setDrives(prev => prev.map(d => d.id === driveDetails.id ? { ...d, nominatedStudents: nominatedList } : d));
+      setDrives(prev => prev.map(d => d.id === driveDetails.id ? { ...d, nominatedStudents: nominatedList, url: nominationDriveUrl, driveUrl: nominationDriveUrl } : d));
       setSelectedDriveForCandidates(null);
 
       // Open Email Dispatch Progress Modal
@@ -535,13 +547,13 @@ export default function DriveManagement({ onNavigate }) {
   // Filtered dataset with Search, Status, CGPA, Branch, and Bond Filters
   const filteredDrives = drives.filter(d => {
     const matchesSearch = (d.company || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (d.role || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (d.location || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (d.branches || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (d.bond || '').toLowerCase().includes(searchTerm.toLowerCase());
-    
+      (d.role || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (d.location || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (d.branches || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (d.bond || '').toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesStatus = statusFilter === 'All' || d.status === statusFilter;
-    
+
     let matchesCgpa = true;
     if (cgpaFilter === '7.0+') matchesCgpa = parseFloat(d.minCGPA) >= 7.0;
     if (cgpaFilter === '7.5+') matchesCgpa = parseFloat(d.minCGPA) >= 7.5;
@@ -641,7 +653,7 @@ export default function DriveManagement({ onNavigate }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', minHeight: '100vh', backgroundColor: '#f6f4ee', fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-      
+
       {/* Hidden File Input for Excel/CSV Upload */}
       <input
         type="file"
@@ -757,7 +769,7 @@ export default function DriveManagement({ onNavigate }) {
       </div>
 
       <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingBottom: '24px' }}>
-        
+
         {/* Left Sidebar */}
         <aside style={{
           width: '260px',
@@ -814,10 +826,10 @@ export default function DriveManagement({ onNavigate }) {
 
         {/* Main Content Area */}
         <main style={{ flex: 1, padding: '12px 36px 24px 30px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-          
+
           {/* Table Container Card */}
           <div style={{ ...glassCardStyle, padding: '28px 32px', width: '100%', marginBottom: '24px' }}>
-            
+
             {/* Top Toolbar: Search + CGPA Filter + Branch Filter + Bond Filter + Status Tabs */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
               <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
@@ -825,7 +837,7 @@ export default function DriveManagement({ onNavigate }) {
               </h3>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                
+
                 {/* Search Bar */}
                 <div style={{ position: 'relative', width: '200px' }}>
                   <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
@@ -1184,7 +1196,7 @@ export default function DriveManagement({ onNavigate }) {
             </div>
 
             {/* Drive Eligibility Criteria Badges Summary */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', backgroundColor: '#f8fafc', padding: '12px 18px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', backgroundColor: '#f8fafc', padding: '12px 18px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '16px' }}>
               <span style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Drive Eligibility Rules:</span>
               <span style={{ backgroundColor: '#dbeafe', color: '#1e40af', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: 700 }}>
                 🎓 Min CGPA: {selectedDriveForCandidates.minCGPA}
@@ -1197,9 +1209,44 @@ export default function DriveManagement({ onNavigate }) {
               </span>
             </div>
 
+            {/* Drive Registration / Application URL Input Box (Before sending email) */}
+            <div style={{
+              backgroundColor: '#fff1f2',
+              padding: '14px 18px',
+              borderRadius: '14px',
+              border: '1.5px solid #fbcfe8',
+              marginBottom: '20px',
+              boxShadow: '0 2px 8px rgba(190, 24, 93, 0.05)'
+            }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px', fontWeight: 800, color: '#be185d', marginBottom: '6px' }}>
+                <ExternalLink size={18} color="#be185d" />
+                <span>Enter Drive URL / Application Link (Will be attached in Email & Student Page)</span>
+              </label>
+              <input
+                type="url"
+                placeholder="e.g. https://careers.company.com/apply-drive or https://ait-placement.com"
+                value={nominationDriveUrl}
+                onChange={(e) => setNominationDriveUrl(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  borderRadius: '10px',
+                  border: '1px solid #f472b6',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  outline: 'none',
+                  backgroundColor: '#ffffff',
+                  color: '#0f172a'
+                }}
+              />
+              <div style={{ fontSize: '12px', color: '#831843', marginTop: '4px', fontWeight: 500 }}>
+                💡 Admin URL entered here will automatically be included in candidate invitation emails and displayed on the student's portal page.
+              </div>
+            </div>
+
             {/* Candidate Search & Select All Controls Bar */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', gap: '14px' }}>
-              
+
               {/* Select All Button / Checkbox */}
               <button
                 onClick={handleToggleSelectAllCandidates}
@@ -1493,6 +1540,11 @@ export default function DriveManagement({ onNavigate }) {
                     <option value="Completed">Completed</option>
                   </select>
                 </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#be185d', marginBottom: '6px' }}>Drive URL / Application Link</label>
+                  <input type="url" placeholder="e.g. https://forms.gle/xyz or https://drive.google.com/..." value={formData.url || formData.driveUrl || ''} onChange={(e) => setFormData({ ...formData, url: e.target.value, driveUrl: e.target.value })} style={inputStyle} />
+                </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
@@ -1543,9 +1595,15 @@ export default function DriveManagement({ onNavigate }) {
                   <div style={{ fontSize: '13px', color: '#64748b', marginTop: '2px' }}>
                     Company: <strong>{emailSendingStatus.drive?.company}</strong> ({emailSendingStatus.drive?.role})
                   </div>
+                  {emailSendingStatus.drive?.url && (
+                    <div style={{ fontSize: '12px', color: '#be185d', fontWeight: 700, marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <ExternalLink size={13} />
+                      <span>Attached URL: {emailSendingStatus.drive.url}</span>
+                    </div>
+                  )}
                 </div>
               </div>
-              
+
               {!emailSendingStatus.isSending && (
                 <button onClick={() => setEmailSendingStatus(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px' }}>
                   <X size={22} />
@@ -1858,7 +1916,7 @@ export default function DriveManagement({ onNavigate }) {
 
             {/* 4 Organised Sections Cards for 26 Attributes */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              
+
               {/* Card 1: Academic Performance */}
               <div style={{ backgroundColor: '#f8fafc', borderRadius: '16px', padding: '20px', border: '1px solid #e2e8f0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: 700, color: '#1e293b', marginBottom: '14px' }}>

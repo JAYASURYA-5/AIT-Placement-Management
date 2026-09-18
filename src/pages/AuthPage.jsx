@@ -20,8 +20,8 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
   // Role preset credentials for user convenience
   const rolePresets = {
     Student: {
-      email: 'madhumithalakshmi9406@gmail.com',
-      placeholder: 'Enter Student Email or Register Number (e.g. 710123205020)',
+      email: '',
+      placeholder: 'Enter Student Email or Register Number',
       label: 'Student Email / Register Number',
       hint: 'Default password is your Register Number',
     },
@@ -33,10 +33,10 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
     },
   };
 
-  // Form State initialized with Student preset
+  // Form State initialized with empty fields for Student
   const [formData, setFormData] = useState({
-    emailOrReg: rolePresets[initialRole]?.email || 'madhumithalakshmi9406@gmail.com',
-    password: '710123205020',
+    emailOrReg: initialRole === 'Student' ? '' : (rolePresets[initialRole]?.email || ''),
+    password: initialRole === 'Student' ? '' : 'password123',
   });
 
   const [errorMsg, setErrorMsg] = useState('');
@@ -52,8 +52,8 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
     setSelectedRole(roleId);
     setFormData((prev) => ({
       ...prev,
-      emailOrReg: rolePresets[roleId]?.email || '',
-      password: roleId === 'Student' ? '710123205020' : 'password123',
+      emailOrReg: roleId === 'Student' ? '' : (rolePresets[roleId]?.email || ''),
+      password: roleId === 'Student' ? '' : 'password123',
     }));
     if (errorMsg) setErrorMsg('');
     if (successMsg) setSuccessMsg('');
@@ -78,12 +78,12 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
 
   const handleDemoProceed = () => {
     const email = formData.emailOrReg.trim() || `${selectedRole.toLowerCase()}@ait.edu.in`;
-    const name = selectedRole === 'Student' ? 'MADHUMITHA.K' : selectedRole;
+    const name = selectedRole === 'Student' ? 'Student' : selectedRole;
     onLoginSuccess({
       role: selectedRole,
       identifier: email,
       name: name,
-      regNo: '710123205020',
+      regNo: formData.emailOrReg.trim() || '',
       provider: 'demo'
     });
   };
@@ -270,7 +270,7 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
                           marginTop: '4px'
                         }}
                       >
-                        🚀 Continue as Selected Student (MADHUMITHA.K)
+                        🚀 Continue to Student Portal
                       </button>
                     </div>
                   )}

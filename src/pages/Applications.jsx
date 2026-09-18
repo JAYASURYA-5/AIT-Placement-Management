@@ -17,6 +17,7 @@ const defaultApplications = [
     eligibility: 'B.Tech CSE/IT/ECE with CGPA >= 6.5',
     bond: 'No Bond',
     location: 'Chennai / Tenkasi',
+    driveUrl: 'https://careers.zoho.com/campus-drive',
     rounds: [
       { name: 'Candidate Nomination', status: 'Completed' },
       { name: 'Online Programming Challenge', status: 'Upcoming' },
@@ -39,6 +40,7 @@ const defaultApplications = [
     eligibility: 'B.Tech IT/CSE/ECE/AI&DS with CGPA >= 8.5',
     bond: 'No Bond',
     location: 'Bangalore',
+    driveUrl: 'https://drive.google.com/drive/folders/1AIT-team-texa-drive',
     rounds: [
       { name: 'Nomination by Placement Cell', status: 'Completed' },
       { name: 'Aptitude & Logical Assessment', status: 'Upcoming' },
@@ -59,6 +61,7 @@ const defaultApplications = [
     eligibility: 'B.Tech IT/CSE/ECE with CGPA >= 7.0',
     bond: '1 Year',
     location: 'Chennai',
+    driveUrl: 'https://learning.tcsion.com/hub/national-qualifier-test/',
     rounds: [
       { name: 'TCS NQT National Qualifier Test', status: 'Completed' },
       { name: 'Technical Interview Round', status: 'Upcoming' },
@@ -79,6 +82,7 @@ const defaultApplications = [
     eligibility: 'All Engineering branches with CGPA >= 6.5',
     bond: 'No Bond',
     location: 'Mysore / Bangalore',
+    driveUrl: 'https://infytq.onwingspan.com/',
     rounds: [
       { name: 'Online Coding Challenge', status: 'Completed' },
       { name: 'Technical Interview', status: 'Completed' },
@@ -101,7 +105,7 @@ export default function Applications() {
       try {
         profile = JSON.parse(localStorage.getItem('ait-profile') || '{}')
         setStudentProfile(profile)
-      } catch {}
+      } catch { }
 
       const studentIds = [
         (profile.uid || '').toLowerCase(),
@@ -116,6 +120,7 @@ export default function Applications() {
         const formattedDrives = fsDrives.map(drive => {
           const nominatedList = (drive.nominatedStudents || []).map(s => String(s).toLowerCase())
           const isNominated = studentIds.some(id => nominatedList.includes(id)) || nominatedList.length > 0
+          const driveUrl = drive.url || drive.driveUrl || drive.link || ''
 
           return {
             id: drive.id,
@@ -132,6 +137,7 @@ export default function Applications() {
             eligibility: `Min CGPA: ${drive.minCGPA || '6.5'}, Branches: ${drive.branches || 'CSE, IT, ECE'}, Max Backlogs: ${drive.maxBacklogs || '0'}`,
             bond: drive.bond || 'No Bond',
             location: drive.location || 'Campus',
+            driveUrl: driveUrl,
             rounds: [
               { name: 'Admin Candidate Nomination', status: isNominated ? 'Completed' : 'Upcoming' },
               { name: 'Technical Assessment', status: 'Upcoming' },
@@ -250,13 +256,37 @@ export default function Applications() {
                     <span className={`status-badge badge-${app.status.toLowerCase()}`}>
                       {app.isNominated ? 'Shortlisted' : app.status}
                     </span>
-                    <button
-                      className="btn-view-details"
-                      type="button"
-                      onClick={() => handleOpenDetails(app)}
-                    >
-                      View Details
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {app.driveUrl && (
+                        <a
+                          href={app.driveUrl.startsWith('http') ? app.driveUrl : `https://${app.driveUrl}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            backgroundColor: '#fdf2f8',
+                            color: '#be185d',
+                            border: '1px solid #fbcfe8',
+                            fontWeight: '700',
+                            fontSize: '12px',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            textDecoration: 'none'
+                          }}
+                        >
+                          Drive Link ↗
+                        </a>
+                      )}
+                      <button
+                        className="btn-view-details"
+                        type="button"
+                        onClick={() => handleOpenDetails(app)}
+                      >
+                        View Details
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))
@@ -306,6 +336,91 @@ export default function Applications() {
               <div className="modal-section">
                 <h4 className="modal-section-title">Eligibility Criteria</h4>
                 <p className="modal-description">{selectedApp.eligibility}</p>
+              </div>
+
+              {/* Placement Drive Link Section */}
+              <div className="modal-section">
+                <h4 className="modal-section-title">Placement Drive Link / Application Portal</h4>
+                {selectedApp.driveUrl ? (
+                  <div style={{
+                    backgroundColor: '#fdf2f8',
+                    border: '1.5px solid #fbcfe8',
+                    borderRadius: '12px',
+                    padding: '14px 16px',
+                    marginTop: '8px',
+                    boxShadow: '0 2px 8px rgba(190, 24, 93, 0.05)'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: '220px' }}>
+                        <div style={{
+                          width: '38px',
+                          height: '38px',
+                          borderRadius: '10px',
+                          backgroundColor: '#fce7f3',
+                          color: '#be185d',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                          </svg>
+                        </div>
+                        <div style={{ overflow: 'hidden' }}>
+                          <div style={{ fontSize: '13px', fontWeight: '800', color: '#be185d', letterSpacing: '0.01em' }}>
+                            Placement Cell Drive URL
+                          </div>
+                          <a
+                            href={selectedApp.driveUrl.startsWith('http') ? selectedApp.driveUrl : `https://${selectedApp.driveUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              fontSize: '13px',
+                              color: '#9d174d',
+                              wordBreak: 'break-all',
+                              textDecoration: 'underline',
+                              fontWeight: '600'
+                            }}
+                          >
+                            {selectedApp.driveUrl}
+                          </a>
+                        </div>
+                      </div>
+                      <a
+                        href={selectedApp.driveUrl.startsWith('http') ? selectedApp.driveUrl : `https://${selectedApp.driveUrl}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          backgroundColor: '#be185d',
+                          color: '#ffffff',
+                          fontWeight: '700',
+                          fontSize: '13px',
+                          padding: '8px 16px',
+                          borderRadius: '8px',
+                          textDecoration: 'none',
+                          boxShadow: '0 4px 12px rgba(190, 24, 93, 0.3)',
+                          flexShrink: 0
+                        }}
+                      >
+                        <span>Open Drive Link</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                          <polyline points="15 3 21 3 21 9"></polyline>
+                          <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="modal-description" style={{ color: '#64748b', fontStyle: 'italic', margin: '4px 0 0 0' }}>
+                    No placement drive URL attached by the admin yet.
+                  </p>
+                )}
               </div>
 
               <div className="modal-section">

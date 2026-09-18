@@ -591,6 +591,9 @@ export async function fetchDrivesFromFirestore() {
         package: data.package || '',
         location: data.location || '',
         status: data.status || 'Upcoming',
+        url: data.url || data.driveUrl || data.link || '',
+        driveUrl: data.url || data.driveUrl || data.link || '',
+        link: data.url || data.driveUrl || data.link || '',
         nominatedStudents: data.nominatedStudents || [],
         createdAt: data.createdAt || ''
       });
@@ -619,6 +622,9 @@ export async function addDriveToFirestore(driveData) {
       package: driveData.package || '',
       location: driveData.location || '',
       status: driveData.status || 'Upcoming',
+      url: driveData.url || driveData.driveUrl || driveData.link || '',
+      driveUrl: driveData.url || driveData.driveUrl || driveData.link || '',
+      link: driveData.url || driveData.driveUrl || driveData.link || '',
       nominatedStudents: driveData.nominatedStudents || [],
       createdAt: new Date().toISOString()
     };
@@ -686,6 +692,9 @@ export async function batchAddDrivesToFirestore(drivesArray) {
         package: drive.package || '',
         location: drive.location || '',
         status: drive.status || 'Upcoming',
+        url: drive.url || drive.driveUrl || drive.link || '',
+        driveUrl: drive.url || drive.driveUrl || drive.link || '',
+        link: drive.url || drive.driveUrl || drive.link || '',
         nominatedStudents: drive.nominatedStudents || [],
         createdAt: new Date().toISOString()
       };

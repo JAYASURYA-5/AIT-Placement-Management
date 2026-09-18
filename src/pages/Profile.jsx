@@ -387,17 +387,17 @@ export default function Profile() {
         const projectsList = Array.isArray(profileData.projects) && profileData.projects.length > 0
           ? profileData.projects
           : [
-              {
-                title: 'Placement Portal Dashboard',
-                description: 'Designed a student-facing dashboard with profile tracking, milestones, and resume upload flows.',
-                meta: 'React, Vite, CSS'
-              },
-              {
-                title: 'Job Application Tracker',
-                description: 'Built a responsive interface for tracking applications, interview status and upcoming events.',
-                meta: 'JavaScript, API Design'
-              }
-            ]
+            {
+              title: 'Placement Portal Dashboard',
+              description: 'Designed a student-facing dashboard with profile tracking, milestones, and resume upload flows.',
+              meta: 'React, Vite, CSS'
+            },
+            {
+              title: 'Job Application Tracker',
+              description: 'Built a responsive interface for tracking applications, interview status and upcoming events.',
+              meta: 'JavaScript, API Design'
+            }
+          ]
         return (
           <div className="tab-body">
             {projectsList.map((proj, idx) => (

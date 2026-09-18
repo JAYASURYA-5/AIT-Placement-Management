@@ -14,6 +14,7 @@ export function generateDriveInvitationEmail({ student, drive }) {
   const driveDate = drive?.date || 'To be announced';
   const location = drive?.location || 'AIT Campus / Online';
   const minCGPA = drive?.minCGPA || '6.5';
+  const url = drive?.url || drive?.driveUrl || drive?.link || '';
 
   return `
 <!DOCTYPE html>
@@ -60,11 +61,17 @@ export function generateDriveInvitationEmail({ student, drive }) {
           <div class="detail-item"><span>Drive Date</span><strong>${driveDate}</strong></div>
           <div class="detail-item"><span>Location</span><strong>${location}</strong></div>
           <div class="detail-item"><span>Min CGPA</span><strong>${minCGPA} CGPA</strong></div>
+          ${url ? `
+          <div class="detail-item" style="grid-column: 1 / -1;">
+            <span>Drive URL / Portal Link</span>
+            <strong><a href="${url.startsWith('http') ? url : 'https://' + url}" target="_blank" style="color: #be185d; text-decoration: underline; word-break: break-all;">${url}</a></strong>
+          </div>` : ''}
         </div>
       </div>
 
       <div class="instructions">
         <strong>📌 Action Required:</strong> Please log in to your <strong>AIT Placement Portal</strong> immediately to view complete round schedules, job descriptions, and confirm your participation.
+        ${url ? `<br><br>🔗 <strong>Drive Portal URL:</strong> <a href="${url.startsWith('http') ? url : 'https://' + url}" target="_blank" style="color: #be185d;">${url}</a>` : ''}
       </div>
     </div>
     <div class="footer">
@@ -81,21 +88,31 @@ export function generateDriveInvitationEmail({ student, drive }) {
  * Generate plain text email body suitable for mailto: links and web email clients
  */
 export function generateDriveInvitationText({ student, drive }) {
+  const company = drive?.company || 'Company';
+  const role = drive?.role || 'Software Engineer';
+  const pkg = drive?.package || 'As per Industry Standards';
+  const driveDate = drive?.date || 'To be announced';
+  const location = drive?.location || 'AIT Campus / Online';
+  const minCGPA = drive?.minCGPA || '6.5';
+  const url = drive?.url || drive?.driveUrl || drive?.link || '';
+
+  const urlLine = url ? `\n- Drive URL: ${url}` : '';
+
   return `Dear Student,
 
-Congratulations! You have been shortlisted & nominated for the campus recruitment drive with ${drive?.company || 'Company'}.
+Congratulations! You have been shortlisted & nominated for the campus recruitment drive with ${company}.
 
 Drive Details:
-- Company: ${drive?.company || 'Company'}
-- Role: ${drive?.role || 'Software Engineer'}
-- Package (CTC): ${drive?.package || 'As per Industry Standards'}
-- Drive Date: ${drive?.date || 'To be announced'}
-- Location: ${drive?.location || 'AIT Campus / Online'}
-- Min CGPA: ${drive?.minCGPA || '6.5'} CGPA
+- Company: ${company}
+- Role: ${role}
+- Package (CTC): ${pkg}
+- Drive Date: ${driveDate}
+- Location: ${location}
+- Min CGPA: ${minCGPA} CGPA${urlLine}
 
 Action Required:
 Please log in to your AIT Placement Portal to confirm your participation and view round details.
-
+${url ? `\nDrive Link / Portal URL:\n${url}\n` : ''}
 Best regards,
 Training & Placement Cell
 Adithya Institute of Technology (AIT)`;

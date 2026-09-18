@@ -771,7 +771,7 @@ export default function UsersPage({ onNavigate }) {
                   }}
                 >
                   <Plus size={18} strokeWidth={2.5} />
-                  <span>+ Add User</span>
+                  <span>Add User</span>
                 </button>
 
               </div>

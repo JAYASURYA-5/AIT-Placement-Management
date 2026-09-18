@@ -37,7 +37,7 @@ const formatEventDate = (dateKey) => {
         year: 'numeric'
       }).format(new Date(year, month - 1, day))
     }
-  } catch {}
+  } catch { }
   return dateKey
 }
 
@@ -53,7 +53,7 @@ export default function DriveCalendar() {
       let profile = {}
       try {
         profile = JSON.parse(localStorage.getItem('ait-profile') || '{}')
-      } catch {}
+      } catch { }
 
       const studentIds = [
         (profile.uid || '').toLowerCase(),
@@ -95,7 +95,8 @@ export default function DriveCalendar() {
             minCGPA: drive.minCGPA,
             branches: drive.branches,
             bond: drive.bond,
-            location: drive.location
+            location: drive.location,
+            driveUrl: drive.url || drive.driveUrl || drive.link || ''
           }
 
           if (!newEventsMap[dateKey]) {
@@ -213,7 +214,7 @@ export default function DriveCalendar() {
 
       {showCalendar && <div className="profile-page-content">
         <div className="profile-card calendar-card-container">
-          
+
           {/* Calendar Navigation Header */}
           <div className="calendar-nav-header">
             <div className="calendar-nav-left">
@@ -251,9 +252,8 @@ export default function DriveCalendar() {
             {calendarCells.map((cell, index) => (
               <div
                 key={index}
-                className={`calendar-day-cell ${cell.isCurrentMonth ? 'current' : 'outside'} ${
-                  cell.events.length > 0 ? 'has-events' : ''
-                }`}
+                className={`calendar-day-cell ${cell.isCurrentMonth ? 'current' : 'outside'} ${cell.events.length > 0 ? 'has-events' : ''
+                  }`}
               >
                 <span className="day-number">{cell.day}</span>
                 {cell.events.map((evt) => (
@@ -393,6 +393,49 @@ export default function DriveCalendar() {
                 <h4 className="modal-section-title">Description</h4>
                 <p className="modal-description">{selectedEvent.description}</p>
               </div>
+
+              {selectedEvent.driveUrl && (
+                <div className="modal-section">
+                  <h4 className="modal-section-title">Placement Drive Link / Application Portal</h4>
+                  <div style={{
+                    backgroundColor: '#fdf2f8',
+                    border: '1.5px solid #fbcfe8',
+                    borderRadius: '12px',
+                    padding: '12px 16px',
+                    marginTop: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '10px'
+                  }}>
+                    <a
+                      href={selectedEvent.driveUrl.startsWith('http') ? selectedEvent.driveUrl : `https://${selectedEvent.driveUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: '#be185d', fontWeight: '700', fontSize: '13px', wordBreak: 'break-all' }}
+                    >
+                      🔗 {selectedEvent.driveUrl}
+                    </a>
+                    <a
+                      href={selectedEvent.driveUrl.startsWith('http') ? selectedEvent.driveUrl : `https://${selectedEvent.driveUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        backgroundColor: '#be185d',
+                        color: '#ffffff',
+                        fontWeight: '700',
+                        fontSize: '12.5px',
+                        padding: '6px 14px',
+                        borderRadius: '8px',
+                        textDecoration: 'none'
+                      }}
+                    >
+                      Open Link ↗
+                    </a>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="modal-footer">
