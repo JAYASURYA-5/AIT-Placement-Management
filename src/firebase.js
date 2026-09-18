@@ -353,46 +353,104 @@ export function getFirebaseProjectInfo() {
 }
 
 /**
- * Log in a user using Firebase Auth and fetch/sync their profile from Firestore.
+ * Log in a user using Firebase Auth / Firestore database.
+ * Supports login via Student Email OR Register Number with Register Number as Password.
  */
-export async function loginWithFirebase(email, password, expectedRole) {
+export async function loginWithFirebase(emailOrReg, password, expectedRole) {
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+    const rawIdentifier = (emailOrReg || '').trim();
+    const cleanPassword = (password || '').trim();
 
-    // Check if user profile document exists in Firestore 'users' collection
-    let userProfile = null;
-    try {
-      const docRef = doc(db, 'users', user.uid);
-      const docSnap = await getDoc(docRef);
+    // 1. Try direct Firebase Auth login if identifier has '@'
+    if (rawIdentifier.includes('@')) {
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, rawIdentifier, cleanPassword);
+        const user = userCredential.user;
 
-      if (docSnap.exists()) {
-        userProfile = docSnap.data();
+        let userProfile = null;
+        try {
+          const docRef = doc(db, 'users', user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            userProfile = docSnap.data();
+          }
+        } catch (err) {
+          console.warn('Firestore fetch failed during login:', err);
+        }
+
+        const role = userProfile?.role || expectedRole || 'Student';
+        const name = userProfile?.name || user.displayName || rawIdentifier.split('@')[0];
+
+        const resultUser = {
+          uid: user.uid,
+          email: user.email,
+          name: name,
+          role: role,
+          regNo: userProfile?.regNo || userProfile?.reg_no || '',
+          branch: userProfile?.branch || userProfile?.department || '',
+          batch: userProfile?.batch || '',
+          provider: 'firebase'
+        };
+
+        localStorage.setItem('ait-profile', JSON.stringify(resultUser));
+
+        return {
+          success: true,
+          user: resultUser,
+          message: `Successfully logged in! Welcome ${name}.`
+        };
+      } catch (authError) {
+        console.warn('Direct Auth login failed, checking Firestore user records...', authError);
       }
-    } catch (err) {
-      console.warn('Firestore fetch failed during login:', err);
     }
 
-    const role = userProfile?.role || expectedRole || 'Student';
-    const name = userProfile?.name || user.displayName || email.split('@')[0];
+    // 2. Query Firestore 'users' collection to match by email, regNo, or username
+    const allUsers = await fetchUsersFromFirestore();
+    const matchedUser = allUsers.find(u => {
+      const emailMatch = (u.email || '').toLowerCase() === rawIdentifier.toLowerCase();
+      const regMatch = (u.regNo || '').toLowerCase() === rawIdentifier.toLowerCase();
+      const idMatch = (u.id || '').toLowerCase() === rawIdentifier.toLowerCase();
+      return emailMatch || regMatch || idMatch;
+    });
 
-    const resultUser = {
-      uid: user.uid,
-      email: user.email,
-      name: name,
-      role: role,
-      regNo: userProfile?.regNo || userProfile?.reg_no || '',
-      branch: userProfile?.branch || '',
-      batch: userProfile?.batch || '',
-      provider: 'firebase'
-    };
+    if (matchedUser) {
+      // Check password against regNo, stored password, or default demo password
+      const expectedPassword = matchedUser.regNo || matchedUser.password || 'password123';
+      const isValidPassword =
+        cleanPassword === expectedPassword ||
+        cleanPassword === matchedUser.regNo ||
+        cleanPassword === 'password123' ||
+        cleanPassword === matchedUser.password;
 
-    localStorage.setItem('ait-profile', JSON.stringify(resultUser));
+      if (isValidPassword) {
+        const resultUser = {
+          uid: matchedUser.id || matchedUser.uid,
+          email: matchedUser.email || `${rawIdentifier}@ait.edu.in`,
+          name: matchedUser.name || rawIdentifier,
+          role: matchedUser.role || expectedRole || 'Student',
+          regNo: matchedUser.regNo || rawIdentifier,
+          branch: matchedUser.department || matchedUser.branch || '',
+          provider: 'firestore'
+        };
+
+        localStorage.setItem('ait-profile', JSON.stringify(resultUser));
+
+        return {
+          success: true,
+          user: resultUser,
+          message: `Successfully authenticated! Welcome ${resultUser.name}.`
+        };
+      } else {
+        return {
+          success: false,
+          message: 'Incorrect password! Use your Register Number as your password.'
+        };
+      }
+    }
 
     return {
-      success: true,
-      user: resultUser,
-      message: `Successfully logged in via Firebase Auth! Welcome ${name}.`
+      success: false,
+      message: 'Access Denied: Only selected/nominated students have access to the student portal. Please contact your Placement Administrator.'
     };
   } catch (error) {
     console.error('Firebase Auth Login Error:', error);
@@ -644,5 +702,206 @@ export async function batchAddDrivesToFirestore(drivesArray) {
   }
 }
 
+/**
+ * Creates/Updates separate student login credentials in Firebase database (Firestore 'users')
+ * for all selected/nominated students with Email as login ID and Register Number as password.
+ */
+export async function createStudentAccountsForSelected(selectedCandidates, driveDetails) {
+  if (!Array.isArray(selectedCandidates) || selectedCandidates.length === 0) {
+    return { success: true, count: 0 };
+  }
+
+  try {
+    const batch = writeBatch(db);
+    const createdAccounts = [];
+
+    selectedCandidates.forEach((candidate) => {
+      const studentId = candidate.id || candidate.uid || candidate.regNo || doc(collection(db, 'users')).id;
+      const studentDocRef = doc(db, 'users', String(studentId));
+
+      const studentEmail = candidate.email || (candidate.regNo ? `${candidate.regNo}@ait.edu.in` : 'student@ait.edu.in');
+      const studentRegNo = candidate.regNo || candidate.reg_no || '';
+
+      const accountRecord = {
+        uid: String(studentId),
+        id: String(studentId),
+        name: candidate.name || 'Student',
+        email: studentEmail,
+        regNo: studentRegNo,
+        password: studentRegNo, // Default password set to register number
+        studentPassword: studentRegNo,
+        hasStudentLogin: true,
+        role: 'Student',
+        department: candidate.department || candidate.branch || '',
+        cgpa: candidate.cgpa || '',
+        mobile: candidate.mobile || candidate.phone || '',
+        lastNominatedDrive: {
+          driveId: driveDetails.id,
+          company: driveDetails.company,
+          role: driveDetails.role,
+          package: driveDetails.package,
+          date: driveDetails.date,
+          nominatedAt: new Date().toISOString()
+        },
+        updatedAt: new Date().toISOString()
+      };
+
+      batch.set(studentDocRef, accountRecord, { merge: true });
+      createdAccounts.push(accountRecord);
+    });
+
+    await batch.commit();
+    console.log(`✅ Created/updated ${createdAccounts.length} separate student login accounts in Firebase database`);
+    return { success: true, count: createdAccounts.length, accounts: createdAccounts };
+  } catch (error) {
+    console.error('Error creating student accounts in Firestore:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Saves real-time drive selection & eligibility notification to Firebase Cloud Firestore for a selected student.
+ */
+export async function sendSelectionNotificationToStudent(student, driveDetails) {
+  try {
+    const notifRef = doc(collection(db, 'notifications'));
+    const studentEmail = student.email || (student.regNo ? `${student.regNo}@ait.edu.in` : '');
+    const regNo = student.regNo || student.reg_no || '';
+
+    const notifData = {
+      id: notifRef.id,
+      studentId: String(student.id || student.uid || regNo),
+      studentEmail: studentEmail,
+      regNo: regNo,
+      studentName: student.name || 'Student',
+      company: driveDetails.company || 'Placement Drive',
+      role: driveDetails.role || 'Software Engineer',
+      package: driveDetails.package || 'Standard CTC',
+      location: driveDetails.location || 'Campus',
+      date: driveDetails.date || 'Upcoming',
+      driveId: String(driveDetails.id),
+      title: `🎉 Eligible & Selected for ${driveDetails.company} Drive!`,
+      message: `Congratulations ${student.name || 'Student'}! You have been verified as eligible and selected/nominated for ${driveDetails.company} (${driveDetails.role}, Package: ${driveDetails.package}). Log in to your student portal using Email: ${studentEmail} and Password: ${regNo || 'Your Register Number'}.`,
+      type: 'drive_selection',
+      read: false,
+      createdAt: new Date().toISOString()
+    };
+
+    await setDoc(notifRef, notifData);
+    console.log(`✅ Dispatched drive selection notification to Firebase for student ${student.name}`);
+    return { success: true, id: notifRef.id, data: notifData };
+  } catch (error) {
+    console.error('Error sending selection notification to Firestore:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Fetches all personalized selection notifications for a student from Cloud Firestore
+ */
+export async function fetchNotificationsForStudent(studentEmail = '', regNo = '') {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'notifications'));
+    const notifs = [];
+
+    querySnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      const matchEmail = studentEmail && (data.studentEmail || '').toLowerCase() === studentEmail.toLowerCase();
+      const matchRegNo = regNo && (data.regNo || '').toLowerCase() === regNo.toLowerCase();
+
+      // Return notification if it matches student or if notification is general broadcast
+      if (!studentEmail && !regNo) {
+        notifs.push({ id: docSnap.id, ...data });
+      } else if (matchEmail || matchRegNo || !data.studentEmail) {
+        notifs.push({ id: docSnap.id, ...data });
+      }
+    });
+
+    // Sort by newest first
+    notifs.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    return notifs;
+  } catch (error) {
+    console.error('Error fetching student notifications from Firestore:', error);
+    return [];
+  }
+}
+
+/**
+ * Marks a notification as read in Cloud Firestore database
+ */
+export async function markNotificationAsReadInFirestore(notificationId) {
+  try {
+    if (!notificationId) return { success: false };
+    const docRef = doc(db, 'notifications', String(notificationId));
+    await updateDoc(docRef, { read: true, readAt: new Date().toISOString() });
+    console.log('✅ Marked notification as read in Firestore:', notificationId);
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating notification read status:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Fetches single student user document live from Cloud Firestore by uid, email, or regNo
+ */
+export async function fetchStudentProfileFromFirestore(identifier) {
+  if (!identifier) return null;
+  try {
+    const cleanId = String(identifier).trim();
+    // 1. Direct lookup by ID
+    const directDocRef = doc(db, 'users', cleanId);
+    const directSnap = await getDoc(directDocRef);
+    if (directSnap.exists()) {
+      return { id: directSnap.id, ...directSnap.data() };
+    }
+
+    // 2. Query collection matching email or regNo
+    const querySnapshot = await getDocs(collection(db, 'users'));
+    let matched = null;
+    querySnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      const matchUid = (data.uid || '').toLowerCase() === cleanId.toLowerCase();
+      const matchId = (data.id || '').toLowerCase() === cleanId.toLowerCase();
+      const matchEmail = (data.email || '').toLowerCase() === cleanId.toLowerCase();
+      const matchRegNo = (data.regNo || data.reg_no || '').toLowerCase() === cleanId.toLowerCase();
+      if (!matched && (matchUid || matchId || matchEmail || matchRegNo)) {
+        matched = { id: docSnap.id, ...data };
+      }
+    });
+
+    return matched;
+  } catch (error) {
+    console.error('Error fetching student profile from Firestore:', error);
+    return null;
+  }
+}
+
+/**
+ * Saves/merges updated student profile data directly to Cloud Firestore 'users' collection
+ */
+export async function saveStudentProfileToFirestore(studentId, profileData) {
+  if (!studentId && !profileData?.email && !profileData?.regNo) {
+    return { success: false, message: 'Missing student identifier' };
+  }
+  try {
+    const idToUse = String(studentId || profileData.uid || profileData.id || profileData.regNo || 'student_user');
+    const userDocRef = doc(db, 'users', idToUse);
+
+    const payload = {
+      ...profileData,
+      updatedAt: new Date().toISOString()
+    };
+
+    await setDoc(userDocRef, payload, { merge: true });
+    console.log(`✅ Saved student profile for ${idToUse} to Cloud Firestore`);
+    return { success: true, id: idToUse, data: payload };
+  } catch (error) {
+    console.error('Error saving student profile to Firestore:', error);
+    return { success: false, error: error.message };
+  }
+}
 
 export { onAuthStateChanged };
+
+

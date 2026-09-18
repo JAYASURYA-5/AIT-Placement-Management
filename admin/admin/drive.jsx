@@ -47,7 +47,9 @@ import {
   updateDriveInFirestore,
   deleteDriveFromFirestore,
   batchAddDrivesToFirestore,
-  fetchUsersFromFirestore
+  fetchUsersFromFirestore,
+  createStudentAccountsForSelected,
+  sendSelectionNotificationToStudent
 } from '../../src/firebase';
 import { sendBatchDriveEmails, generateDriveInvitationEmail, openWebEmailClient } from '../../src/utils/emailService';
 
@@ -240,34 +242,47 @@ export default function DriveManagement({ onNavigate }) {
     }
   };
 
-  // Save Selected Candidates to Drive Document in Firestore
+  // Save Selected Candidates to Drive Document in Firestore & Create Student Accounts + Send Notifications
   const handleSaveNominatedCandidates = async () => {
     if (!selectedDriveForCandidates) return;
 
     setIsSaving(true);
-    showToast('Saving nominated candidates to Firebase...', 'info');
+    showToast('Saving nominated candidates & generating student logins in Firebase...', 'info');
 
     const nominatedList = Array.from(selectedCandidateIds);
-    const res = await updateDriveInFirestore(selectedDriveForCandidates.id, {
+    const driveDetails = selectedDriveForCandidates;
+
+    const res = await updateDriveInFirestore(driveDetails.id, {
       nominatedStudents: nominatedList
     });
 
-    setIsSaving(false);
-
     if (res && res.success) {
-      setDrives(prev => prev.map(d => d.id === selectedDriveForCandidates.id ? { ...d, nominatedStudents: nominatedList } : d));
-      showToast(`🎉 ${nominatedList.length} candidate(s) successfully nominated for ${selectedDriveForCandidates.company}!`);
+      // Filter student objects that were selected
+      const selectedCandidatesList = eligibleCandidates.filter(c => selectedCandidateIds.has(c.id));
+
+      // 1. Create separate student login accounts in Firebase database (Email + RegNo password)
+      await createStudentAccountsForSelected(selectedCandidatesList, driveDetails);
+
+      // 2. Dispatch real-time selection notifications to Firebase for each selected student
+      for (const student of selectedCandidatesList) {
+        await sendSelectionNotificationToStudent(student, driveDetails);
+      }
+
+      setIsSaving(false);
+      setDrives(prev => prev.map(d => d.id === driveDetails.id ? { ...d, nominatedStudents: nominatedList } : d));
+      showToast(`🎉 ${nominatedList.length} candidate(s) nominated! Created student logins & sent notifications to Firebase.`, 'success');
       setSelectedDriveForCandidates(null);
     } else {
+      setIsSaving(false);
       showToast(`Error saving candidates: ${res?.error || 'Unknown error'}`, 'error');
     }
   };
 
-  // Save Nominated Candidates & Automatically Send Email Notifications
+  // Save Nominated Candidates & Automatically Send Email Notifications + Create Student Accounts
   const handleSaveAndSendEmailNotifications = async () => {
     if (!selectedDriveForCandidates) return;
     if (selectedCandidateIds.size === 0) {
-      showToast('Please select at least one candidate to send email notifications!', 'error');
+      showToast('Please select at least one candidate to send notifications!', 'error');
       return;
     }
 
@@ -276,15 +291,22 @@ export default function DriveManagement({ onNavigate }) {
     const driveDetails = selectedDriveForCandidates;
 
     setIsSaving(true);
-    showToast('Saving nominated candidates to Firebase...', 'info');
+    showToast('Saving candidates & setting up student logins in Firebase...', 'info');
 
     const res = await updateDriveInFirestore(driveDetails.id, {
       nominatedStudents: nominatedList
     });
 
-    setIsSaving(false);
-
     if (res && res.success) {
+      // 1. Create separate student login accounts in Firebase database
+      await createStudentAccountsForSelected(selectedCandidates, driveDetails);
+
+      // 2. Dispatch selection notifications to student page database
+      for (const student of selectedCandidates) {
+        await sendSelectionNotificationToStudent(student, driveDetails);
+      }
+
+      setIsSaving(false);
       setDrives(prev => prev.map(d => d.id === driveDetails.id ? { ...d, nominatedStudents: nominatedList } : d));
       setSelectedDriveForCandidates(null);
 
@@ -324,8 +346,9 @@ export default function DriveManagement({ onNavigate }) {
         isSending: false
       }));
 
-      showToast(`✉️ Successfully sent drive email notifications to ${batchRes.count} candidate(s)!`, 'success');
+      showToast(`✉️ Student logins generated & drive email notifications sent to ${batchRes.count} candidate(s)!`, 'success');
     } else {
+      setIsSaving(false);
       showToast(`Error saving candidates: ${res?.error || 'Unknown error'}`, 'error');
     }
   };

@@ -2,18 +2,15 @@ import React, { useState } from 'react';
 import AITLogo from '../components/AITLogo';
 import {
   loginWithFirebase,
-  registerWithFirebase,
   getFirebaseProjectInfo,
   isFirebaseRealApiKey,
-  saveFirebaseApiKey,
-  clearCustomApiKey
+  saveFirebaseApiKey
 } from '../firebase';
 
 export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBackToHome }) {
   const [selectedRole, setSelectedRole] = useState(initialRole);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [apiKeyInput, setApiKeyInput] = useState('');
@@ -23,10 +20,10 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
   // Role preset credentials for user convenience
   const rolePresets = {
     Student: {
-      email: 'student@ait.edu.in',
-      placeholder: 'Enter Student Reg No. / Email',
-      label: 'Email / Register Number',
-      hint: 'Demo: student@ait.edu.in',
+      email: 'madhumithalakshmi9406@gmail.com',
+      placeholder: 'Enter Student Email or Register Number (e.g. 710123205020)',
+      label: 'Student Email / Register Number',
+      hint: 'Default password is your Register Number',
     },
     Admin: {
       email: 'admin@ait.edu.in',
@@ -38,10 +35,8 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
 
   // Form State initialized with Student preset
   const [formData, setFormData] = useState({
-    emailOrReg: rolePresets[initialRole]?.email || 'student@ait.edu.in',
-    password: 'password123',
-    fullName: 'Jayasurya K',
-    regNo: '710123205015'
+    emailOrReg: rolePresets[initialRole]?.email || 'madhumithalakshmi9406@gmail.com',
+    password: '710123205020',
   });
 
   const [errorMsg, setErrorMsg] = useState('');
@@ -58,7 +53,7 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
     setFormData((prev) => ({
       ...prev,
       emailOrReg: rolePresets[roleId]?.email || '',
-      password: 'password123',
+      password: roleId === 'Student' ? '710123205020' : 'password123',
     }));
     if (errorMsg) setErrorMsg('');
     if (successMsg) setSuccessMsg('');
@@ -83,12 +78,12 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
 
   const handleDemoProceed = () => {
     const email = formData.emailOrReg.trim() || `${selectedRole.toLowerCase()}@ait.edu.in`;
-    const name = formData.fullName.trim() || (selectedRole === 'Student' ? 'Jayasurya K' : selectedRole);
+    const name = selectedRole === 'Student' ? 'MADHUMITHA.K' : selectedRole;
     onLoginSuccess({
       role: selectedRole,
       identifier: email,
       name: name,
-      regNo: formData.regNo,
+      regNo: '710123205020',
       provider: 'demo'
     });
   };
@@ -100,7 +95,7 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
     setIsApiKeyError(false);
 
     if (!formData.emailOrReg.trim()) {
-      setErrorMsg('Please enter your email address.');
+      setErrorMsg('Please enter your student email address or Register Number.');
       return;
     }
     if (!formData.password) {
@@ -114,52 +109,26 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
       ? formData.emailOrReg.trim()
       : `${formData.emailOrReg.trim()}@ait.edu.in`;
 
-    if (isRegisterMode) {
-      // ── Handle Register Mode ────────────────────────────────────────────────
-      const name = formData.fullName.trim() || email.split('@')[0];
-      const res = await registerWithFirebase(email, formData.password, selectedRole, name, formData.regNo);
+    // ── Handle Login Mode Only (Strict Student Verification) ──
+    const res = await loginWithFirebase(email, formData.password, selectedRole);
 
-      setIsLoading(false);
-      if (res.success) {
-        setSuccessMsg(res.message);
-        setTimeout(() => {
-          onLoginSuccess({
-            role: selectedRole,
-            identifier: email,
-            name: name,
-            regNo: formData.regNo,
-            provider: 'firebase'
-          });
-        }, 1200);
+    setIsLoading(false);
+
+    if (res.success) {
+      onLoginSuccess({
+        role: res.user.role || selectedRole,
+        identifier: res.user.email,
+        name: res.user.name,
+        regNo: res.user.regNo,
+        provider: 'firebase'
+      });
+    } else {
+      if (res.isApiKeyError || !isFirebaseRealApiKey()) {
+        setErrorMsg(res.message);
+        setIsApiKeyError(true);
+        setShowApiKeyInput(true);
       } else {
         setErrorMsg(res.message);
-        if (res.isApiKeyError || !isFirebaseRealApiKey()) {
-          setIsApiKeyError(true);
-          setShowApiKeyInput(true);
-        }
-      }
-    } else {
-      // ── Handle Login Mode ───────────────────────────────────────────────────
-      const res = await loginWithFirebase(email, formData.password, selectedRole);
-
-      setIsLoading(false);
-
-      if (res.success) {
-        onLoginSuccess({
-          role: res.user.role || selectedRole,
-          identifier: res.user.email,
-          name: res.user.name,
-          regNo: res.user.regNo,
-          provider: 'firebase'
-        });
-      } else {
-        if (res.isApiKeyError || !isFirebaseRealApiKey()) {
-          setErrorMsg(res.message);
-          setIsApiKeyError(true);
-          setShowApiKeyInput(true);
-        } else {
-          setErrorMsg(res.message);
-        }
       }
     }
   };
@@ -196,50 +165,17 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
             </div>
 
             <h2 className="auth-welcome-title">
-              {isRegisterMode ? 'Create Account' : 'Welcome Back!'}
+              Welcome Back!
             </h2>
             <p className="auth-welcome-subtitle">
-              {isRegisterMode
-                ? 'Register your profile in the Firebase Database to manage your placements.'
-                : 'Login to access your role-specific dashboard & placement management tools.'}
+              Login to access your role-specific dashboard & placement management tools.
             </p>
-
           </div>
 
           {/* Right Form Panel */}
           <div className="auth-right-panel">
-            {/* Mode Switcher Tabs (Login vs Register) */}
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
-              <button
-                type="button"
-                onClick={() => { setIsRegisterMode(false); setErrorMsg(''); setSuccessMsg(''); setIsApiKeyError(false); }}
-                style={{
-                  flex: 1, padding: '8px 12px', borderRadius: '8px', border: 'none',
-                  fontWeight: '700', cursor: 'pointer',
-                  backgroundColor: !isRegisterMode ? 'var(--primary-maroon)' : '#f1f5f9',
-                  color: !isRegisterMode ? '#fff' : '#64748b',
-                  transition: 'all 0.2s'
-                }}
-              >
-                Sign In
-              </button>
-              <button
-                type="button"
-                onClick={() => { setIsRegisterMode(true); setErrorMsg(''); setSuccessMsg(''); setIsApiKeyError(false); }}
-                style={{
-                  flex: 1, padding: '8px 12px', borderRadius: '8px', border: 'none',
-                  fontWeight: '700', cursor: 'pointer',
-                  backgroundColor: isRegisterMode ? 'var(--primary-maroon)' : '#f1f5f9',
-                  color: isRegisterMode ? '#fff' : '#64748b',
-                  transition: 'all 0.2s'
-                }}
-              >
-                Register in Firebase
-              </button>
-            </div>
-
             {/* Role Selection Tabs */}
-            <div className="auth-role-tabs">
+            <div className="auth-role-tabs" style={{ marginTop: '4px' }}>
               {roles.map((r) => (
                 <button
                   key={r.id}
@@ -251,6 +187,22 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
                 </button>
               ))}
             </div>
+
+            {/* Access Notice */}
+            {selectedRole === 'Student' && (
+              <div style={{
+                padding: '10px 12px',
+                borderRadius: '8px',
+                backgroundColor: '#f0fdf4',
+                color: '#166534',
+                border: '1px solid #bbf7d0',
+                fontSize: '12px',
+                fontWeight: '600',
+                marginBottom: '14px'
+              }}>
+                🔒 <strong>Restricted Access:</strong> Only selected & nominated students have access to the student portal.
+              </div>
+            )}
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="auth-form">
@@ -318,7 +270,7 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
                           marginTop: '4px'
                         }}
                       >
-                        🚀 Continue with Local Demo Account instead
+                        🚀 Continue as Selected Student (MADHUMITHA.K)
                       </button>
                     </div>
                   )}
@@ -333,36 +285,6 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
                 }}>
                   ✅ {successMsg}
                 </div>
-              )}
-
-              {/* Extra Register Fields */}
-              {isRegisterMode && (
-                <>
-                  <div className="auth-field-group">
-                    <label className="auth-label">Full Name</label>
-                    <input
-                      type="text"
-                      className="auth-input"
-                      placeholder="e.g. Jayasurya K"
-                      value={formData.fullName}
-                      onChange={(e) => handleInputChange('fullName', e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  {selectedRole === 'Student' && (
-                    <div className="auth-field-group">
-                      <label className="auth-label">Register Number</label>
-                      <input
-                        type="text"
-                        className="auth-input"
-                        placeholder="e.g. 710123205015"
-                        value={formData.regNo}
-                        onChange={(e) => handleInputChange('regNo', e.target.value)}
-                      />
-                    </div>
-                  )}
-                </>
               )}
 
               {/* Email / Reg No */}
@@ -409,32 +331,35 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
                     )}
                   </button>
                 </div>
+                {selectedRole === 'Student' && (
+                  <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '4px', fontWeight: '500' }}>
+                    💡 Selected Students: Password is your <strong>Register Number</strong> (e.g. 710123205020)
+                  </div>
+                )}
               </div>
 
               {/* Options Row */}
-              {!isRegisterMode && (
-                <div className="auth-options-row">
-                  <label className="auth-remember-label">
-                    <input
-                      type="checkbox"
-                      className="auth-checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                    />
-                    <span>Remember me</span>
-                  </label>
-                  <a
-                    href="#forgot"
-                    className="auth-forgot-link"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      alert('Password reset link has been sent to your registered email.');
-                    }}
-                  >
-                    Forgot Password?
-                  </a>
-                </div>
-              )}
+              <div className="auth-options-row">
+                <label className="auth-remember-label">
+                  <input
+                    type="checkbox"
+                    className="auth-checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
+                  <span>Remember me</span>
+                </label>
+                <a
+                  href="#forgot"
+                  className="auth-forgot-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    alert('Password reset link has been sent to your registered email.');
+                  }}
+                >
+                  Forgot Password?
+                </a>
+              </div>
 
               {/* Submit Button */}
               <button
@@ -445,9 +370,7 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
               >
                 {isLoading
                   ? 'Connecting to Firebase...'
-                  : isRegisterMode
-                    ? `Create ${selectedRole} Account`
-                    : `Login as ${selectedRole}`}
+                  : `Login as ${selectedRole}`}
               </button>
             </form>
           </div>

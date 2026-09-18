@@ -1,63 +1,97 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SearchIcon, BellIcon, ChevronDownIcon, ProfileIcon, SettingsIcon, LogoutIcon } from './Icons';
+import { fetchNotificationsForStudent } from '../firebase';
 
-export default function Header({ searchQuery, setSearchQuery, notifications, setActiveTab, onLogout }) {
+export default function Header({ searchQuery, setSearchQuery, notifications: propNotifications, setActiveTab, onLogout }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [liveNotifications, setLiveNotifications] = useState([]);
+
   const [profileName, setProfileName] = useState(() => {
     try {
-      const raw = localStorage.getItem('ait-profile')
-      if (raw) return JSON.parse(raw).name || 'Jayasurya K'
+      const raw = localStorage.getItem('ait-profile');
+      if (raw) return JSON.parse(raw).name || 'Jayasurya K';
     } catch {}
-    return 'Jayasurya K'
-  })
+    return 'Jayasurya K';
+  });
+
   const [profileRole, setProfileRole] = useState(() => {
     try {
-      const raw = localStorage.getItem('ait-profile')
+      const raw = localStorage.getItem('ait-profile');
       if (raw) {
-        const parsed = JSON.parse(raw)
-        // derive simple role like 'IV - IT'
-        const branch = parsed.branch || ''
-        const batch = parsed.batch || ''
-        const startYearMatch = batch.match(/(\d{4})/)
-        const startYear = startYearMatch ? parseInt(startYearMatch[0], 10) : null
-        let yearNum = null
+        const parsed = JSON.parse(raw);
+        const branch = parsed.branch || '';
+        const batch = parsed.batch || '';
+        const startYearMatch = batch.match(/(\d{4})/);
+        const startYear = startYearMatch ? parseInt(startYearMatch[0], 10) : null;
+        let yearNum = null;
         if (startYear) {
-          const cur = new Date().getFullYear()
-          yearNum = Math.min(5, Math.max(1, cur - startYear + 1))
+          const cur = new Date().getFullYear();
+          yearNum = Math.min(5, Math.max(1, cur - startYear + 1));
         }
-        const romans = ['I','II','III','IV','V']
-        const yearRoman = yearNum ? romans[yearNum-1] : 'IV'
-        const dept = branch.includes('Information') ? 'IT' : branch.split(' ').slice(-1)[0]
-        return `${yearRoman} - ${dept}`
+        const romans = ['I','II','III','IV','V'];
+        const yearRoman = yearNum ? romans[yearNum-1] : 'IV';
+        const dept = branch.includes('Information') ? 'IT' : branch.split(' ').slice(-1)[0];
+        return `${yearRoman} - ${dept}`;
       }
     } catch {}
-    return 'IV - IT'
-  })
+    return 'IV - IT';
+  });
 
-  React.useEffect(() => {
-    const handler = (e) => {
-      const d = e?.detail || {}
-      if (d.name) setProfileName(d.name)
-      if (d.branch || d.batch) {
-        const branch = d.branch || ''
-        const batch = d.batch || ''
-        const startYearMatch = batch.match(/(\d{4})/)
-        const startYear = startYearMatch ? parseInt(startYearMatch[0], 10) : null
-        let yearNum = null
-        if (startYear) {
-          const cur = new Date().getFullYear()
-          yearNum = Math.min(5, Math.max(1, cur - startYear + 1))
+  useEffect(() => {
+    async function loadFsNotifications() {
+      try {
+        const rawProfile = JSON.parse(localStorage.getItem('ait-profile') || '{}');
+        const fsNotifs = await fetchNotificationsForStudent(rawProfile.email || '', rawProfile.regNo || '');
+
+        if (fsNotifs && fsNotifs.length > 0) {
+          const formatted = fsNotifs.map(n => ({
+            id: n.id,
+            title: n.title,
+            time: n.createdAt ? new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently',
+            read: Boolean(n.read),
+            message: n.message,
+            company: n.company
+          }));
+          setLiveNotifications(formatted);
+        } else {
+          setLiveNotifications(propNotifications || []);
         }
-        const romans = ['I','II','III','IV','V']
-        const yearRoman = yearNum ? romans[yearNum-1] : 'IV'
-        const dept = branch.includes('Information') ? 'IT' : branch.split(' ').slice(-1)[0]
-        setProfileRole(`${yearRoman} - ${dept}`)
+      } catch (err) {
+        setLiveNotifications(propNotifications || []);
       }
     }
-    window.addEventListener('profile:update', handler)
-    return () => window.removeEventListener('profile:update', handler)
-  }, [])
+
+    loadFsNotifications();
+    const interval = setInterval(loadFsNotifications, 8000); // Poll for real-time notifications
+
+    const handler = (e) => {
+      const d = e?.detail || {};
+      if (d.name) setProfileName(d.name);
+      if (d.branch || d.batch) {
+        const branch = d.branch || '';
+        const batch = d.batch || '';
+        const startYearMatch = batch.match(/(\d{4})/);
+        const startYear = startYearMatch ? parseInt(startYearMatch[0], 10) : null;
+        let yearNum = null;
+        if (startYear) {
+          const cur = new Date().getFullYear();
+          yearNum = Math.min(5, Math.max(1, cur - startYear + 1));
+        }
+        const romans = ['I','II','III','IV','V'];
+        const yearRoman = yearNum ? romans[yearNum-1] : 'IV';
+        const dept = branch.includes('Information') ? 'IT' : branch.split(' ').slice(-1)[0];
+        setProfileRole(`${yearRoman} - ${dept}`);
+      }
+    };
+    window.addEventListener('profile:update', handler);
+    return () => {
+      window.removeEventListener('profile:update', handler);
+      clearInterval(interval);
+    };
+  }, [propNotifications]);
+
+  const activeNotifications = liveNotifications.length > 0 ? liveNotifications : (propNotifications || []);
 
   return (
     <header className="top-header">
@@ -89,14 +123,14 @@ export default function Header({ searchQuery, setSearchQuery, notifications, set
             title="Notifications"
           >
             <BellIcon />
-            {notifications.some(n => !n.read) && <span className="notification-badge" />}
+            {activeNotifications.some(n => !n.read) && <span className="notification-badge" />}
           </button>
 
           {showNotifications && (
             <div className="dropdown-menu">
-              <div className="dropdown-header">Notifications ({notifications.length})</div>
+              <div className="dropdown-header">Notifications ({activeNotifications.length})</div>
               <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                {notifications.map((notif) => (
+                {activeNotifications.map((notif) => (
                   <div key={notif.id} className="dropdown-item" onClick={() => { setActiveTab('notifications'); setShowNotifications(false); }}>
                     <div style={{
                       width: '8px', height: '8px', borderRadius: '50%',

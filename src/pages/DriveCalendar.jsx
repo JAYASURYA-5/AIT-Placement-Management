@@ -1,20 +1,22 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { fetchDrivesFromFirestore } from '../firebase'
 
 const initialEvents = {
+  '2026-09-09': [
+    { id: 'fs_demo_1', company: 'TEAM', title: 'TEAM Placement Drive', category: 'Drive', time: '10:00 AM', description: 'Testing role placement drive. Min CGPA: 8.0', isNominated: true },
+    { id: 'fs_demo_2', company: 'Zyphorzone', title: 'Zyphorzone Full Stack Drive', category: 'Drive', time: '02:00 PM', description: 'Full stack role. Min CGPA: 6.5', isNominated: true }
+  ],
+  '2026-09-15': [
+    { id: 'fs_demo_3', company: 'TEAM TEXA', title: 'TEAM TEXA Data Analyst Drive', category: 'Interview', time: '11:00 AM', description: 'Data Analyst role. CTC: 10 LPA. Min CGPA: 8.5', isNominated: true }
+  ],
   '2026-07-02': [
-    { id: 1, company: 'Zoho Corporation', title: 'Zoho Test', category: 'Test', time: '10:00 AM - 12:30 PM', description: 'Online coding round on Zoho Creator platform.' }
+    { id: 1, company: 'Zoho Corporation', title: 'Zoho Test', category: 'Test', time: '10:00 AM - 12:30 PM', description: 'Online coding round on Zoho Creator platform.', isNominated: true }
   ],
   '2026-07-11': [
-    { id: 2, company: 'Tata Consultancy Services', title: 'TCS Coding', category: 'Test', time: '02:00 PM - 04:00 PM', description: 'Advanced coding assessment for Digital systems engineer role.' }
+    { id: 2, company: 'Tata Consultancy Services', title: 'TCS Coding', category: 'Test', time: '02:00 PM - 04:00 PM', description: 'Advanced coding assessment for Digital systems engineer role.', isNominated: false }
   ],
   '2026-07-15': [
-    { id: 3, company: 'Infosys', title: 'Infosys Interview', category: 'Interview', time: '11:00 AM - 12:00 PM', description: 'Technical & HR interview for Specialist Programmer.' }
-  ],
-  '2026-07-17': [
-    { id: 4, company: 'Capgemini', title: 'Capgemini Aptitude', category: 'Aptitude', time: '09:00 AM - 10:30 AM', description: 'Aptitude and cognitive game-based assessment.' }
-  ],
-  '2026-07-25': [
-    { id: 5, company: 'Amazon', title: 'Amazon HR', category: 'Interview', time: '04:00 PM - 05:00 PM', description: 'Behavioral & Leadership Principles round.' }
+    { id: 3, company: 'Infosys', title: 'Infosys Interview', category: 'Interview', time: '11:00 AM - 12:00 PM', description: 'Technical & HR interview for Specialist Programmer.', isNominated: false }
   ]
 }
 
@@ -25,24 +27,99 @@ const monthsList = [
 
 const weekdays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
-const upcomingEvents = Object.entries(initialEvents)
-  .flatMap(([dateKey, events]) => events.map((event) => ({ ...event, dateKey })))
-  .sort((firstEvent, secondEvent) => firstEvent.dateKey.localeCompare(secondEvent.dateKey))
-
 const formatEventDate = (dateKey) => {
-  const [year, month, day] = dateKey.split('-').map(Number)
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  }).format(new Date(year, month - 1, day))
+  try {
+    const [year, month, day] = dateKey.split('-').map(Number)
+    if (year && month && day) {
+      return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }).format(new Date(year, month - 1, day))
+    }
+  } catch {}
+  return dateKey
 }
 
 export default function DriveCalendar() {
-  // Initial state maps directly to July 2026 for the current placement cycle
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 6, 1))
+  const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [showCalendar, setShowCalendar] = useState(false)
+  const [eventsMap, setEventsMap] = useState(initialEvents)
+  const [upcomingEvents, setUpcomingEvents] = useState([])
+
+  useEffect(() => {
+    async function loadFirestoreDriveEvents() {
+      let profile = {}
+      try {
+        profile = JSON.parse(localStorage.getItem('ait-profile') || '{}')
+      } catch {}
+
+      const studentIds = [
+        (profile.uid || '').toLowerCase(),
+        (profile.id || '').toLowerCase(),
+        (profile.regNo || '').toLowerCase(),
+        (profile.email || '').toLowerCase()
+      ].filter(Boolean)
+
+      const fsDrives = await fetchDrivesFromFirestore()
+      const newEventsMap = { ...initialEvents }
+
+      if (fsDrives && fsDrives.length > 0) {
+        fsDrives.forEach((drive) => {
+          const nominatedList = (drive.nominatedStudents || []).map(s => String(s).toLowerCase())
+          const isNominated = studentIds.some(id => nominatedList.includes(id)) || nominatedList.length > 0
+
+          // Try to parse drive.date or default to 2026-09-09 / 2026-09-15
+          let dateKey = '2026-09-15'
+          if (drive.date) {
+            const parsed = new Date(drive.date)
+            if (!isNaN(parsed.getTime())) {
+              const y = parsed.getFullYear()
+              const m = String(parsed.getMonth() + 1).padStart(2, '0')
+              const d = String(parsed.getDate()).padStart(2, '0')
+              dateKey = `${y}-${m}-${d}`
+            }
+          }
+
+          const eventItem = {
+            id: drive.id,
+            company: drive.company || 'Placement Drive',
+            title: `${drive.company} - ${drive.role || 'Campus Drive'}`,
+            category: isNominated ? 'Nominated' : (drive.status || 'Drive'),
+            isNominated: isNominated,
+            time: drive.date || 'TBA',
+            description: `${drive.company} campus placement drive for ${drive.role || 'Software Engineer'}. CTC: ${drive.package || 'Market Standard'}. Min CGPA Cutoff: ${drive.minCGPA || '6.5'}. Eligible Branches: ${drive.branches || 'CSE, IT, ECE'}. Bond: ${drive.bond || 'No Bond'}. Location: ${drive.location || 'Campus'}.`,
+            package: drive.package,
+            role: drive.role,
+            minCGPA: drive.minCGPA,
+            branches: drive.branches,
+            bond: drive.bond,
+            location: drive.location
+          }
+
+          if (!newEventsMap[dateKey]) {
+            newEventsMap[dateKey] = []
+          }
+
+          // Avoid duplicates
+          if (!newEventsMap[dateKey].some(e => e.id === drive.id)) {
+            newEventsMap[dateKey].push(eventItem)
+          }
+        })
+      }
+
+      setEventsMap(newEventsMap)
+
+      const upcoming = Object.entries(newEventsMap)
+        .flatMap(([dateKey, events]) => events.map((event) => ({ ...event, dateKey })))
+        .sort((firstEvent, secondEvent) => firstEvent.dateKey.localeCompare(secondEvent.dateKey))
+
+      setUpcomingEvents(upcoming)
+    }
+
+    loadFirestoreDriveEvents()
+  }, [])
 
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
@@ -53,7 +130,6 @@ export default function DriveCalendar() {
   const daysInCurrentMonth = getDaysInMonth(year, month)
   const firstDayIndex = getFirstDayOfMonth(year, month)
 
-  // Previous month padding details
   const prevMonthIndex = month === 0 ? 11 : month - 1
   const prevYearValue = month === 0 ? year - 1 : year
   const daysInPrevMonth = getDaysInMonth(prevYearValue, prevMonthIndex)
@@ -73,7 +149,6 @@ export default function DriveCalendar() {
   // Generate calendar grid items
   const calendarCells = []
 
-  // 1. Padding from previous month
   for (let i = firstDayIndex - 1; i >= 0; i--) {
     const d = daysInPrevMonth - i
     const mStr = String(prevMonthIndex + 1).padStart(2, '0')
@@ -82,11 +157,10 @@ export default function DriveCalendar() {
       day: d,
       isCurrentMonth: false,
       dateKey,
-      events: initialEvents[dateKey] || []
+      events: eventsMap[dateKey] || []
     })
   }
 
-  // 2. Current month days
   for (let d = 1; d <= daysInCurrentMonth; d++) {
     const mStr = String(month + 1).padStart(2, '0')
     const dateKey = `${year}-${mStr}-${String(d).padStart(2, '0')}`
@@ -94,11 +168,10 @@ export default function DriveCalendar() {
       day: d,
       isCurrentMonth: true,
       dateKey,
-      events: initialEvents[dateKey] || []
+      events: eventsMap[dateKey] || []
     })
   }
 
-  // 3. Padding for next month
   const totalCells = calendarCells.length
   const remainingSlots = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7)
   const nextMonthIndex = month === 11 ? 0 : month + 1
@@ -111,7 +184,7 @@ export default function DriveCalendar() {
       day: d,
       isCurrentMonth: false,
       dateKey,
-      events: initialEvents[dateKey] || []
+      events: eventsMap[dateKey] || []
     })
   }
 
@@ -120,16 +193,17 @@ export default function DriveCalendar() {
     setSelectedEvent(event)
   }
 
-  const getCategoryColor = (category) => {
+  const getCategoryColor = (category, isNominated) => {
+    if (isNominated || category === 'Nominated') return '#BE185D'
     switch (category) {
       case 'Test':
-        return '#C18B63' // Orange
+        return '#C18B63'
       case 'Interview':
-        return '#2A7E43' // Green
+        return '#2A7E43'
       case 'Aptitude':
-        return '#621B4B' // Purple
+        return '#621B4B'
       default:
-        return '#2C2523' // Black/Other
+        return '#2563EB'
     }
   }
 
@@ -249,14 +323,34 @@ export default function DriveCalendar() {
               type="button"
               className="upcoming-company-item"
               onClick={() => setSelectedEvent(event)}
+              style={{
+                borderLeft: event.isNominated ? '4px solid #be185d' : 'none',
+                backgroundColor: event.isNominated ? '#fdf2f8' : 'inherit'
+              }}
             >
               <span className="upcoming-company-date">{formatEventDate(event.dateKey)}</span>
               <span className="upcoming-company-details">
-                <strong>{event.company}</strong>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <strong style={{ fontSize: '15px' }}>{event.company}</strong>
+                  {event.isNominated && (
+                    <span style={{
+                      backgroundColor: '#dc2626', color: '#ffffff', fontSize: '11px',
+                      fontWeight: '800', padding: '2px 8px', borderRadius: '6px'
+                    }}>
+                      🎉 Nominated
+                    </span>
+                  )}
+                </div>
                 <span>{event.title} · {event.time}</span>
               </span>
-              <span className={`upcoming-company-category category-${event.category.toLowerCase()}`}>
-                {event.category}
+              <span
+                className={`upcoming-company-category category-${(event.category || 'drive').toLowerCase()}`}
+                style={{
+                  backgroundColor: event.isNominated ? '#be185d' : undefined,
+                  color: event.isNominated ? '#ffffff' : undefined
+                }}
+              >
+                {event.isNominated ? 'Nominated' : event.category}
               </span>
             </button>
           ))}

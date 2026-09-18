@@ -4,7 +4,7 @@ import DriveCalendarPage from '../pages/DriveCalendar';
 import ProfilePage from '../pages/Profile';
 import SettingsPage from '../pages/Settings';
 import ChatbotView from './ChatbotWidget';
-import { fetchUsersFromFirestore } from '../firebase';
+import { fetchUsersFromFirestore, fetchNotificationsForStudent, markNotificationAsReadInFirestore } from '../firebase';
 import '../index.css';
 import {
   ProfileIcon,
@@ -2631,174 +2631,286 @@ function TrainingView() {
     );
 }
 
-// ─── Standalone Notifications View Component ───────────────────────────
+// ─── Standalone Notifications View Component ─────────────────────────────
 function NotificationsView() {
-  const [filter, setFilter] = useState('all');
-    const [notifList, setNotifList] = useState([
-      {
-        id: 1,
-        title: "Zoho Drive Registration is Open",
-        sub: "Register before 24 Jul 2025",
-        time: "10:30 AM",
-        iconType: "orange",
-        icon: <DocumentsIcon style={{ width: '20px', height: '20px' }} />,
-        unread: true,
-        important: true
-      },
-      {
-        id: 2,
-        title: "TCS Online Test will be on 30 Jul 2025",
-        sub: "Check your email for test link",
-        time: "Yesterday",
-        iconType: "purple",
-        icon: <AssessmentsIcon style={{ width: '20px', height: '20px' }} />,
-        unread: true,
-        important: false
-      },
-      {
-        id: 3,
-        title: "Infosys Interview Shortlist Released",
-        sub: "Check your dashboard",
-        time: "19 Jul 2025",
-        iconType: "blue",
-        icon: <ProfileIcon style={{ width: '20px', height: '20px' }} />,
-        unread: false,
-        important: true
-      },
-      {
-        id: 4,
-        title: "Resume Writing Workshop on 25 Jul 2025",
-        sub: "Venue: Seminar Hall",
-        time: "19 Jul 2025",
-        iconType: "green",
-        icon: <ResumeIcon style={{ width: '20px', height: '20px' }} />,
-        unread: false,
-        important: false
-      }
-    ]);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState('All');
+  const [studentProfile, setStudentProfile] = useState(null);
+  const [toastMsg, setToastMsg] = useState(null);
 
-    const handleToggleRead = (id) => {
-      setNotifList(prev => prev.map(n => n.id === id ? { ...n, unread: !n.unread } : n));
-    };
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3500);
+  };
 
-    const handleMarkAllRead = () => {
-      setNotifList(prev => prev.map(n => ({ ...n, unread: false })));
-    };
+  const loadNotifications = async () => {
+    setLoading(true);
+    let profile = {};
+    try {
+      profile = JSON.parse(localStorage.getItem('ait-profile') || '{}');
+      setStudentProfile(profile);
+    } catch {}
 
-    const filteredNotifs = notifList.filter(n => {
-      if (filter === 'unread') return n.unread;
-      if (filter === 'important') return n.important;
-      return true;
-    });
+    const email = profile.email || '';
+    const regNo = profile.regNo || '';
 
-    return (
-      <div className="feature-page-container">
-        <div className="notifications-workspace">
-          {/* Header */}
-          <div className="resume-workspace-header" style={{ borderBottom: 'none', paddingBottom: 0 }}>
-            <div>
-              <h2 style={{ fontSize: '20px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <BellIcon style={{ color: 'var(--primary-maroon)' }} /> 16. Notifications
-              </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>
-                Stay updated with critical alerts, interview results, and campus drive schedules.
-              </p>
-            </div>
+    const fsNotifs = await fetchNotificationsForStudent(email, regNo);
 
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              {notifList.some(n => n.unread) && (
-                <button
-                  className="api-settings-btn"
-                  style={{ fontSize: '12.5px', padding: '6px 12px' }}
-                  onClick={handleMarkAllRead}
-                >
-                  ✓ Mark all as read
-                </button>
-              )}
+    if (fsNotifs && fsNotifs.length > 0) {
+      setNotifications(fsNotifs);
+    } else {
+      // Default demo notifications for student view if no drive selection yet
+      setNotifications([
+        {
+          id: 'demo_1',
+          title: '🎉 Selected & Nominated: Zoho Corp Drive',
+          company: 'Zoho Corp',
+          role: 'Full Stack Engineer',
+          package: '8.5 LPA',
+          message: `Congratulations ${profile.name || 'Student'}! You are eligible & selected for Zoho Corp campus drive. You can log into your student account using Email: ${email || '710123205015@ait.edu.in'} and Password: ${regNo || '710123205015'}.`,
+          type: 'drive_selection',
+          read: false,
+          createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString()
+        },
+        {
+          id: 'demo_2',
+          title: '🎉 Nominated for TEAM TEXA Placement Drive',
+          company: 'TEAM TEXA',
+          role: 'Data Analyst',
+          package: '10 LPA',
+          message: 'You have been shortlisted and nominated for TEAM TEXA upcoming drive. Please keep your resume updated in your student profile.',
+          type: 'drive_selection',
+          read: true,
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString()
+        },
+        {
+          id: 'demo_3',
+          title: '📢 Placement Registration Closes Soon',
+          company: 'Placement Cell',
+          role: 'Notice',
+          message: 'Placement drive registrations for upcoming Q3 campus drives will close on 25th September. Ensure all CGPA & arrear details are verified.',
+          type: 'notice',
+          read: true,
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString()
+        }
+      ]);
+    }
+    setLoading(false);
+  };
 
-              <div className="resume-tabs" style={{ margin: 0 }}>
-                <button
-                  className={`resume-tab-btn ${filter === 'all' ? 'active' : ''}`}
-                  onClick={() => setFilter('all')}
-                >
-                  All
-                </button>
-                <button
-                  className={`resume-tab-btn ${filter === 'unread' ? 'active' : ''}`}
-                  onClick={() => setFilter('unread')}
-                >
-                  Unread
-                </button>
-                <button
-                  className={`resume-tab-btn ${filter === 'important' ? 'active' : ''}`}
-                  onClick={() => setFilter('important')}
-                >
-                  Important
-                </button>
-              </div>
-            </div>
-          </div>
+  useEffect(() => {
+    loadNotifications();
+  }, []);
 
-          {/* List */}
-          <div className="notifications-list">
-            {filteredNotifs.length > 0 ? (
-              filteredNotifs.map(notif => (
-                <div
-                  key={notif.id}
-                  className={`notification-row-item ${notif.unread ? 'unread' : ''}`}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => handleToggleRead(notif.id)}
-                  title="Click to toggle read status"
-                >
-                  <div className="notification-left-content">
-                    <div className={`notification-icon-badge ${notif.iconType}`}>
-                      {notif.icon}
-                    </div>
-                    <div>
-                      <div className="notification-text-title">{notif.title}</div>
-                      <div className="notification-text-sub">{notif.sub}</div>
-                    </div>
-                  </div>
+  const handleMarkAsRead = async (id) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    await markNotificationAsReadInFirestore(id);
+    showToast('✓ Marked notification as read');
+  };
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    {notif.important && (
-                      <span style={{
-                        fontSize: '10.5px',
-                        fontWeight: '800',
-                        color: 'var(--primary-maroon)',
-                        backgroundColor: 'var(--primary-maroon-light)',
-                        padding: '2px 8px',
-                        borderRadius: '8px'
-                      }}>
-                        Urgent
-                      </span>
-                    )}
-                    <div className="notification-right-meta">
-                      {notif.time}
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)', fontSize: '14.5px' }}>
-                📭 No {filter === 'all' ? '' : filter} notifications found. All caught up!
-              </div>
+  const handleMarkAllAsRead = async () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    for (const n of notifications) {
+      if (!n.read) await markNotificationAsReadInFirestore(n.id);
+    }
+    showToast('✓ All notifications marked as read!');
+  };
+
+  const filteredNotifs = notifications.filter(n => {
+    if (activeFilter === 'Drive Selections') return n.type === 'drive_selection' || (n.title || '').includes('Selected');
+    if (activeFilter === 'Unread') return !n.read;
+    return true;
+  });
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  return (
+    <div className="feature-page-container">
+      {toastMsg && (
+        <div style={{
+          position: 'fixed', bottom: '28px', right: '100px',
+          backgroundColor: 'var(--primary-maroon)', color: '#fff',
+          padding: '12px 20px', borderRadius: '14px',
+          fontWeight: '700', fontSize: '13.5px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+          zIndex: 3000, animation: 'fadeIn 0.2s ease-out',
+        }}>
+          {toastMsg}
+        </div>
+      )}
+
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
+        <div>
+          <h2 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span>Student Notifications</span>
+            {unreadCount > 0 && (
+              <span style={{
+                backgroundColor: '#EF4444', color: '#fff', fontSize: '12px', fontWeight: '800',
+                padding: '3px 10px', borderRadius: '999px'
+              }}>
+                {unreadCount} Unread
+              </span>
             )}
-          </div>
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', marginTop: '4px', fontWeight: '500' }}>
+            Real-time drive eligibility &amp; candidate selection alerts sent to {studentProfile?.name || 'your student page'}
+          </p>
+        </div>
 
-          {/* Footer Action Button */}
-          <div className="notification-footer-btn-container">
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button
+            onClick={loadNotifications}
+            style={{
+              padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border-medium)',
+              backgroundColor: '#fff', color: 'var(--text-main)', fontSize: '13px', fontWeight: '700',
+              cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px'
+            }}
+          >
+            <RefreshIcon style={{ width: '15px', height: '15px' }} /> Refresh
+          </button>
+
+          {unreadCount > 0 && (
             <button
-              className="btn-apply"
-              style={{ width: '100%', maxWidth: '240px', padding: '12px', fontSize: '13px' }}
-              onClick={() => alert("All catchable notifications loaded. You are viewing the latest status updates.")}
+              onClick={handleMarkAllAsRead}
+              style={{
+                padding: '10px 18px', borderRadius: '12px', border: 'none',
+                backgroundColor: 'var(--primary-maroon)', color: '#fff', fontSize: '13px', fontWeight: '700',
+                cursor: 'pointer'
+              }}
             >
-              View All Notifications
+              ✓ Mark All as Read
             </button>
+          )}
+        </div>
+      </div>
+
+      {/* Login Credentials Notice Card */}
+      <div style={{
+        padding: '16px 20px', borderRadius: '16px', backgroundColor: '#EFF6FF',
+        border: '1px solid #BFDBFE', color: '#1E40AF', marginBottom: '24px',
+        display: 'flex', alignItems: 'center', gap: '14px'
+      }}>
+        <div style={{ fontSize: '24px' }}>🔑</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: '800', fontSize: '14px' }}>Student Login Credentials Info</div>
+          <div style={{ fontSize: '12.5px', color: '#1E3A8A', marginTop: '2px' }}>
+            Once selected by Admin Drive, your separate student page login is created automatically in Firebase database.
+            Log in anytime with <strong>Email / RegNo:</strong> {studentProfile?.email || 'Your Student Email'} &amp; <strong>Password:</strong> {studentProfile?.regNo || 'Your Register Number'}.
           </div>
         </div>
       </div>
-    );
+
+      {/* Filter Chips */}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        {['All', 'Drive Selections', 'Unread'].map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveFilter(tab)}
+            style={{
+              padding: '8px 16px', borderRadius: '10px', border: 'none',
+              fontWeight: '700', fontSize: '13px', cursor: 'pointer',
+              backgroundColor: activeFilter === tab ? 'var(--primary-maroon)' : '#F1F5F9',
+              color: activeFilter === tab ? '#fff' : '#64748b',
+              transition: 'all 0.2s'
+            }}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* Notifications List */}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
+          Fetching student notifications from Firebase...
+        </div>
+      ) : filteredNotifs.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
+          <BellIcon style={{ width: '40px', height: '40px', margin: '0 auto 12px', display: 'block', stroke: 'var(--border-medium)' }} />
+          <p style={{ fontWeight: '700', fontSize: '15px' }}>No notifications found for "{activeFilter}"</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {filteredNotifs.map(n => (
+            <div
+              key={n.id}
+              style={{
+                padding: '20px', borderRadius: '16px',
+                backgroundColor: n.read ? '#ffffff' : '#FEF2F2',
+                border: n.read ? '1px solid var(--border-light)' : '1px solid #FECACA',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                display: 'flex', gap: '16px', alignItems: 'flex-start',
+                position: 'relative'
+              }}
+            >
+              {/* Left Badge Icon */}
+              <div style={{
+                width: '44px', height: '44px', borderRadius: '12px',
+                backgroundColor: n.type === 'drive_selection' || (n.title || '').includes('Selected') ? '#DCFCE7' : '#F3E8FF',
+                color: n.type === 'drive_selection' || (n.title || '').includes('Selected') ? '#15803D' : '#7E22CE',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '20px', flexShrink: 0
+              }}>
+                {n.type === 'drive_selection' || (n.title || '').includes('Selected') ? '🎉' : '📢'}
+              </div>
+
+              {/* Main Content */}
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
+                  <h4 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
+                    {n.title}
+                  </h4>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                    {n.createdAt ? new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' }) : (n.time || 'Recently')}
+                  </span>
+                </div>
+
+                {/* Company & Role Badges */}
+                {n.company && (
+                  <div style={{ display: 'flex', gap: '8px', margin: '8px 0', flexWrap: 'wrap' }}>
+                    <span style={{ backgroundColor: '#F1F5F9', color: '#334155', padding: '3px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700' }}>
+                      🏢 {n.company}
+                    </span>
+                    {n.role && (
+                      <span style={{ backgroundColor: '#FAF5FF', color: '#7E22CE', padding: '3px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700' }}>
+                        💼 {n.role}
+                      </span>
+                    )}
+                    {n.package && (
+                      <span style={{ backgroundColor: '#ECFDF5', color: '#047857', padding: '3px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700' }}>
+                        💰 {n.package}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                <p style={{ fontSize: '13.5px', color: '#334155', lineHeight: '1.6', margin: '6px 0 0 0' }}>
+                  {n.message}
+                </p>
+              </div>
+
+              {/* Read Action Button */}
+              {!n.read && (
+                <button
+                  onClick={() => handleMarkAsRead(n.id)}
+                  title="Mark as read"
+                  style={{
+                    padding: '6px 12px', borderRadius: '8px', border: '1px solid #FCA5A5',
+                    backgroundColor: '#fff', color: '#DC2626', fontSize: '12px', fontWeight: '700',
+                    cursor: 'pointer', flexShrink: 0
+                  }}
+                >
+                  Mark Read
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ─── Standalone Documents View Component ───────────────────────────────
