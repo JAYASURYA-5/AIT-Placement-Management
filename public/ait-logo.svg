@@ -1,0 +1,15 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer Orange Arch -->
+  <path d="M 38 142 A 66 66 0 1 1 162 142" stroke="#F36F21" stroke-width="18" stroke-linecap="round" fill="none"/>
+
+  <!-- 5 Flame Leaf Petals (Orange) -->
+  <path d="M 100 8 C 114 26, 110 40, 100 48 C 90 40, 86 26, 100 8 Z" fill="#F36F21"/>
+  <path d="M 166 38 C 166 58, 153 68, 142 63 C 145 50, 153 38, 166 38 Z" fill="#F36F21"/>
+  <path d="M 192 98 C 180 112, 164 108, 158 98 C 164 88, 180 84, 192 98 Z" fill="#F36F21"/>
+  <path d="M 34 38 C 47 38, 55 50, 58 63 C 47 68, 34 58, 34 38 Z" fill="#F36F21"/>
+  <path d="M 8 98 C 20 84, 36 88, 42 98 C 36 108, 20 112, 8 98 Z" fill="#F36F21"/>
+
+  <!-- Inner Navy 'A' Symbol -->
+  <path d="M 100 78 L 138 155 L 118 155 L 100 118 L 82 155 L 62 155 Z" fill="#1B2A4A"/>
+  <path d="M 62 155 C 72 135, 128 135, 138 155 C 122 143, 78 143, 62 155 Z" fill="#1B2A4A"/>
+</svg>
