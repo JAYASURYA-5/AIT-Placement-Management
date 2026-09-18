@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
+<<<<<<< HEAD
 import uploadedLogo from '../assets/auth_logo.jpg';
+=======
+import AITLogo from '../components/AITLogo';
+import './AuthPage.css';
+import {
+  loginWithFirebase,
+  getFirebaseProjectInfo,
+  isFirebaseRealApiKey,
+  saveFirebaseApiKey
+} from '../firebase';
+
+>>>>>>> eaf6cf4 (add the new elemnt)
 export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBackToHome }) {
   const [selectedRole, setSelectedRole] = useState(initialRole);
   const [showPassword, setShowPassword] = useState(false);
