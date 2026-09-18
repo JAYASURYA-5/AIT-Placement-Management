@@ -9,8 +9,26 @@ import FeatureView from './components/FeatureViews';
 import { ApplyModal, CalendarModal, PrepModal } from './components/Modals';
 import ChatbotView from './components/ChatbotWidget';
 
+import avatarMale   from './assets/avatar_male.jpg';
+import avatarFemale from './assets/avatar_female.jpg';
+import avatarOther  from './assets/avatar_other.jpg';
+
+// Gender-based passport-style avatar photos
+export const AVATARS = {
+  male:   avatarMale,
+  female: avatarFemale,
+  other:  avatarOther,
+};
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  // Shared profile state — drives both the header chip and the profile page
+  const [sharedProfile, setSharedProfile] = useState({
+    name: 'Jayasurya K',
+    gender: 'male',
+  });
+  const headerAvatarSrc = AVATARS[sharedProfile.gender] || AVATARS.male;
   const [searchQuery, setSearchQuery] = useState('');
   const [drives, setDrives] = useState(initialDrivesData);
   const [chatbotOpen, setChatbotOpen] = useState(false);
@@ -74,6 +92,8 @@ export default function App() {
           notifications={notifications}
           setActiveTab={setActiveTab}
           onLogout={handleLogout}
+          avatarSrc={headerAvatarSrc}
+          profileName={sharedProfile.name}
         />
 
         {/* Dynamic View rendering depending on active left feature menu */}
@@ -101,6 +121,8 @@ export default function App() {
             drives={drives}
             setActiveTab={setActiveTab}
             onApplyDrive={(drive) => setSelectedDriveToApply(drive)}
+            sharedProfile={sharedProfile}
+            setSharedProfile={setSharedProfile}
           />
         )}
       </main>

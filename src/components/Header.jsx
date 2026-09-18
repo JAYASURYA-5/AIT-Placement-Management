@@ -1,16 +1,10 @@
 import React, { useState } from 'react';
 import { SearchIcon, BellIcon, ChevronDownIcon, ProfileIcon, SettingsIcon, LogoutIcon } from './Icons';
 
-export default function Header({ searchQuery, setSearchQuery, notifications, setActiveTab, onLogout }) {
+export default function Header({ searchQuery, setSearchQuery, notifications, setActiveTab, onLogout, avatarSrc, profileName: profileNameProp }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [profileName, setProfileName] = useState(() => {
-    try {
-      const raw = localStorage.getItem('ait-profile')
-      if (raw) return JSON.parse(raw).name || 'Jayasurya K'
-    } catch (e) {}
-    return 'Jayasurya K'
-  })
+  const [profileName, setProfileName] = useState(profileNameProp || 'Jayasurya K');
   const [profileRole, setProfileRole] = useState(() => {
     try {
       const raw = localStorage.getItem('ait-profile')
@@ -144,12 +138,10 @@ export default function Header({ searchQuery, setSearchQuery, notifications, set
             }}
           >
             <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
+              src={avatarSrc || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileName)}&background=4C1536&color=fff`}
               alt={profileName}
               className="profile-avatar"
               onError={(e) => {
-                // Fallback avatar if image offline
-                const initials = (profileName || 'Jayasurya K').split(' ').slice(0,2).map(n=>n[0]).join('')
                 e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profileName)}&background=4C1536&color=fff`;
               }}
             />

@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import avatarMale   from '../assets/avatar_male.jpg';
+import avatarFemale from '../assets/avatar_female.jpg';
+import avatarOther  from '../assets/avatar_other.jpg';
 
 export default function ProfilePage() {
+  // Returns a gender-appropriate passport-style avatar
+  const getDefaultAvatar = (gender) => {
+    if (gender === 'female') return avatarFemale;
+    if (gender === 'other')  return avatarOther;
+    return avatarMale;
+  };
+
   const [profile, setProfile] = useState({
     name: 'Jayasurya K',
     regNo: '20IT30104',
     degree: 'B.Tech - Information Technology',
     batch: '2023 - 2027',
     completion: 90,
+    gender: 'male',
     email: 'jayasurya.k@ait.edu.in',
     phone: '+91 63749 09350',
     location: 'Coimbatore, Tamil Nadu',
     github: 'github.com/jayasurya-k',
     linkedin: 'linkedin.com/in/jayasurya-k',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
     
     // Additional education details
     education: {
@@ -95,12 +105,12 @@ export default function ProfilePage() {
         {/* Profile Info Row */}
         <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flexWrap: 'wrap' }}>
           <img
-            src={profile.avatar}
+            src={getDefaultAvatar(profile.gender, profile.name)}
             alt={profile.name}
             style={{
               width: '90px',
               height: '90px',
-              borderRadius: '12px',
+              borderRadius: '50%',
               objectFit: 'cover',
               border: '1.5px solid var(--border-light)'
             }}
@@ -476,6 +486,19 @@ export default function ProfilePage() {
                   onChange={(e) => setTempProfile({ ...tempProfile, name: e.target.value })}
                   style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium)', fontSize: '13px', outline: 'none' }}
                 />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)' }}>Gender</label>
+                <select
+                  value={tempProfile.gender}
+                  onChange={(e) => setTempProfile({ ...tempProfile, gender: e.target.value })}
+                  style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium)', fontSize: '13px', outline: 'none', backgroundColor: '#fff', cursor: 'pointer' }}
+                >
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other / Prefer not to say</option>
+                </select>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>

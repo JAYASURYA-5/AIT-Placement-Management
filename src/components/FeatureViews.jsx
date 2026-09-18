@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import avatarMale   from '../assets/avatar_male.jpg';
+import avatarFemale from '../assets/avatar_female.jpg';
+import avatarOther  from '../assets/avatar_other.jpg';
 import {
   ProfileIcon,
   ApplicationsIcon,
@@ -491,9 +494,7 @@ function CertificatesView() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
             <div>
               <h2 className="cert-section-title" style={{ margin: 0 }}>Certificates</h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '4px', fontWeight: '500' }}>
-                Verified credentials and certifications awarded to Jayasurya K
-              </p>
+
             </div>
 
             <button
@@ -1307,9 +1308,7 @@ function AlumniView() {
           }}>20</span>
           Alumni Network
         </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', fontWeight: '500' }}>
-          Connect with AIT alumni placed across top companies worldwide.
-        </p>
+
       </div>
 
       {/* Search Bar — identical to Resources */}
@@ -1641,45 +1640,336 @@ function ChatbotView() {
   );
 }
 
-export default function FeatureView({ activeTab, drives, setActiveTab, onApplyDrive }) {
+export default function FeatureView({ activeTab, drives, setActiveTab, onApplyDrive, sharedProfile, setSharedProfile }) {
+  // ── Profile state ───────────────────────────────────────────────
+  const [profile, setProfile] = React.useState({
+    name: sharedProfile?.name || 'Jayasurya K',
+    regNo: '717822IT045',
+    degree: 'B.Tech - Information Technology',
+    year: 'IV Year',
+    department: 'Information Technology',
+    college: 'AIT Engineering College',
+    batch: '2022 - 2026',
+    cgpa: '8.74',
+    arrears: '0',
+    gender: sharedProfile?.gender || 'male',
+    email: 'jayasurya.k@ait.edu.in',
+    phone: '+91 98765 43210',
+    linkedin: 'linkedin.com/in/jayasuryak',
+    github: 'github.com/jayasuryak',
+  });
+
+  const [showEditModal, setShowEditModal] = React.useState(false);
+  const [editForm, setEditForm] = React.useState({ ...profile });
+
+  // Passport-style avatars: local generated images
+  const AVATARS = {
+    male:   avatarMale,
+    female: avatarFemale,
+    other:  avatarOther,
+  };
+  const avatarSrc = AVATARS[profile.gender] || AVATARS.male;
+  const previewAvatarSrc = AVATARS[editForm.gender] || AVATARS.male;
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    setProfile({ ...editForm });
+    // Sync name + gender up to App so the header chip updates too
+    if (setSharedProfile) setSharedProfile({ name: editForm.name, gender: editForm.gender });
+    setShowEditModal(false);
+  };
+
+  const openEdit = () => {
+    setEditForm({ ...profile });
+    setShowEditModal(true);
+  };
+
+  // Modal overlay style
+  const overlayStyle = {
+    position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    zIndex: 3000, padding: '20px',
+  };
+  const modalStyle = {
+    backgroundColor: '#fff', borderRadius: '20px', padding: '32px',
+    width: '100%', maxWidth: '480px', maxHeight: '90vh', overflowY: 'auto',
+    boxShadow: '0 24px 60px rgba(0,0,0,0.2)',
+    border: '1px solid var(--border-light)',
+  };
+  const fieldStyle = {
+    display: 'flex', flexDirection: 'column', gap: '5px',
+  };
+  const labelStyle = {
+    fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px',
+  };
+  const inputStyle = {
+    padding: '9px 13px', borderRadius: '9px',
+    border: '1.5px solid var(--border-medium)',
+    fontSize: '13px', outline: 'none', fontFamily: 'var(--font-family)',
+    transition: 'border-color 0.2s',
+  };
+
   if (activeTab === 'profile') {
     return (
       <div className="feature-page-container">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '32px' }}>
-          <img
-            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"
-            alt="Jayasurya K"
-            style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--primary-maroon)' }}
-            onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=Jayasurya+K&background=4C1536&color=fff'; }}
-          />
-          <div>
-            <h2 style={{ fontSize: '22px', fontWeight: '800' }}>Jayasurya K</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: '600' }}>B.Tech - Information Technology (IV Year)</p>
-            <p style={{ color: 'var(--primary-maroon)', fontSize: '13px', fontWeight: '700', marginTop: '4px' }}>Reg No: 717822IT045 | CGPA: 8.74</p>
+
+        {/* ── Profile Header Card ── */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '20px',
+          marginBottom: '24px', padding: '20px 24px',
+          border: '1.5px solid var(--border-light)', borderRadius: '16px',
+          backgroundColor: '#fff', boxShadow: 'var(--shadow-sm)',
+          position: 'relative',
+        }}>
+          {/* Passport-style Avatar */}
+          <div style={{
+            flexShrink: 0,
+            border: '2.5px solid var(--primary-maroon)',
+            borderRadius: '50%',
+            overflow: 'hidden',
+            width: '90px',
+            height: '90px',
+            boxShadow: '0 2px 10px rgba(76,21,54,0.15)',
+            backgroundColor: '#f0f0f0',
+          }}>
+            <img
+              src={avatarSrc}
+              alt={profile.name}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'top center',
+                display: 'block',
+              }}
+              onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=4C1536&color=fff&size=300`; }}
+            />
           </div>
+
+          {/* Info */}
+          <div style={{ flex: 1 }}>
+            <h2 style={{ fontSize: '20px', fontWeight: '800', margin: '0 0 4px' }}>{profile.name}</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', fontWeight: '600', margin: '0 0 3px' }}>
+              {profile.degree} ({profile.year})
+            </p>
+            <p style={{ color: 'var(--primary-maroon)', fontSize: '12.5px', fontWeight: '700', margin: '0' }}>
+              Reg No: {profile.regNo} | CGPA: {profile.cgpa}
+            </p>
+          </div>
+
+          {/* Edit button */}
+          <button
+            onClick={openEdit}
+            style={{
+              position: 'absolute', top: '16px', right: '16px',
+              padding: '7px 18px', borderRadius: '9px',
+              border: '1.5px solid var(--primary-maroon)',
+              backgroundColor: 'transparent', color: 'var(--primary-maroon)',
+              fontSize: '12.5px', fontWeight: '700', cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(76,21,54,0.06)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+          >
+            ✏️ Edit Profile
+          </button>
         </div>
 
+        {/* ── Detail Cards ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
           <div style={{ padding: '20px', border: '1px solid var(--border-light)', borderRadius: '16px', backgroundColor: 'var(--bg-card)' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '14px', color: 'var(--primary-maroon)' }}>Academic Details</h3>
+            <h3 style={{ fontSize: '15px', fontWeight: '800', marginBottom: '14px', color: 'var(--primary-maroon)' }}>Academic Details</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
-              <div><strong>Department:</strong> Information Technology</div>
-              <div><strong>College:</strong> AIT Engineering College</div>
-              <div><strong>Batch:</strong> 2022 - 2026</div>
-              <div><strong>Arrears:</strong> 0 History of Arrears</div>
+              <div><strong>Department:</strong> {profile.department}</div>
+              <div><strong>College:</strong> {profile.college}</div>
+              <div><strong>Batch:</strong> {profile.batch}</div>
+              <div><strong>Arrears:</strong> {profile.arrears} History of Arrears</div>
             </div>
           </div>
 
           <div style={{ padding: '20px', border: '1px solid var(--border-light)', borderRadius: '16px', backgroundColor: 'var(--bg-card)' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '14px', color: 'var(--primary-maroon)' }}>Contact Details</h3>
+            <h3 style={{ fontSize: '15px', fontWeight: '800', marginBottom: '14px', color: 'var(--primary-maroon)' }}>Contact Details</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
-              <div><strong>Email:</strong> jayasurya.k@ait.edu.in</div>
-              <div><strong>Phone:</strong> +91 98765 43210</div>
-              <div><strong>LinkedIn:</strong> linkedin.com/in/jayasuryak</div>
-              <div><strong>GitHub:</strong> github.com/jayasuryak</div>
+              <div><strong>Email:</strong> {profile.email}</div>
+              <div><strong>Phone:</strong> {profile.phone}</div>
+              <div><strong>LinkedIn:</strong> {profile.linkedin}</div>
+              <div><strong>GitHub:</strong> {profile.github}</div>
             </div>
           </div>
         </div>
+
+        {/* ── Edit Profile Modal ── */}
+        {showEditModal && (
+          <div style={overlayStyle} onClick={(e) => { if (e.target === e.currentTarget) setShowEditModal(false); }}>
+            <div style={modalStyle}>
+              {/* Modal Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '17px', fontWeight: '800', color: 'var(--primary-maroon)', margin: 0 }}>Edit Profile</h3>
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  style={{ border: 'none', background: 'transparent', fontSize: '20px', cursor: 'pointer', color: 'var(--text-muted)', lineHeight: 1 }}
+                >✕</button>
+              </div>
+
+              {/* Live passport-style avatar preview */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+                <div style={{
+                  border: '2.5px solid var(--primary-maroon)',
+                  borderRadius: '6px',
+                  overflow: 'hidden',
+                  width: '80px',
+                  height: '106px',
+                  boxShadow: '0 4px 16px rgba(76,21,54,0.2)',
+                  backgroundColor: '#f0f0f0',
+                  transition: 'all 0.3s ease',
+                }}>
+                  <img
+                    src={previewAvatarSrc}
+                    alt="Preview"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      objectPosition: 'top center',
+                      display: 'block',
+                    }}
+                    onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(editForm.name)}&background=4C1536&color=fff&size=300`; }}
+                  />
+                </div>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>Profile photo updates with gender</span>
+              </div>
+
+              <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+
+                {/* Gender — top and prominent */}
+                <div style={fieldStyle}>
+                  <label style={labelStyle}>Gender *</label>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    {[
+                      { value: 'male',   label: '♂ Male',   bg: '#EFF6FF', color: '#1D4ED8', active: '#DBEAFE' },
+                      { value: 'female', label: '♀ Female', bg: '#FFF0F6', color: '#BE185D', active: '#FCE7F3' },
+                      { value: 'other',  label: '⚧ Other',  bg: '#F3F0FF', color: '#6D28D9', active: '#EDE9FE' },
+                    ].map(opt => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setEditForm({ ...editForm, gender: opt.value })}
+                        style={{
+                          flex: 1, padding: '10px 6px', borderRadius: '10px', cursor: 'pointer',
+                          border: `2px solid ${editForm.gender === opt.value ? opt.color : 'var(--border-medium)'}`,
+                          backgroundColor: editForm.gender === opt.value ? opt.active : opt.bg,
+                          color: opt.color, fontWeight: '700', fontSize: '13px',
+                          transition: 'all 0.2s', fontFamily: 'var(--font-family)',
+                        }}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '4px' }} />
+
+                {/* Name */}
+                <div style={fieldStyle}>
+                  <label style={labelStyle}>Full Name</label>
+                  <input required type="text" style={inputStyle} value={editForm.name}
+                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+                </div>
+
+                {/* Reg No + CGPA row */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={fieldStyle}>
+                    <label style={labelStyle}>Reg. No</label>
+                    <input required type="text" style={inputStyle} value={editForm.regNo}
+                      onChange={(e) => setEditForm({ ...editForm, regNo: e.target.value })} />
+                  </div>
+                  <div style={fieldStyle}>
+                    <label style={labelStyle}>CGPA</label>
+                    <input required type="text" style={inputStyle} value={editForm.cgpa}
+                      onChange={(e) => setEditForm({ ...editForm, cgpa: e.target.value })} />
+                  </div>
+                </div>
+
+                {/* Degree + Year row */}
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+                  <div style={fieldStyle}>
+                    <label style={labelStyle}>Degree / Branch</label>
+                    <input required type="text" style={inputStyle} value={editForm.degree}
+                      onChange={(e) => setEditForm({ ...editForm, degree: e.target.value })} />
+                  </div>
+                  <div style={fieldStyle}>
+                    <label style={labelStyle}>Year</label>
+                    <select style={{ ...inputStyle, cursor: 'pointer' }} value={editForm.year}
+                      onChange={(e) => setEditForm({ ...editForm, year: e.target.value })}>
+                      <option>I Year</option>
+                      <option>II Year</option>
+                      <option>III Year</option>
+                      <option>IV Year</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Batch */}
+                <div style={fieldStyle}>
+                  <label style={labelStyle}>Batch</label>
+                  <input required type="text" style={inputStyle} value={editForm.batch}
+                    onChange={(e) => setEditForm({ ...editForm, batch: e.target.value })} />
+                </div>
+
+                {/* Email + Phone row */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={fieldStyle}>
+                    <label style={labelStyle}>Email</label>
+                    <input required type="email" style={inputStyle} value={editForm.email}
+                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
+                  </div>
+                  <div style={fieldStyle}>
+                    <label style={labelStyle}>Phone</label>
+                    <input required type="text" style={inputStyle} value={editForm.phone}
+                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
+                  </div>
+                </div>
+
+                {/* LinkedIn + GitHub row */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={fieldStyle}>
+                    <label style={labelStyle}>LinkedIn</label>
+                    <input type="text" style={inputStyle} value={editForm.linkedin}
+                      onChange={(e) => setEditForm({ ...editForm, linkedin: e.target.value })} />
+                  </div>
+                  <div style={fieldStyle}>
+                    <label style={labelStyle}>GitHub</label>
+                    <input type="text" style={inputStyle} value={editForm.github}
+                      onChange={(e) => setEditForm({ ...editForm, github: e.target.value })} />
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '6px' }}>
+                  <button type="button" onClick={() => setShowEditModal(false)}
+                    style={{
+                      padding: '9px 20px', borderRadius: '9px', border: '1.5px solid var(--border-medium)',
+                      backgroundColor: '#fff', color: 'var(--text-main)', fontSize: '13px', fontWeight: '700',
+                      cursor: 'pointer', fontFamily: 'var(--font-family)',
+                    }}>
+                    Cancel
+                  </button>
+                  <button type="submit"
+                    style={{
+                      padding: '9px 24px', borderRadius: '9px', border: 'none',
+                      backgroundColor: 'var(--primary-maroon)', color: '#fff',
+                      fontSize: '13px', fontWeight: '700', cursor: 'pointer',
+                      fontFamily: 'var(--font-family)',
+                    }}>
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
       </div>
     );
   }
@@ -2148,9 +2438,7 @@ Report generated via AIT AI Resume Workspace.
               <h2 style={{ fontSize: '20px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <ResumeIcon style={{ color: 'var(--primary-maroon)' }} /> Resume Workspace
               </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>
-                Build an industry-standard resume and check its ATS score using advanced Gemini AI analysis.
-              </p>
+
             </div>
 
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
@@ -2958,9 +3246,7 @@ Report generated via AIT AI Resume Workspace.
               <h2 style={{ fontSize: '20px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <TrainingIcon style={{ color: 'var(--primary-maroon)' }} /> 9. Aptitude & Coding Practice
               </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>
-                Test and optimize your placement potential with interactive training modules.
-              </p>
+
             </div>
 
             <div className="resume-tabs">
@@ -3421,9 +3707,7 @@ Report generated via AIT AI Resume Workspace.
               <h2 style={{ fontSize: '20px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <BellIcon style={{ color: 'var(--primary-maroon)' }} /> 16. Notifications
               </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>
-                Stay updated with critical alerts, interview results, and campus drive schedules.
-              </p>
+
             </div>
 
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -3586,9 +3870,7 @@ Zoho Corporation`;
               <h2 style={{ fontSize: '20px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <DocumentsIcon style={{ color: 'var(--primary-maroon)' }} /> Offer Letter
               </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>
-                Access and submit academic marksheets, verification reports, and official selection letters.
-              </p>
+
             </div>
           </div>
 
@@ -4625,9 +4907,7 @@ Generated by AIT Placement Portal AI Engine
             }}>17</span>
             Resources &amp; Materials
           </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', fontWeight: '500' }}>
-            Access all placement preparation materials in one place.
-          </p>
+
         </div>
 
         {/* Search Bar */}
@@ -4751,9 +5031,7 @@ Generated by AIT Placement Portal AI Engine
       <h2 style={{ fontSize: '22px', fontWeight: '800', textTransform: 'capitalize' }}>
         {activeTab.replace('-', ' ')}
       </h2>
-      <p style={{ color: 'var(--text-muted)', fontSize: '14px', maxWidth: '400px', marginTop: '8px' }}>
-        Welcome to the {activeTab.replace('-', ' ')} module. Explore placement resources, tests, and active updates tailored for Jayasurya K.
-      </p>
+
       <button
         className="btn-apply"
         style={{ marginTop: '24px' }}
