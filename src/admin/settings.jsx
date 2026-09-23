@@ -790,9 +790,6 @@ export default function SettingsPage({ onNavigate }) {
           <div style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
             Settings
           </div>
-          <div style={{ fontSize: '15px', color: '#64748b', marginTop: '2px', fontWeight: 500 }}>
-            Manage platform settings and preferences
-          </div>
         </div>
       </div>
 

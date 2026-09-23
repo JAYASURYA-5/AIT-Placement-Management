@@ -490,9 +490,6 @@ export default function CompanyManagement({ onNavigate }) {
           <div style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
             Company Management
           </div>
-          <div style={{ fontSize: '15px', color: '#64748b', marginTop: '2px', fontWeight: 500 }}>
-            Manage corporate partners, hiring tiers, package details, and HR contacts
-          </div>
         </div>
 
         {/* Action Buttons Group */}

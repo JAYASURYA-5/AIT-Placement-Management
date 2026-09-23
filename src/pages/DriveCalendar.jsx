@@ -296,7 +296,7 @@ export default function DriveCalendar() {
         <div className="upcoming-companies-header">
           <div>
             <h2 id="upcoming-companies-title" className="card-title">Upcoming Companies</h2>
-            <p className="upcoming-companies-subtitle">Your next placement activities, ordered by date</p>
+
           </div>
           <div className="upcoming-companies-actions">
             <button

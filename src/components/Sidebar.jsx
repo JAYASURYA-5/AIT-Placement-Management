@@ -35,6 +35,7 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
         <div className="brand-logo-icon" style={{ background: 'none', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <AITLogo size={32} />
         </div>
+        </div>
         <div className="brand-info">
           <span className="brand-title">AIT</span>
           <span className="brand-subtitle">PLACEMENT PORTAL</span>

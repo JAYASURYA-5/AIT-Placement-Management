@@ -6,6 +6,7 @@ import {
   isFirebaseRealApiKey,
   saveFirebaseApiKey
 } from '../firebase';
+import './AuthPage.css';
 
 export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBackToHome }) {
   const [selectedRole, setSelectedRole] = useState(initialRole);

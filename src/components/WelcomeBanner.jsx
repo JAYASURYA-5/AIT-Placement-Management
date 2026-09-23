@@ -14,9 +14,6 @@ export default function WelcomeBanner({ userName = "Jayasurya" }) {
       <h1 className="welcome-title">
         Welcome back, {name}! 👋
       </h1>
-      <p className="welcome-subtitle">
-        Keep learning, keep growing.
-      </p>
     </div>
   );
 }
