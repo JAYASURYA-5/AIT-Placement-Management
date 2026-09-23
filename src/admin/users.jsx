@@ -29,12 +29,13 @@ import {
   ExternalLink,
   Calendar,
   Check,
-  Filter
+  Filter,
+  LogOut
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { fetchUsersFromFirestore, addStudentToFirestore, updateStudentInFirestore, batchAddStudentsToFirestore, deleteStudentFromFirestore, clearAllUsersFromFirestore } from '../firebase';
 
-export default function UsersPage({ onNavigate }) {
+export default function UsersPage({ onNavigate, onLogout }) {
   const [activeNav, setActiveNav] = useState('Student');
   const [searchQuery, setSearchQuery] = useState('');
   const [deptFilter, setDeptFilter] = useState('All');
@@ -544,7 +545,7 @@ export default function UsersPage({ onNavigate }) {
       {/* Top Header Label */}
       <div style={{
         padding: '22px 36px 10px 36px',
-        fontSize: '24px',
+        fontSize: '30px',
         fontWeight: 800,
         color: '#0f172a',
         letterSpacing: '-0.02em'
@@ -576,7 +577,7 @@ export default function UsersPage({ onNavigate }) {
           </div>
 
           {/* Navigation Links */}
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeNav === item.label;
@@ -607,6 +608,35 @@ export default function UsersPage({ onNavigate }) {
                 </button>
               );
             })}
+
+            {/* Logout Button right near Settings */}
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '14px',
+                  padding: '14px 22px',
+                  borderRadius: '14px',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                  color: '#fca5a5',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+                  textAlign: 'left',
+                  marginTop: '10px',
+                  width: '100%'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.25)'; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#fca5a5'; }}
+              >
+                <LogOut size={20} color="currentColor" strokeWidth={2.3} />
+                <span>Logout</span>
+              </button>
+            )}
           </nav>
         </aside>
 

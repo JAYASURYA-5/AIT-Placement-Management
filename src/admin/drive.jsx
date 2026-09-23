@@ -40,7 +40,8 @@ import {
   CheckCircle2,
   Eye,
   Phone,
-  ExternalLink
+  ExternalLink,
+  LogOut
 } from 'lucide-react';
 import {
   fetchDrivesFromFirestore,
@@ -54,7 +55,7 @@ import {
 } from '../firebase';
 import { sendBatchDriveEmails, generateDriveInvitationEmail, openWebEmailClient } from '../utils/emailService';
 
-export default function DriveManagement({ onNavigate }) {
+export default function DriveManagement({ onNavigate, onLogout }) {
   const [activeNav, setActiveNav] = useState('Drives');
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -698,7 +699,7 @@ export default function DriveManagement({ onNavigate }) {
             Drive Management
           </div>
           <div style={{ fontSize: '15px', color: '#64748b', marginTop: '2px', fontWeight: 500 }}>
-            Manage campus placement drives in Firebase & auto-suggest eligible student candidates
+            
           </div>
         </div>
 
@@ -790,7 +791,7 @@ export default function DriveManagement({ onNavigate }) {
             </span>
           </div>
 
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeNav === item.label;
@@ -821,6 +822,35 @@ export default function DriveManagement({ onNavigate }) {
                 </button>
               );
             })}
+
+            {/* Logout Button right near Settings */}
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '14px',
+                  padding: '14px 22px',
+                  borderRadius: '14px',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                  color: '#fca5a5',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+                  textAlign: 'left',
+                  marginTop: '10px',
+                  width: '100%'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.25)'; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#fca5a5'; }}
+              >
+                <LogOut size={20} color="currentColor" strokeWidth={2.3} />
+                <span>Logout</span>
+              </button>
+            )}
           </nav>
         </aside>
 
