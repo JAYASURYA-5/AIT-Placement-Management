@@ -222,7 +222,7 @@ export default function SettingsPage({ onNavigate, onLogout }) {
 
               <form onSubmit={(e) => { e.preventDefault(); showToast('Profile details saved successfully!'); }}>
                 <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a', marginBottom: '12px' }}>Personal Details</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '18px' }}>
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '18px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Full Name *</label>
                     <input type="text" value={profileData.name} onChange={(e) => setProfileData({ ...profileData, name: e.target.value })} style={inputStyle} />
@@ -242,7 +242,7 @@ export default function SettingsPage({ onNavigate, onLogout }) {
                 </div>
 
                 <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a', marginBottom: '12px', borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>Security Password</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '22px' }}>
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '22px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Current Password</label>
                     <input type="password" placeholder="••••••••" value={profileData.currentPass} onChange={(e) => setProfileData({ ...profileData, currentPass: e.target.value })} style={inputStyle} />
@@ -325,7 +325,7 @@ export default function SettingsPage({ onNavigate, onLogout }) {
                   <input type="checkbox" checked={securityData.twoFactor} onChange={(e) => { setSecurityData({ ...securityData, twoFactor: e.target.checked }); showToast(e.target.checked ? '2FA Enabled' : '2FA Disabled', 'info'); }} style={{ width: '20px', height: '20px', cursor: 'pointer' }} />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Session Timeout</label>
                     <select value={securityData.sessionTimeout} onChange={(e) => setSecurityData({ ...securityData, sessionTimeout: e.target.value })} style={inputStyle}>
@@ -400,7 +400,7 @@ export default function SettingsPage({ onNavigate, onLogout }) {
               <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0' }}>Notification Preferences</h3>
               <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px', borderBottom: '1px solid #f1f5f9', paddingBottom: '14px' }}>Configure channels & alerts for placement announcements.</div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 {[
                   { title: 'Email Drive Announcements', desc: 'Instant email when new company drives post', key: 'companyDriveUpdates' },
                   { title: 'Student Registrations Digest', desc: 'Notify on new student verification submissions', key: 'studentRegistrations' },
@@ -464,7 +464,7 @@ export default function SettingsPage({ onNavigate, onLogout }) {
               <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0' }}>Placement Eligibility Rules</h3>
               <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px', borderBottom: '1px solid #f1f5f9', paddingBottom: '14px' }}>Set global student cutoff criteria and backlog thresholds.</div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '18px' }}>
+              <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '18px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Minimum Cutoff CGPA *</label>
                   <input type="text" value={rulesData.minCGPA} onChange={(e) => setRulesData({ ...rulesData, minCGPA: e.target.value })} style={inputStyle} />
@@ -536,7 +536,7 @@ export default function SettingsPage({ onNavigate, onLogout }) {
               <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0' }}>AI & Automation Settings</h3>
               <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px', borderBottom: '1px solid #f1f5f9', paddingBottom: '14px' }}>Configure AI resume parsing, candidate scoring, and auto-matching.</div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '12px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}>
                   <div>
                     <div style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>AI Resume Screening</div>
@@ -804,7 +804,7 @@ export default function SettingsPage({ onNavigate, onLogout }) {
           display: 'flex',
           flexDirection: 'column',
           padding: '32px 20px',
-          flexShrink: 0,
+          flexShrink: 0, alignSelf: 'flex-start', position: 'sticky', top: '24px',
           borderRadius: '24px',
           margin: '12px 0 16px 20px',
           boxShadow: '0 12px 36px rgba(0,0,0,0.22)'

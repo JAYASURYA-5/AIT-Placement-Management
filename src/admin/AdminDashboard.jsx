@@ -21,7 +21,7 @@ import {
   LogOut
 } from 'lucide-react';
 
-export default function AdminDashboard({ onLogout }) {
+export default function AdminDashboard({ onLogout, onNavChange }) {
   const [activeNav, setActiveNav] = useState('Dashboard');
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [hoveredSlice, setHoveredSlice] = useState(null);
@@ -255,21 +255,26 @@ export default function AdminDashboard({ onLogout }) {
     transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
   };
 
+  const handleNavigation = (nav) => {
+    setActiveNav(nav);
+    if (onNavChange) onNavChange();
+  };
+
   // Render active subpages unconditionally after all hook declarations
   if (activeNav === 'Student' || activeNav === 'Students' || activeNav === 'Users') {
-    return <UsersPage onNavigate={setActiveNav} onLogout={onLogout} />;
+    return <UsersPage onNavigate={handleNavigation} onLogout={onLogout} />;
   }
   if (activeNav === 'Reports') {
-    return <PlacementStatistics onNavigate={setActiveNav} onLogout={onLogout} />;
+    return <PlacementStatistics onNavigate={handleNavigation} onLogout={onLogout} />;
   }
   if (activeNav === 'Settings') {
-    return <SettingsPage onNavigate={setActiveNav} onLogout={onLogout} />;
+    return <SettingsPage onNavigate={handleNavigation} onLogout={onLogout} />;
   }
   if (activeNav === 'Drives') {
-    return <DriveManagement onNavigate={setActiveNav} onLogout={onLogout} />;
+    return <DriveManagement onNavigate={handleNavigation} onLogout={onLogout} />;
   }
   if (activeNav === 'Companies') {
-    return <CompanyManagement onNavigate={setActiveNav} onLogout={onLogout} />;
+    return <CompanyManagement onNavigate={handleNavigation} onLogout={onLogout} />;
   }
 
   return (
@@ -342,6 +347,53 @@ export default function AdminDashboard({ onLogout }) {
         .active-guide-line {
           transition: x1 0.1s ease-out, x2 0.1s ease-out;
         }
+
+        /* Responsive Dashboard Layout */
+        @media (max-width: 1024px) {
+          .admin-main-container {
+            flex-direction: column !important;
+          }
+          .admin-sidebar {
+            width: auto !important;
+            margin: 12px 20px 0 20px !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            padding: 16px !important;
+            gap: 12px !important;
+            justify-content: center !important;
+          }
+          .admin-sidebar .admin-brand {
+            width: 100% !important;
+            margin-bottom: 12px !important;
+            justify-content: center !important;
+          }
+          .admin-sidebar button {
+            margin-bottom: 0 !important;
+            padding: 8px 16px !important;
+          }
+          .admin-content {
+            margin-left: 20px !important;
+            margin-top: 16px !important;
+          }
+          .admin-top-stats {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .admin-charts-row {
+            flex-direction: column !important;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .admin-top-stats {
+            grid-template-columns: 1fr !important;
+          }
+          .admin-sidebar button span {
+            display: none !important; /* icons only on very small screens */
+          }
+          .admin-sidebar button {
+            padding: 10px !important;
+          }
+        }
       `}</style>
 
       {/* Top Header Label */}
@@ -365,7 +417,7 @@ export default function AdminDashboard({ onLogout }) {
           display: 'flex',
           flexDirection: 'column',
           padding: '32px 20px',
-          flexShrink: 0,
+          flexShrink: 0, alignSelf: 'flex-start', position: 'sticky', top: '24px',
           borderRadius: '24px',
           margin: '12px 0 16px 20px',
           boxShadow: '0 12px 36px rgba(0,0,0,0.22)'
@@ -386,7 +438,7 @@ export default function AdminDashboard({ onLogout }) {
               return (
                 <button
                   key={item.label}
-                  onClick={() => setActiveNav(item.label)}
+                  onClick={() => handleNavigation(item.label)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -446,7 +498,7 @@ export default function AdminDashboard({ onLogout }) {
         <main style={{ flex: 1, padding: '12px 36px 24px 30px', overflowY: 'auto' }}>
           
           {/* Top Row: 4 Glassmorphism Metric Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '32px', marginBottom: '54px' }}>
+          <div className="admin-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '32px', marginBottom: '54px' }}>
             {statCards.map((card, idx) => (
               <div
                 key={idx}
@@ -469,7 +521,7 @@ export default function AdminDashboard({ onLogout }) {
           </div>
 
           {/* Middle Row: Glassmorphism System Overview & Top Departments */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.55fr 1fr', gap: '32px', marginBottom: '54px' }}>
+          <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1.55fr 1fr', gap: '32px', marginBottom: '54px' }}>
             
             {/* System Overview Glass Card */}
             <div style={{
@@ -798,7 +850,7 @@ export default function AdminDashboard({ onLogout }) {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          flexShrink: 0,
+                          flexShrink: 0, alignSelf: 'flex-start', position: 'sticky', top: '24px',
                           transition: 'transform 0.2s ease'
                         }}>
                           <Icon size={22} color={act.iconColor} strokeWidth={2.2} />

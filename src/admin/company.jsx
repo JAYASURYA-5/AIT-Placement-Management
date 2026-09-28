@@ -569,7 +569,7 @@ export default function CompanyManagement({ onNavigate, onLogout }) {
           display: 'flex',
           flexDirection: 'column',
           padding: '32px 20px',
-          flexShrink: 0,
+          flexShrink: 0, alignSelf: 'flex-start', position: 'sticky', top: '24px',
           borderRadius: '24px',
           margin: '12px 0 16px 20px',
           boxShadow: '0 12px 36px rgba(0,0,0,0.22)'
@@ -921,7 +921,7 @@ export default function CompanyManagement({ onNavigate, onLogout }) {
                   <input type="text" required placeholder="e.g. TCS, Amazon, Microsoft" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} style={inputStyle} />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Industry / Sector</label>
                     <input type="text" placeholder="e.g. IT Services & Software" value={formData.industry} onChange={(e) => setFormData({ ...formData, industry: e.target.value })} style={inputStyle} />
@@ -932,7 +932,7 @@ export default function CompanyManagement({ onNavigate, onLogout }) {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Tier Category *</label>
                     <select value={formData.tier} onChange={(e) => setFormData({ ...formData, tier: e.target.value })} style={inputStyle}>
@@ -952,7 +952,7 @@ export default function CompanyManagement({ onNavigate, onLogout }) {
                   <input type="text" required placeholder="e.g. Software Engineer; Cloud Developer" value={formData.roles} onChange={(e) => setFormData({ ...formData, roles: e.target.value })} style={inputStyle} />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Partnership Status *</label>
                     <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} style={inputStyle}>
