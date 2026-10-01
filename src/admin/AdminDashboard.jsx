@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { fetchDrivesFromFirestore } from '../firebase';
+import { fetchDrivesFromFirestore, fetchUsersFromFirestore } from '../firebase';
 import AITLogo from '../components/AITLogo';
 import UsersPage from './users.jsx';
 import PlacementStatistics from './PlacementStatistics.jsx';
@@ -28,7 +28,6 @@ export default function AdminDashboard({ onLogout }) {
 
   const chartSvgRef = useRef(null);
 
-
   // Sidebar navigation items matching reference image
   const navItems = [
     { label: 'Dashboard', icon: LayoutDashboard },
@@ -40,6 +39,16 @@ export default function AdminDashboard({ onLogout }) {
   ];
 
   const [drivesCount, setDrivesCount] = useState(75);
+  const [registeredStudentsCount, setRegisteredStudentsCount] = useState('1,248');
+  const [placedStudentsCount, setPlacedStudentsCount] = useState('1,050');
+
+  // Dynamic Departments State (calculated live from Firestore student & drive nominations)
+  const [departments, setDepartments] = useState([
+    { name: 'CSE', percentage: 42, color: '#be185d' },
+    { name: 'IT', percentage: 28, color: '#7c3aed' },
+    { name: 'AI&DS', percentage: 18, color: '#ec4899' },
+    { name: 'ECE', percentage: 12, color: '#3b82f6' }
+  ]);
 
   // Recent Activities list state
   const [activities, setActivities] = useState([
@@ -69,10 +78,14 @@ export default function AdminDashboard({ onLogout }) {
     }
   ]);
 
-  // Load live placement drives from Cloud Firestore for Recent Activities
+  // Load live placement drives & student datasets from Cloud Firestore
   useEffect(() => {
-    async function loadLiveDrives() {
-      const fsDrives = await fetchDrivesFromFirestore();
+    async function loadDashboardData() {
+      const [fsDrives, fsStudents] = await Promise.all([
+        fetchDrivesFromFirestore(),
+        fetchUsersFromFirestore()
+      ]);
+
       if (fsDrives && fsDrives.length > 0) {
         setDrivesCount(fsDrives.length);
         const driveActivities = fsDrives.map(drive => ({
@@ -104,8 +117,99 @@ export default function AdminDashboard({ onLogout }) {
           }
         ]);
       }
+
+      if (fsStudents && fsStudents.length > 0) {
+        setRegisteredStudentsCount(fsStudents.length.toLocaleString());
+
+        // Calculate dynamic Top Departments breakdown from Firestore database
+        const deptCounts = {
+          'CSE': 0,
+          'IT': 0,
+          'AI&DS': 0,
+          'ECE': 0,
+          'EEE': 0,
+          'MECH': 0,
+          'CIVIL': 0
+        };
+
+        let totalTracked = 0;
+        let nominatedCount = 0;
+
+        // First aggregate nominated candidate students across active placement drives
+        if (fsDrives && fsDrives.length > 0) {
+          fsDrives.forEach(drive => {
+            if (Array.isArray(drive.nominatedStudents) && drive.nominatedStudents.length > 0) {
+              drive.nominatedStudents.forEach(candId => {
+                nominatedCount++;
+                const s = fsStudents.find(st => st.id === candId || st.uid === candId || st.regNo === candId || st.email === candId);
+                const deptStr = ((s ? (s.department || s.branch) : '') || '').toUpperCase();
+                if (deptStr.includes('AIDS') || deptStr.includes('AI&DS') || deptStr.includes('AI & DS')) deptCounts['AI&DS']++;
+                else if (deptStr.includes('CSE') || deptStr.includes('COMPUTER')) deptCounts['CSE']++;
+                else if (deptStr.includes('IT') || deptStr.includes('INFORMATION')) deptCounts['IT']++;
+                else if (deptStr.includes('ECE') || deptStr.includes('ELECTRONICS')) deptCounts['ECE']++;
+                else if (deptStr.includes('EEE') || deptStr.includes('ELECTRICAL')) deptCounts['EEE']++;
+                else if (deptStr.includes('MECH') || deptStr.includes('MECHANICAL')) deptCounts['MECH']++;
+                else if (deptStr.includes('CIVIL')) deptCounts['CIVIL']++;
+                else deptCounts['CSE']++;
+                totalTracked++;
+              });
+            }
+          });
+        }
+
+        // If no nominations yet, aggregate across all registered student profiles in Firestore
+        if (totalTracked === 0) {
+          fsStudents.forEach(s => {
+            const deptStr = (s.department || s.branch || '').toUpperCase();
+            if (deptStr.includes('AIDS') || deptStr.includes('AI&DS') || deptStr.includes('AI & DS')) deptCounts['AI&DS']++;
+            else if (deptStr.includes('CSE') || deptStr.includes('COMPUTER')) deptCounts['CSE']++;
+            else if (deptStr.includes('IT') || deptStr.includes('INFORMATION')) deptCounts['IT']++;
+            else if (deptStr.includes('ECE') || deptStr.includes('ELECTRONICS')) deptCounts['ECE']++;
+            else if (deptStr.includes('EEE') || deptStr.includes('ELECTRICAL')) deptCounts['EEE']++;
+            else if (deptStr.includes('MECH') || deptStr.includes('MECHANICAL')) deptCounts['MECH']++;
+            else if (deptStr.includes('CIVIL')) deptCounts['CIVIL']++;
+            else deptCounts['CSE']++;
+            totalTracked++;
+          });
+        }
+
+        if (totalTracked > 0) {
+          const deptColors = {
+            'CSE': '#be185d',
+            'IT': '#7c3aed',
+            'AI&DS': '#ec4899',
+            'ECE': '#3b82f6',
+            'EEE': '#10b981',
+            'MECH': '#f59e0b',
+            'CIVIL': '#64748b'
+          };
+
+          const calculatedDepts = Object.keys(deptCounts)
+            .filter(d => deptCounts[d] > 0)
+            .map(d => ({
+              name: d,
+              count: deptCounts[d],
+              percentage: Math.round((deptCounts[d] / totalTracked) * 100),
+              color: deptColors[d] || '#be185d'
+            }))
+            .sort((a, b) => b.count - a.count);
+
+          if (calculatedDepts.length > 0) {
+            const pctSum = calculatedDepts.reduce((sum, item) => sum + item.percentage, 0);
+            if (pctSum !== 100) {
+              calculatedDepts[0].percentage += (100 - pctSum);
+            }
+            setDepartments(calculatedDepts);
+          }
+        }
+
+        if (nominatedCount > 0) {
+          setPlacedStudentsCount(nominatedCount.toLocaleString());
+        }
+      }
     }
-    loadLiveDrives();
+
+    loadDashboardData();
   }, []);
 
   // Chart & Metric Data Definitions
@@ -126,19 +230,12 @@ export default function AdminDashboard({ onLogout }) {
     }
   ];
 
-  const departments = [
-    { name: 'CSE', percentage: 42, color: '#be185d' },
-    { name: 'ECE', percentage: 28, color: '#3b82f6' },
-    { name: 'EEE', percentage: 18, color: '#10b981' },
-    { name: 'Mech', percentage: 12, color: '#f59e0b' }
-  ];
-
   // Stats data
   const statCards = [
-    { title: 'Students Registered', value: '1,248' },
+    { title: 'Students Registered', value: registeredStudentsCount },
     { title: 'Companies Visited', value: '120' },
     { title: 'Placement Drives', value: String(drivesCount) },
-    { title: 'Students Placed', value: '1,050' },
+    { title: 'Students Placed', value: placedStudentsCount },
   ];
 
   // SVG Line Chart Helpers
@@ -687,39 +784,42 @@ export default function AdminDashboard({ onLogout }) {
                 <div style={{ width: '220px', height: '220px', position: 'relative', flexShrink: 0 }}>
                   <svg viewBox="0 0 210 210" style={{ width: '100%', height: '100%' }}>
                     <g className="donut-chart-container">
-                      {departments.map((dept) => {
-                        const startAngle = cumulativeAngle;
-                        const sliceAngle = (dept.percentage / 100) * 360;
-                        const endAngle = startAngle + sliceAngle;
-                        cumulativeAngle = endAngle;
+                      {(() => {
+                        let cumulativeAngle = 0;
+                        return departments.map((dept) => {
+                          const startAngle = cumulativeAngle;
+                          const sliceAngle = (dept.percentage / 100) * 360;
+                          const endAngle = startAngle + sliceAngle;
+                          cumulativeAngle = endAngle;
 
-                        const pathD = getSlicePath(startAngle, endAngle - 0.6);
-                        const isHovered = hoveredSlice === dept.name;
+                          const pathD = getSlicePath(startAngle, endAngle - 0.6);
+                          const isHovered = hoveredSlice === dept.name;
 
-                        const midAngle = startAngle + sliceAngle / 2;
-                        const rad = ((midAngle - 90) * Math.PI) / 180;
-                        const offsetX = isHovered ? Math.cos(rad) * 6 : 0;
-                        const offsetY = isHovered ? Math.sin(rad) * 6 : 0;
+                          const midAngle = startAngle + sliceAngle / 2;
+                          const rad = ((midAngle - 90) * Math.PI) / 180;
+                          const offsetX = isHovered ? Math.cos(rad) * 6 : 0;
+                          const offsetY = isHovered ? Math.sin(rad) * 6 : 0;
 
-                        return (
-                          <path
-                            key={dept.name}
-                            d={pathD}
-                            fill={dept.color}
-                            style={{
-                              cursor: 'pointer',
-                              transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, filter 0.25s ease',
-                              opacity: hoveredSlice && !isHovered ? 0.45 : 1,
-                              transform: `translate(${offsetX}px, ${offsetY}px)`,
-                              filter: isHovered ? 'drop-shadow(0 8px 16px rgba(0,0,0,0.22))' : 'none'
-                            }}
-                            onMouseEnter={() => setHoveredSlice(dept.name)}
-                            onMouseLeave={() => setHoveredSlice(null)}
-                          >
-                            <title>{dept.name}: {dept.percentage}%</title>
-                          </path>
-                        );
-                      })}
+                          return (
+                            <path
+                              key={dept.name}
+                              d={pathD}
+                              fill={dept.color}
+                              style={{
+                                cursor: 'pointer',
+                                transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, filter 0.25s ease',
+                                opacity: hoveredSlice && !isHovered ? 0.45 : 1,
+                                transform: `translate(${offsetX}px, ${offsetY}px)`,
+                                filter: isHovered ? 'drop-shadow(0 8px 16px rgba(0,0,0,0.22))' : 'none'
+                              }}
+                              onMouseEnter={() => setHoveredSlice(dept.name)}
+                              onMouseLeave={() => setHoveredSlice(null)}
+                            >
+                              <title>{dept.name}: {dept.percentage}%</title>
+                            </path>
+                          );
+                        });
+                      })()}
                     </g>
 
                     {/* Donut Center Hole Text */}

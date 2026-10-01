@@ -1409,7 +1409,28 @@ export default function UsersPage({ onNavigate, onLogout }) {
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>Department / Branch</label>
-                    <input type="text" value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })} placeholder="e.g. CSE / IT" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '6px' }}>
+                      {['AI&DS', 'CSE', 'IT', 'ECE', 'EEE', 'MECH', 'CIVIL'].map(dept => (
+                        <button
+                          key={dept}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, department: dept })}
+                          style={{
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            border: (formData.department || '').toUpperCase() === dept ? '1px solid #be185d' : '1px solid #cbd5e1',
+                            backgroundColor: (formData.department || '').toUpperCase() === dept ? '#fce7f3' : '#ffffff',
+                            color: (formData.department || '').toUpperCase() === dept ? '#be185d' : '#475569',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {dept}
+                        </button>
+                      ))}
+                    </div>
+                    <input type="text" value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })} placeholder="e.g. CSE / IT / AI&DS" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>Student Mobile</label>

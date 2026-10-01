@@ -693,10 +693,32 @@ export default function Profile() {
                   </div>
                   <div className="form-group">
                     <label>Branch / Department</label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '6px' }}>
+                      {['AI&DS', 'CSE', 'IT', 'ECE', 'EEE', 'MECH', 'CIVIL'].map(dept => (
+                        <button
+                          key={dept}
+                          type="button"
+                          onClick={() => setEditForm({ ...editForm, branch: dept, department: dept })}
+                          style={{
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            border: ((editForm.branch || editForm.department || '').toUpperCase() === dept) ? '1px solid #be185d' : '1px solid #cbd5e1',
+                            backgroundColor: ((editForm.branch || editForm.department || '').toUpperCase() === dept) ? '#fce7f3' : '#ffffff',
+                            color: ((editForm.branch || editForm.department || '').toUpperCase() === dept) ? '#be185d' : '#475569',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {dept}
+                        </button>
+                      ))}
+                    </div>
                     <input
                       type="text"
                       value={editForm.branch || editForm.department || ''}
                       onChange={(e) => setEditForm({ ...editForm, branch: e.target.value, department: e.target.value })}
+                      placeholder="e.g. CSE, IT, AI&DS"
                       required
                     />
                   </div>
