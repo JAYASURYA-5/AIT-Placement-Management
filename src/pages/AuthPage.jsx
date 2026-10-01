@@ -106,12 +106,10 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
 
     setIsLoading(true);
 
-    const email = formData.emailOrReg.includes('@')
-      ? formData.emailOrReg.trim()
-      : `${formData.emailOrReg.trim()}@ait.edu.in`;
+    const identifier = formData.emailOrReg.trim();
 
     // ── Handle Login Mode Only (Strict Student Verification) ──
-    const res = await loginWithFirebase(email, formData.password, selectedRole);
+    const res = await loginWithFirebase(identifier, formData.password, selectedRole);
 
     setIsLoading(false);
 
@@ -161,16 +159,17 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
         <div className="auth-card">
           {/* Left Decorative Welcome Panel */}
           <div className="auth-left-panel">
-            <div className="auth-illustration-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px' }}>
-              <AITLogo size={84} />
+            <div className="auth-illustration-wrap">
+              <img 
+                src="/ait-login-logo.jpg" 
+                alt="AIT College Logo" 
+                className="auth-logo-image"
+              />
             </div>
 
             <h2 className="auth-welcome-title">
               Welcome Back!
             </h2>
-            <p className="auth-welcome-subtitle">
-              Login to access your role-specific dashboard & placement management tools.
-            </p>
           </div>
 
           {/* Right Form Panel */}
@@ -189,21 +188,6 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
               ))}
             </div>
 
-            {/* Access Notice */}
-            {selectedRole === 'Student' && (
-              <div style={{
-                padding: '10px 12px',
-                borderRadius: '8px',
-                backgroundColor: '#f0fdf4',
-                color: '#166534',
-                border: '1px solid #bbf7d0',
-                fontSize: '12px',
-                fontWeight: '600',
-                marginBottom: '14px'
-              }}>
-                🔒 <strong>Restricted Access:</strong> Only selected & nominated students have access to the student portal.
-              </div>
-            )}
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="auth-form">
@@ -332,11 +316,7 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
                     )}
                   </button>
                 </div>
-                {selectedRole === 'Student' && (
-                  <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '4px', fontWeight: '500' }}>
-                    💡 Selected Students: Password is your <strong>Register Number</strong> (e.g. 710123205020)
-                  </div>
-                )}
+
               </div>
 
               {/* Options Row */}

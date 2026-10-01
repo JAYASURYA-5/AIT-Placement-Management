@@ -25,6 +25,8 @@ export default function App() {
   });
 
   const [authRole, setAuthRole] = useState('Student');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
   const [user, setUser] = useState(() => {
     try {
       const savedProfile = JSON.parse(localStorage.getItem('ait-profile') || '{}');
@@ -198,24 +200,54 @@ export default function App() {
     );
   }
 
+
+
   if (currentScreen === 'admin') {
     return (
-      <AdminDashboard
-        onLogout={() => {
-          setCurrentScreen('landing');
-          showToast('👋 Logged out of Admin Portal.');
-        }}
-      />
+      <div className={`admin-layout-wrapper ${isAdminMenuOpen ? 'menu-open' : ''}`}>
+        <button 
+          className="admin-mobile-menu-btn"
+          onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
+        >
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        {isAdminMenuOpen && (
+          <div className="admin-sidebar-overlay" onClick={() => setIsAdminMenuOpen(false)} />
+        )}
+        <div onClick={() => { if(isAdminMenuOpen) setIsAdminMenuOpen(false) }}>
+          <AdminDashboard
+            onLogout={() => {
+              setCurrentScreen('landing');
+              showToast('👋 Logged out of Admin Portal.');
+            }}
+            onNavChange={() => setIsAdminMenuOpen(false)}
+          />
+        </div>
+      </div>
     );
   }
 
   return (
     <div className="app-container">
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div className="mobile-sidebar-overlay" onClick={() => setIsMobileMenuOpen(false)} />
+      )}
+
       {/* Left Feature Navigation Sidebar */}
       <Sidebar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
+          setIsMobileMenuOpen(false); // Close menu on select
+        }}
         onLogout={handleLogout}
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
       />
 
       {/* Main Content Dashboard Shell */}
@@ -226,6 +258,7 @@ export default function App() {
           notifications={notifications}
           setActiveTab={setActiveTab}
           onLogout={handleLogout}
+          onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         />
 
         {/* Dynamic View rendering depending on active left feature menu */}

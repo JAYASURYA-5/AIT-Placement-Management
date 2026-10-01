@@ -284,7 +284,7 @@ export default function PlacementStatistics({ onNavigate, onLogout }) {
           display: 'flex',
           flexDirection: 'column',
           padding: '32px 20px',
-          flexShrink: 0,
+          flexShrink: 0, alignSelf: 'flex-start', position: 'sticky', top: '24px',
           borderRadius: '24px',
           margin: '12px 0 16px 20px',
           boxShadow: '0 12px 36px rgba(0,0,0,0.22)'

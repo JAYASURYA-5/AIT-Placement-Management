@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SearchIcon, BellIcon, ChevronDownIcon, ProfileIcon, SettingsIcon, LogoutIcon } from './Icons';
 import { fetchNotificationsForStudent } from '../firebase';
 
-export default function Header({ searchQuery, setSearchQuery, notifications: propNotifications, setActiveTab, onLogout }) {
+export default function Header({ searchQuery, setSearchQuery, notifications: propNotifications, setActiveTab, onLogout, onMenuToggle }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [liveNotifications, setLiveNotifications] = useState([]);
@@ -95,12 +95,24 @@ export default function Header({ searchQuery, setSearchQuery, notifications: pro
 
   return (
     <header className="top-header">
-      {/* Search Input Bar */}
-      <div className="search-container">
-        <div className="search-icon-wrapper">
-          <SearchIcon />
-        </div>
-        <input
+      {/* Mobile Menu Toggle & Search Input Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+        <button 
+          className="mobile-menu-btn" 
+          onClick={onMenuToggle}
+          title="Toggle Menu"
+        >
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <div className="search-container">
+          <div className="search-icon-wrapper">
+            <SearchIcon />
+          </div>
+          <input
           type="text"
           className="search-input"
           placeholder="Search drives, companies..."
@@ -108,7 +120,8 @@ export default function Header({ searchQuery, setSearchQuery, notifications: pro
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
-
+      </div>
+      
       {/* Right Header Actions */}
       <div className="header-right">
         {/* Notifications Icon Button */}

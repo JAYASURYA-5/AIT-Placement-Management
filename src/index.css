@@ -284,7 +284,7 @@ body {
 }
 
 .search-icon-wrapper {
-  position: absolute;
+  position: fixed !important;
   left: 16px;
   top: 50%;
   transform: translateY(-50%);
@@ -322,7 +322,7 @@ body {
 }
 
 .notification-badge {
-  position: absolute;
+  position: fixed !important;
   top: 8px;
   right: 8px;
   width: 9px;
@@ -680,7 +680,7 @@ body {
 
 /* Dropdowns & Popups */
 .dropdown-menu {
-  position: absolute;
+  position: fixed !important;
   top: 100%;
   right: 0;
   margin-top: 8px;
@@ -759,9 +759,9 @@ body {
 }
 
 .modal-close-btn {
-  position: absolute;
+  position: fixed !important;
   top: 20px;
-  right: 20px;
+  left: 20px;
   background: none;
   border: none;
   color: var(--text-muted);
@@ -953,7 +953,7 @@ body {
 }
 
 .scanner-doc-line {
-  position: absolute;
+  position: fixed !important;
   left: 0;
   width: 100%;
   height: 4px;
@@ -1009,7 +1009,7 @@ body {
 }
 
 .gauge-score-text {
-  position: absolute;
+  position: fixed !important;
   bottom: 0px;
   left: 50%;
   transform: translateX(-50%);
@@ -1337,7 +1337,7 @@ body {
 }
 
 .donut-inner-text {
-  position: absolute;
+  position: fixed !important;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -1798,16 +1798,6 @@ body {
   body {
     padding: 8px;
   }
-  .app-container {
-    flex-direction: column;
-    border-radius: 16px;
-  }
-  .sidebar {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--border-light);
-    padding: 16px;
-  }
   .drives-grid, .prep-grid, .stats-grid {
     grid-template-columns: 1fr;
   }
@@ -1841,7 +1831,7 @@ body {
   
   /* Force preview card to act as the raw printable page */
   .resume-preview-card {
-    position: absolute;
+    position: fixed !important;
     left: 0;
     top: 0;
     width: 210mm;
@@ -2656,7 +2646,7 @@ body {
 
 /* Clear (X) button inside search */
 .alumni-search-clear {
-  position: absolute;
+  position: fixed !important;
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
@@ -2742,7 +2732,7 @@ body {
 
 /* Featured indicator dot */
 .alumni-featured-dot {
-  position: absolute;
+  position: fixed !important;
   bottom: 2px;
   right: 2px;
   width: 12px;
@@ -4009,7 +3999,7 @@ body:has(.lp-root) #root {
 }
 .lp-hero-title--highlight::after {
   content: '';
-  position: absolute;
+  position: fixed !important;
   left: 0;
   bottom: -4px;
   width: 100%;
@@ -4064,7 +4054,7 @@ body:has(.lp-root) #root {
   box-shadow: 0 20px 60px rgba(0,0,0,0.14);
 }
 .lp-hero-image-glow {
-  position: absolute;
+  position: fixed !important;
   inset: -20px;
   background: radial-gradient(ellipse at center, rgba(76,21,54,0.12) 0%, transparent 70%);
   border-radius: 30px;
@@ -4080,7 +4070,7 @@ body:has(.lp-root) #root {
 
 /* Floating badges on hero */
 .lp-hero-float-badge {
-  position: absolute;
+  position: fixed !important;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -4282,12 +4272,12 @@ body:has(.lp-root) #root {
   flex-wrap: wrap;
 }
 .lp-cta-decoration {
-  position: absolute;
+  position: fixed !important;
   inset: 0;
   pointer-events: none;
 }
 .lp-cta-circle {
-  position: absolute;
+  position: fixed !important;
   border-radius: 50%;
   background: rgba(255,255,255,0.05);
 }
@@ -4662,7 +4652,7 @@ body:has(.auth-page-root) #root {
 }
 
 .auth-eye-btn {
-  position: absolute;
+  position: fixed !important;
   right: 12px;
   background: none;
   border: none;
@@ -5191,7 +5181,7 @@ body:has(.auth-page-root) #root {
   opacity: 1;
 }
 .db-tip-decoration {
-  position: absolute;
+  position: fixed !important;
   right: -30px;
   top: -30px;
   width: 160px;
@@ -5996,7 +5986,7 @@ body:has(.auth-page-root) #root {
 
 .timeline-item::before {
   content: '';
-  position: absolute;
+  position: fixed !important;
   left: 5px;
   top: 14px;
   bottom: -20px;
@@ -6697,4 +6687,297 @@ body:has(.auth-page-root) #root {
   background: var(--color-plum);
   color: #ffffff;
   border-color: var(--color-plum);
+}
+
+/* 📱 Mobile Menu Layout for Student Portal */
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: #2D2529;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.mobile-menu-btn:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.mobile-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(2px);
+  z-index: 1040;
+}
+
+@media (max-width: 1024px) {
+  .mobile-menu-btn {
+    display: flex;
+  }
+  
+  .sidebar {
+    position: fixed !important;
+    left: -280px;
+    top: 0;
+    bottom: 0;
+    z-index: 1050;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+    width: 260px !important;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .mobile-sidebar-overlay {
+    display: block;
+  }
+}
+
+/* 📱 Mobile Menu for Admin Portal */
+.admin-mobile-menu-btn {
+  display: none;
+  position: fixed !important;
+  top: 20px;
+  left: 20px;
+  z-index: 2001;
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.admin-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(2px);
+  z-index: 1040;
+}
+
+@media (max-width: 1024px) {
+  .admin-mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .admin-layout-wrapper {
+    position: relative;
+  }
+
+  /* Make the flex container column so main content takes full width */
+  .admin-layout-wrapper div[style*="display: flex"][style*="minHeight: 0"] {
+    flex-direction: column !important;
+  }
+
+  /* The main right content area */
+  .admin-layout-wrapper main {
+    margin: 12px 16px 0 16px !important;
+    width: auto !important;
+  }
+
+  /* The sidebar */
+  .admin-layout-wrapper aside {
+    position: fixed !important;
+    left: -280px;
+    top: 0;
+    bottom: 0;
+    z-index: 1050;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 10px 0 30px rgba(0,0,0,0.1) !important;
+    margin: 0 !important;
+    border-radius: 0 24px 24px 0 !important;
+  }
+
+  .admin-layout-wrapper.menu-open aside {
+    left: 0 !important;
+  }
+
+  .admin-layout-wrapper.menu-open .admin-sidebar-overlay {
+    display: block;
+  }
+}
+
+/* Global Admin Responsive Fixes */
+@media (max-width: 1024px) {
+  /* Force all inline grids in the admin area to be single column on mobile */
+  .admin-layout-wrapper main div[style*="display: grid"] {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* Make sure admin main area padding is smaller */
+  .admin-layout-wrapper main {
+    padding: 16px !important;
+  }
+
+  /* Make all tables scrollable horizontally so they don't break the page width */
+  .admin-layout-wrapper main table {
+    display: block !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    width: 100% !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Ensure table headers and cells don't shrink too much */
+  .admin-layout-wrapper main th,
+  .admin-layout-wrapper main td {
+    min-width: 120px;
+  }
+
+  /* Fix for the SVG line chart wrapper to not overflow */
+  .admin-layout-wrapper main svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Fix absolute positioning of tooltip or overlays inside charts */
+  .admin-layout-wrapper main .activity-item-hover {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  /* Fix search bars and filters rows (which use inline flex rows) */
+  .admin-layout-wrapper main > div[style*="display: flex"][style*="justifyContent: space-between"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 16px !important;
+  }
+
+  .admin-layout-wrapper main .stat-card-glass {
+    padding: 16px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .admin-layout-wrapper > div > div > div:first-of-type {
+    padding-left: 74px !important;
+  }
+}
+
+/* Prevent accidental horizontal mouse-scrolling on mobile */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+.app-container {
+  max-width: 100%;
+}
+
+/* Force mobile layout to not overflow horizontally */
+@media (max-width: 1024px) {
+  .app-container, .main-wrapper, .admin-layout-wrapper, .admin-layout-wrapper > div {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Ensure grids wrap */
+  .stats-grid, .drives-grid, .prep-grid, .db-row, .db-row-2col, .db-quick-grid {
+    max-width: 100% !important;
+  }
+  
+  /* Allow vertical scrolling on main wrapper but explicitly kill horizontal */
+  .main-wrapper {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    width: 100% !important;
+    padding: 16px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  /* If the top header has action buttons, make them stack vertically so they don't squish the title */
+  .admin-layout-wrapper > div > div > div:first-of-type[style*="display: flex"] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+  }
+  
+  /* Make the action buttons group wrap its buttons on very small screens */
+  .admin-layout-wrapper > div > div > div:first-of-type > div:last-child {
+    flex-wrap: wrap !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .admin-grid-4, .admin-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  /* On mobile, hide the inline aside (it's handled by fixed positioning already),
+     so the main content fills full width */
+  .admin-layout-wrapper div[style*="display: flex"][style*="minHeight: 0"] > aside {
+    display: none !important;
+  }
+
+  /* Make the main content fill full width when sidebar is hidden */
+  .admin-layout-wrapper div[style*="display: flex"][style*="minHeight: 0"] > main {
+    flex: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 12px 16px 24px 16px !important;
+  }
+
+  /* But when menu is open, the aside slides in via fixed position - that's fine */
+}
+
+@media (max-width: 1024px) {
+  /* When the menu is open, restore the sidebar so it's not just a plain black box */
+  .admin-layout-wrapper.menu-open div[style*="display: flex"][style*="minHeight: 0"] > aside {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Hide the student name/role on mobile, keep only the avatar */
+  .profile-details {
+    display: none !important;
+  }
+  .profile-chip {
+    padding: 6px !important;
+  }
+
+  /* Make the header allow wrapping so search bar can drop to a new line */
+  .top-header {
+    flex-wrap: wrap !important;
+    margin-bottom: 16px !important;
+  }
+  
+  /* The container holding the hamburger and search bar */
+  .top-header > div:first-child {
+    flex-wrap: wrap !important;
+    min-width: 100%;
+  }
+
+  /* Force the search bar to drop to its own full-width row */
+  .search-container {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    margin-top: 4px !important;
+    order: 3;
+  }
+
+  /* Push the header-right (bell & profile) to the top right */
+  .header-right {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+  }
 }
