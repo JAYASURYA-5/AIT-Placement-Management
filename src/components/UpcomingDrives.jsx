@@ -56,7 +56,12 @@ export default function UpcomingDrives({ drives, onApply, onViewCalendar }) {
             <div className="drive-top">
               <div
                 className="company-logo"
-                style={{ backgroundColor: drive.logoBg, color: drive.logoColor }}
+                style={{
+                  backgroundColor: drive.logoBg,
+                  color: drive.logoColor,
+                  fontSize: drive.logoText && drive.logoText.length > 5 ? '10px' : drive.logoText && drive.logoText.length > 4 ? '12px' : '15px',
+                  letterSpacing: drive.logoText && drive.logoText.length > 5 ? '-0.4px' : 'normal',
+                }}
               >
                 {drive.logoText}
               </div>

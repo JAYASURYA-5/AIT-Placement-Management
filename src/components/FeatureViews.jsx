@@ -1,32 +1,26 @@
-import React, { useState, useEffect, useRef } from 'react';
-import avatarMale   from '../assets/avatar_male.jpg';
-import avatarFemale from '../assets/avatar_female.jpg';
-import avatarOther  from '../assets/avatar_other.jpg';
+import React, { useState, useEffect } from 'react';
+import ApplicationsPage from '../pages/Applications';
+import DriveCalendarPage from '../pages/DriveCalendar';
+import ProfilePage from '../pages/Profile';
+import SettingsPage from '../pages/Settings';
+import ChatbotView from './ChatbotWidget';
+import { fetchUsersFromFirestore, fetchNotificationsForStudent, markNotificationAsReadInFirestore } from '../firebase';
+import '../index.css';
 import {
   ProfileIcon,
-  ApplicationsIcon,
-  CalendarIcon,
   AssessmentsIcon,
   ResumeIcon,
   TrainingIcon,
   MockInterviewIcon,
   CertificatesIcon,
-  LeaderboardIcon,
-  StatsIcon,
   DocumentsIcon,
-  SettingsIcon,
-  CheckIcon,
   SparklesIcon,
   UploadIcon,
-  FilePdfIcon,
-  KeyIcon,
   InfoIcon,
   RefreshIcon,
   DownloadIcon,
   CodeIcon,
   ResourcesIcon,
-  ChatbotIcon,
-  SparklesIcon as SparklesIconAlias,
   AlumniIcon,
   BellIcon
 } from './Icons';
@@ -869,416 +863,39 @@ function CertificatesView() {
   );
 }
 
-// ─── Standalone Company Details Component ───────────────────────────────
-function CompanyDetailsView({ onApplyDrive }) {
-  const [selectedCompanyId, setSelectedCompanyId] = useState('zoho');
-  const [activeSubTab, setActiveSubTab] = useState('about');
-  const [appliedCompanies, setAppliedCompanies] = useState({});
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [toastMsg, setToastMsg] = useState(null);
-
-  const showToast = (msg) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 3500);
-  };
-
-  const companiesData = {
-    zoho: {
-      id: 'zoho',
-      name: 'Zoho Corporation',
-      logoText: 'zoho',
-      tags: ['IT Services', 'Product Based', 'Chennai'],
-      ctc: '12 LPA',
-      jobRole: 'Software Developer',
-      experience: '0 - 2 Years',
-      batch: '2023 - 2027',
-      aboutText: 'Zoho is a global technology company that builds business software to help organizations run their business better. We are leading the passionaries and innovators individuals to build the future with us.',
-      officeImageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80',
-      eligibility: {
-        minCgpa: '7.5 CGPA & above',
-        branches: ['CSE', 'IT', 'ECE', 'EEE', 'AIDS'],
-        backlogs: 'Max 0 Active Backlogs',
-        skills: ['Java / C++', 'Data Structures', 'OOP Concepts', 'RDBMS / SQL']
-      },
-      process: [
-        { round: 'Round 1', name: 'General Aptitude & C Programming', duration: '90 mins' },
-        { round: 'Round 2', name: 'Basic Programming (5 Problems)', duration: '120 mins' },
-        { round: 'Round 3', name: 'Advanced Programming & App Building', duration: '150 mins' },
-        { round: 'Round 4', name: 'Technical & HR Discussion', duration: '45 mins' }
-      ],
-      cutoffs: [
-        { year: '2024', placed: 42, avgCtc: '12.0 LPA', highestCtc: '15.0 LPA' },
-        { year: '2023', placed: 35, avgCtc: '10.5 LPA', highestCtc: '14.0 LPA' },
-        { year: '2022', placed: 28, avgCtc: '9.0 LPA', highestCtc: '12.0 LPA' }
-      ],
-      reviews: [
-        { name: 'Karthik Raja (Placed 2024)', rating: 5, comment: 'Focus heavily on Round 2 basic programming problems! Clean code and edge case coverage matter most.' },
-        { name: 'Sneha M (Placed 2023)', rating: 5, comment: 'Great product environment and learning curve for freshers. Interviewers are very supportive.' }
-      ]
-    },
-    amazon: {
-      id: 'amazon',
-      name: 'Amazon',
-      logoText: 'Amazon',
-      tags: ['E-Commerce', 'Product Based', 'Bengaluru'],
-      ctc: '28 LPA',
-      jobRole: 'Software Development Engineer (SDE-1)',
-      experience: '0 - 1 Years',
-      batch: '2023 - 2027',
-      aboutText: 'Amazon is guided by four principles: customer obsession rather than competitor focus, passion for invention, commitment to operational excellence, and long-term thinking.',
-      officeImageUrl: 'https://images.unsplash.com/photo-1554469384-e58fac16e23a?auto=format&fit=crop&w=800&q=80',
-      eligibility: {
-        minCgpa: '8.0 CGPA & above',
-        branches: ['CSE', 'IT', 'ECE'],
-        backlogs: 'No Standing Backlogs',
-        skills: ['Data Structures', 'Algorithms', 'System Design', 'Java / Python']
-      },
-      process: [
-        { round: 'Round 1', name: 'Online Assessment (Debugging & DSA)', duration: '100 mins' },
-        { round: 'Round 2', name: 'Technical Interview I (DSA & Coding)', duration: '60 mins' },
-        { round: 'Round 3', name: 'Technical Interview II (System Design)', duration: '60 mins' },
-        { round: 'Round 4', name: 'Bar Raiser & Leadership Principles', duration: '60 mins' }
-      ],
-      cutoffs: [
-        { year: '2024', placed: 12, avgCtc: '28.0 LPA', highestCtc: '44.0 LPA' },
-        { year: '2023', placed: 8, avgCtc: '26.0 LPA', highestCtc: '40.0 LPA' }
-      ],
-      reviews: [
-        { name: 'Arun Kumar (Placed 2024)', rating: 5, comment: 'Prepare Amazon Leadership Principles with STAR method stories thoroughly!' }
-      ]
-    },
-    microsoft: {
-      id: 'microsoft',
-      name: 'Microsoft',
-      logoText: 'Microsoft',
-      tags: ['Cloud & Software', 'Product Based', 'Hyderabad'],
-      ctc: '45 LPA',
-      jobRole: 'Software Engineer',
-      experience: '0 - 1 Years',
-      batch: '2023 - 2027',
-      aboutText: 'Microsoft enables digital transformation for the era of an intelligent cloud and an intelligent edge. Our mission is to empower every person and every organization on the planet to achieve more.',
-      officeImageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80',
-      eligibility: {
-        minCgpa: '8.5 CGPA & above',
-        branches: ['CSE', 'IT'],
-        backlogs: 'No Active Backlogs',
-        skills: ['DSA', 'Object Oriented Design', 'C# / C++', 'Cloud Concepts']
-      },
-      process: [
-        { round: 'Round 1', name: 'Online Coding Test (3 Medium/Hard DSA)', duration: '90 mins' },
-        { round: 'Round 2', name: 'Technical Round 1 (Data Structures)', duration: '60 mins' },
-        { round: 'Round 3', name: 'Technical Round 2 (System Architecture)', duration: '60 mins' },
-        { round: 'Round 4', name: 'AA Round (Appropriateness & Fit)', duration: '45 mins' }
-      ],
-      cutoffs: [
-        { year: '2024', placed: 6, avgCtc: '45.0 LPA', highestCtc: '51.0 LPA' }
-      ],
-      reviews: [
-        { name: 'Priya S (Placed 2024)', rating: 5, comment: 'Strong grasp of tree & graph algorithms is mandatory. Interviewers analyze code readability!' }
-      ]
-    }
-  };
-
-  const currentCompany = companiesData[selectedCompanyId] || companiesData.zoho;
-  const isApplied = appliedCompanies[currentCompany.id];
-
-  const handleApplyClick = () => {
-    if (isApplied) {
-      showToast(`ℹ️ You have already applied for ${currentCompany.name}.`);
-      return;
-    }
-    setAppliedCompanies(prev => ({ ...prev, [currentCompany.id]: true }));
-    showToast(`🎉 Application submitted successfully for ${currentCompany.name} (${currentCompany.jobRole})!`);
-    if (onApplyDrive) {
-      onApplyDrive({ company: currentCompany.name, role: currentCompany.jobRole, ctc: currentCompany.ctc });
-    }
-  };
-
-  const subTabs = [
-    { id: 'about', label: 'About' },
-    { id: 'eligibility', label: 'Eligibility' },
-    { id: 'process', label: 'Process' },
-    { id: 'cutoff', label: 'Previous Year Cutoff' },
-    { id: 'reviews', label: 'Reviews' },
-  ];
-
-  return (
-    <div className="company-details-container">
-      {/* Toast */}
-      {toastMsg && (
-        <div style={{
-          position: 'fixed', bottom: '28px', right: '100px',
-          backgroundColor: 'var(--primary-maroon)', color: '#fff',
-          padding: '12px 20px', borderRadius: '14px',
-          fontWeight: '700', fontSize: '13.5px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-          zIndex: 3000, animation: 'fadeIn 0.2s ease-out',
-        }}>
-          {toastMsg}
-        </div>
-      )}
-
-      {/* Main Company Card Panel */}
-      <div className="company-card-panel">
-        {/* Section title & Company switcher bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
-            Company Details
-          </h2>
-
-          {/* Selector to switch between companies */}
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <span style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--text-muted)' }}>Select Drive:</span>
-            {Object.values(companiesData).map(comp => (
-              <button
-                key={comp.id}
-                onClick={() => setSelectedCompanyId(comp.id)}
-                style={{
-                  padding: '6px 14px', borderRadius: '8px', border: '1px solid',
-                  borderColor: selectedCompanyId === comp.id ? 'var(--primary-maroon)' : 'var(--border-medium)',
-                  backgroundColor: selectedCompanyId === comp.id ? 'var(--primary-maroon-light)' : 'white',
-                  color: selectedCompanyId === comp.id ? 'var(--primary-maroon)' : 'var(--text-muted)',
-                  fontSize: '12.5px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.18s ease'
-                }}
-              >
-                {comp.name.split(' ')[0]}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Company Header Row */}
-        <div className="company-header-row">
-          {/* Logo badge */}
-          {currentCompany.id === 'zoho' ? (
-            <div style={{
-              width: '76px', height: '60px', borderRadius: '14px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              backgroundColor: '#fff', border: '1px solid #EDE8F5',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.06)', padding: '4px', flexShrink: 0
-            }}>
-              {/* ZOHO colorful letter logo box */}
-              <div style={{ display: 'flex', gap: '2px', fontWeight: '900', fontSize: '15px' }}>
-                <span style={{ backgroundColor: '#E11D48', color: '#fff', padding: '4px 6px', borderRadius: '6px' }}>Z</span>
-                <span style={{ backgroundColor: '#F59E0B', color: '#fff', padding: '4px 6px', borderRadius: '6px' }}>O</span>
-                <span style={{ backgroundColor: '#10B981', color: '#fff', padding: '4px 6px', borderRadius: '6px' }}>H</span>
-                <span style={{ backgroundColor: '#3B82F6', color: '#fff', padding: '4px 6px', borderRadius: '6px' }}>O</span>
-              </div>
-            </div>
-          ) : (
-            <div className="company-logo-box" style={{ backgroundColor: currentCompany.id === 'amazon' ? '#FF9900' : '#00A4EF' }}>
-              {currentCompany.name.slice(0, 2).toUpperCase()}
-            </div>
-          )}
-
-          {/* Name & Tags */}
-          <div className="company-title-area">
-            <h3 className="company-name-heading">{currentCompany.name}</h3>
-            <div className="company-tags-row">
-              {currentCompany.tags.map((tag, idx) => (
-                <span key={idx} className="company-tag-chip">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Bookmark Button */}
-          <button
-            onClick={() => {
-              setIsBookmarked(!isBookmarked);
-              showToast(isBookmarked ? `Removed ${currentCompany.name} from bookmarks` : `Saved ${currentCompany.name} to bookmarks!`);
-            }}
-            style={{
-              border: '1px solid var(--border-medium)', background: isBookmarked ? '#FEF3C7' : 'white',
-              borderRadius: '12px', padding: '10px 14px', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '700',
-              color: isBookmarked ? '#D97706' : 'var(--text-muted)'
-            }}
-          >
-            {isBookmarked ? '★ Bookmarked' : '☆ Bookmark'}
-          </button>
-        </div>
-
-        {/* 4-Column Metric Summary Grid */}
-        <div className="company-metrics-grid">
-          <div className="company-metric-cell">
-            <span className="company-metric-label">CTC</span>
-            <span className="company-metric-value">{currentCompany.ctc}</span>
-          </div>
-          <div className="company-metric-cell">
-            <span className="company-metric-label">Job Role</span>
-            <span className="company-metric-value">{currentCompany.jobRole}</span>
-          </div>
-          <div className="company-metric-cell">
-            <span className="company-metric-label">Experience</span>
-            <span className="company-metric-value">{currentCompany.experience}</span>
-          </div>
-          <div className="company-metric-cell">
-            <span className="company-metric-label">Batch</span>
-            <span className="company-metric-value">{currentCompany.batch}</span>
-          </div>
-        </div>
-
-        {/* Sub Tabs Navigation */}
-        <div className="company-tabs-nav">
-          {subTabs.map(tab => (
-            <button
-              key={tab.id}
-              className={`company-tab-btn ${activeSubTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveSubTab(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content */}
-        {activeSubTab === 'about' && (
-          <div>
-            <div className="company-about-content">
-              {/* About Text */}
-              <div className="company-about-text">
-                {currentCompany.aboutText}
-              </div>
-
-              {/* Office Image */}
-              <div className="company-office-image-box">
-                <img
-                  src={currentCompany.officeImageUrl}
-                  alt={`${currentCompany.name} office`}
-                  onError={(e) => {
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80';
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Apply Now Button */}
-            <div className="company-apply-btn-wrapper">
-              <button
-                className={`company-btn-apply-main ${isApplied ? 'applied' : ''}`}
-                onClick={handleApplyClick}
-              >
-                {isApplied ? '✓ Applied' : 'Apply Now'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {activeSubTab === 'eligibility' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: '#FAF6F0', border: '1px solid var(--border-light)' }}>
-              <h4 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--primary-maroon)', marginBottom: '12px' }}>Academic Requirements</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
-                <div><strong>CGPA Cutoff:</strong> {currentCompany.eligibility.minCgpa}</div>
-                <div><strong>Backlog Criteria:</strong> {currentCompany.eligibility.backlogs}</div>
-                <div><strong>Eligible Batches:</strong> {currentCompany.batch}</div>
-              </div>
-            </div>
-
-            <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: '#FAF6F0', border: '1px solid var(--border-light)' }}>
-              <h4 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--primary-maroon)', marginBottom: '12px' }}>Required Technical Skills</h4>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {currentCompany.eligibility.skills.map((skill, idx) => (
-                  <span key={idx} style={{ padding: '6px 12px', borderRadius: '8px', backgroundColor: 'var(--primary-maroon-light)', color: 'var(--primary-maroon)', fontWeight: '700', fontSize: '12.5px' }}>
-                    ✓ {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeSubTab === 'process' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {currentCompany.process.map((p, idx) => (
-              <div key={idx} style={{
-                padding: '16px 20px', borderRadius: '14px', backgroundColor: '#FAF6F0',
-                border: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <span style={{
-                    width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--primary-maroon)',
-                    color: '#fff', fontWeight: '800', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                  }}>
-                    {idx + 1}
-                  </span>
-                  <div>
-                    <h5 style={{ fontSize: '14.5px', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>{p.round}: {p.name}</h5>
-                    <span style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>Duration: {p.duration}</span>
-                  </div>
-                </div>
-                <span style={{ fontSize: '12px', fontWeight: '700', color: '#16A34A', backgroundColor: '#DCFCE7', padding: '4px 10px', borderRadius: '6px' }}>
-                  Mandatory Round
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {activeSubTab === 'cutoff' && (
-          <div>
-            <h4 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--primary-maroon)', marginBottom: '16px' }}>Past Placement Records at AIT</h4>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13.5px' }}>
-              <thead>
-                <tr style={{ backgroundColor: '#FAF6F0', borderBottom: '2px solid var(--border-light)' }}>
-                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: '800' }}>Year</th>
-                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: '800' }}>Students Placed</th>
-                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: '800' }}>Average Package</th>
-                  <th style={{ padding: '12px', textAlign: 'left', fontWeight: '800' }}>Highest Package</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentCompany.cutoffs.map((row, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                    <td style={{ padding: '12px', fontWeight: '700' }}>{row.year}</td>
-                    <td style={{ padding: '12px', fontWeight: '700', color: 'var(--primary-maroon)' }}>{row.placed} Students</td>
-                    <td style={{ padding: '12px' }}>{row.avgCtc}</td>
-                    <td style={{ padding: '12px', fontWeight: '800', color: '#16A34A' }}>{row.highestCtc}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {activeSubTab === 'reviews' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {currentCompany.reviews.map((rev, idx) => (
-              <div key={idx} style={{ padding: '18px', borderRadius: '14px', backgroundColor: '#FAF6F0', border: '1px solid var(--border-light)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontWeight: '800', fontSize: '14px', color: 'var(--primary-maroon)' }}>{rev.name}</span>
-                  <span style={{ color: '#F59E0B', fontWeight: '800' }}>{'★'.repeat(rev.rating)}</span>
-                </div>
-                <p style={{ fontSize: '13.5px', color: 'var(--text-main)', margin: 0, lineHeight: 1.5 }}>"{rev.comment}"</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // ─── Standalone Alumni Network Component ───────────────────────────────
 function AlumniView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeBatch, setActiveBatch] = useState('All');
   const [connected, setConnected] = useState({});
+  const [allAlumni, setAllAlumni] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const batches = ['All', '2017 Batch', '2018 Batch', '2019 Batch', '2020 Batch', '2021 Batch'];
+  const batches = ['All', '2017 Batch', '2018 Batch', '2019 Batch', '2020 Batch', '2021 Batch', '2022 Batch', '2023 Batch', '2024 Batch', '2025 Batch'];
 
-  const allAlumni = [
-    { id: 1, name: 'Rahul R', role: 'Software Engineer', company: 'Google', batch: '2019 Batch', avatarBg: '#4F46E5', tag: 'Featured' },
-    { id: 2, name: 'Sneha M', role: 'Product Manager', company: 'Amazon', batch: '2018 Batch', avatarBg: '#D97706', tag: 'Featured' },
-    { id: 3, name: 'Arun Kumar', role: 'Data Scientist', company: 'Microsoft', batch: '2020 Batch', avatarBg: '#0EA5E9', tag: 'Featured' },
-    { id: 4, name: 'Priya S', role: 'Frontend Engineer', company: 'Flipkart', batch: '2021 Batch', avatarBg: '#EC4899', tag: '' },
-    { id: 5, name: 'Karthik V', role: 'DevOps Engineer', company: 'Zoho', batch: '2020 Batch', avatarBg: '#10B981', tag: '' },
-    { id: 6, name: 'Deepika R', role: 'ML Engineer', company: 'Infosys AI Lab', batch: '2019 Batch', avatarBg: '#8B5CF6', tag: '' },
-    { id: 7, name: 'Vikram N', role: 'Cloud Architect', company: 'TCS', batch: '2017 Batch', avatarBg: '#F59E0B', tag: '' },
-    { id: 8, name: 'Ananya K', role: 'UX Designer', company: 'Swiggy', batch: '2021 Batch', avatarBg: '#EF4444', tag: '' },
-  ];
+  useEffect(() => {
+    async function loadAlumni() {
+      setLoading(true);
+      const fsUsers = await fetchUsersFromFirestore();
+      if (fsUsers && fsUsers.length > 0) {
+        const bgColors = ['#4F46E5', '#D97706', '#0EA5E9', '#EC4899', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'];
+        const formatted = fsUsers.map((u, idx) => ({
+          id: u.id,
+          name: u.name || 'Alumni Member',
+          role: u.wishToWork || u.role || 'Software Engineer',
+          company: u.department || 'AIT Placements',
+          batch: u.yearOfPassing ? `${u.yearOfPassing} Batch` : 'Alumni',
+          avatarBg: bgColors[idx % bgColors.length],
+          tag: u.status === 'Active' ? 'Verified' : ''
+        }));
+        setAllAlumni(formatted);
+      } else {
+        setAllAlumni([]);
+      }
+      setLoading(false);
+    }
+    loadAlumni();
+  }, []);
 
   const filtered = allAlumni.filter(a => {
     const matchesBatch = activeBatch === 'All' || a.batch === activeBatch;
@@ -1409,651 +1026,12 @@ function AlumniView() {
   );
 }
 
-// ─── Standalone Chatbot Component (separate to satisfy Rules of Hooks) ────────
-function ChatbotView() {
-  const messagesEndRef = useRef(null);
-  const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [messages, setMessages] = useState([
-    { id: 1, sender: 'bot', text: 'Hello Jayasurya! How can I help you today?', time: '10:24 AM' },
-    { id: 2, sender: 'user', text: 'When is the next TCS drive?', time: '10:25 AM' },
-    { id: 3, sender: 'bot', text: 'The next TCS drive is on 20 July 2025. Online test will be conducted. Please check your dashboard for more details.', time: '10:25 AM' },
-    { id: 4, sender: 'user', text: 'How to improve my resume?', time: '10:26 AM' },
-    { id: 5, sender: 'bot', text: 'You can use our AI Resume Analyzer to get personalized suggestions.', time: '10:26 AM' }
-  ]);
+// ─── Standalone Resume View Component ─────────────────────────────────
+function ResumeView({ userName = 'Jayasurya K' }) {
+  const [subTab, setSubTab] = useState('checker');
 
-  const quickPrompts = [
-    'What is the next TCS drive?',
-    'How to improve my resume?',
-    'What companies are visiting this month?',
-    'How do I prepare for aptitude tests?',
-    'What is the cutoff CGPA for Infosys?'
-  ];
-
-  const getBotResponse = (query) => {
-    const q = query.toLowerCase();
-    if (q.includes('tcs') && (q.includes('drive') || q.includes('next') || q.includes('when')))
-      return 'The next TCS drive is on 20 July 2025. It includes an Online Test (Aptitude + Coding), TR, MR, and HR rounds. Registration closes on 18 July 2025.';
-    if (q.includes('resume') || q.includes('cv'))
-      return '🔍 Use the AI Resume Analyzer in the Resume Workspace tab! It gives ATS score, keyword analysis, and rewrites weak bullet points using the STAR method.';
-    if (q.includes('infosys') && (q.includes('cgpa') || q.includes('cutoff') || q.includes('eligibility')))
-      return '📋 Infosys eligibility: Minimum 6.5 CGPA, No active backlogs, 60% throughout academics. Drive is scheduled for 30 July 2025.';
-    if (q.includes('compan') || q.includes('visiting') || q.includes('this month'))
-      return '🏢 Companies visiting this month: TCS (20 Jul), Infosys (30 Jul), Zoho (25 Jul). Check Drive Calendar for full details and registration links.';
-    if (q.includes('aptitude') || q.includes('prepare') || q.includes('preparation'))
-      return '📚 To prepare for aptitude tests: (1) Practice on the Assessments tab, (2) Download the Aptitude Handbook from Resources, (3) Take the Daily MCQ test in Training. Aim for 80%+ accuracy!';
-    if (q.includes('zoho'))
-      return '🚀 Zoho drive is on 25 July 2025 for Software Developer roles. CTC: ₹6.5 LPA. Requirements: Strong coding skills, no arrears. Registration open on the dashboard!';
-    if (q.includes('wipro') || q.includes('elite'))
-      return '🔷 Wipro Elite drive is on 25 August 2025. Role: Elite Developer | CTC: ₹6.5 LPA. Rounds: Online Assessment → Technical Interview → HR Round.';
-    if (q.includes('mock interview') || q.includes('interview prep'))
-      return '🎤 Use the Mock Interview section to practice! It includes HR, Technical, and Behavioral question sets with top company-specific tips.';
-    if (q.includes('leaderboard') || q.includes('rank') || q.includes('ranking'))
-      return '🏆 Check the Leaderboard tab to see your ranking among peers based on training, assessments, and profile completeness.';
-    if (q.includes('hello') || q.includes('hi') || q.includes('hey'))
-      return '👋 Hello Jayasurya! I am your Placement Assistant. Ask me about upcoming drives, resume tips, interview preparation, company details, or placement statistics!';
-    if (q.includes('thank'))
-      return "😊 You're welcome! Best of luck with your placement journey. Feel free to ask anything anytime!";
-    return `I understand you're asking about "${query}". For detailed info, check the relevant section — Drives Calendar, Resume Workspace, Training, or Assessments. I'm also here for quick queries! 💡`;
-  };
-
-  const getTimeString = () =>
-    new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-
-  useEffect(() => {
-    if (messagesEndRef.current)
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
-
-  const sendMessage = (text) => {
-    const trimmed = (text !== undefined ? text : inputValue).trim();
-    if (!trimmed) return;
-    setMessages(prev => [...prev, { id: Date.now(), sender: 'user', text: trimmed, time: getTimeString() }]);
-    setInputValue('');
-    setIsTyping(true);
-    setTimeout(() => {
-      setMessages(prev => [...prev, { id: Date.now() + 1, sender: 'bot', text: getBotResponse(trimmed), time: getTimeString() }]);
-      setIsTyping(false);
-    }, 1200 + Math.random() * 600);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  };
-
-  const keyFeatures = [
-    'Placement Assistant chat interface with conversation history',
-    "Sample prompts: 'What is the next TCS drive?', 'How to improve my resume?'",
-    'AI response includes calendar data, drive details and resume tips inline',
-    'Type your message... input with send button; minimise / close controls'
-  ];
-
-  const BotSvg = ({ size = 16 }) => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: size, height: size }}>
-      <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7H3a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z" />
-      <path d="M7 14v4" /><path d="M17 14v4" /><path d="M9 18h6" />
-      <circle cx="9" cy="12" r="1" fill="currentColor" stroke="none" />
-      <circle cx="15" cy="12" r="1" fill="currentColor" stroke="none" />
-    </svg>
-  );
-
-  return (
-    <div className="feature-page-container">
-      {/* Page Header */}
-      <div className="chatbot-page-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span className="chatbot-badge-num">18</span>
-          <h2 style={{ fontSize: '22px', fontWeight: '800' }}>Chatbot / Support</h2>
-        </div>
-        <button className="chatbot-ai-tools-btn">
-          <SparklesIconAlias style={{ width: '15px', height: '15px' }} />
-          AI Tools
-        </button>
-      </div>
-
-      {/* Two-column layout */}
-      <div className="chatbot-layout">
-
-        {/* LEFT: Chat Panel */}
-        <div className="chatbot-panel">
-          {/* Panel Header */}
-          <div className="chatbot-header">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div className="chatbot-avatar-bot"><BotSvg size={20} /></div>
-              <div>
-                <div style={{ fontSize: '14px', fontWeight: '800', color: 'var(--text-main)' }}>Placement Assistant</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
-                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#22C55E', display: 'inline-block' }}></span>
-                  <span style={{ fontSize: '11px', fontWeight: '600', color: '#16A34A' }}>Online</span>
-                </div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <button className="chatbot-header-icon-btn" title="Save conversation">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '17px', height: '17px' }}>
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                  <polyline points="14 2 14 8 20 8" />
-                </svg>
-              </button>
-              <button className="chatbot-header-icon-btn" title="Clear chat" onClick={() => setMessages([{ id: Date.now(), sender: 'bot', text: 'Hello Jayasurya! How can I help you today?', time: getTimeString() }])}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '17px', height: '17px' }}>
-                  <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                </svg>
-              </button>
-              <button className="chatbot-header-icon-btn" title="Profile">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '17px', height: '17px' }}>
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Messages */}
-          <div className="chatbot-messages">
-            {messages.map(msg => (
-              <div key={msg.id} className={`chatbot-msg-row ${msg.sender}`}>
-                {msg.sender === 'bot' && <div className="chatbot-avatar-bot chatbot-msg-avatar"><BotSvg size={16} /></div>}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '72%' }}>
-                  <div className={`chatbot-bubble ${msg.sender}`}>{msg.text}</div>
-                  <span className="chatbot-timestamp">{msg.time}</span>
-                </div>
-                {msg.sender === 'user' && (
-                  <div className="chatbot-avatar-user chatbot-msg-avatar">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}>
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                  </div>
-                )}
-              </div>
-            ))}
-            {isTyping && (
-              <div className="chatbot-msg-row bot">
-                <div className="chatbot-avatar-bot chatbot-msg-avatar"><BotSvg size={16} /></div>
-                <div className="chatbot-bubble bot chatbot-typing">
-                  <span className="chatbot-dot"></span>
-                  <span className="chatbot-dot"></span>
-                  <span className="chatbot-dot"></span>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Quick Prompts */}
-          <div className="chatbot-quick-prompts">
-            {quickPrompts.slice(0, 3).map((p, i) => (
-              <button key={i} className="chatbot-quick-chip" onClick={() => sendMessage(p)}>{p}</button>
-            ))}
-          </div>
-
-          {/* Input Bar */}
-          <div className="chatbot-input-bar">
-            <input
-              type="text"
-              className="chatbot-input"
-              placeholder="Type your message..."
-              value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={isTyping}
-            />
-            <button className="chatbot-send-btn" onClick={() => sendMessage(undefined)} disabled={!inputValue.trim() || isTyping} title="Send">
-              <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: '18px', height: '18px' }}>
-                <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 19-7z" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* RIGHT: Key Features Panel */}
-        <div className="chatbot-features-panel">
-          <h3 className="chatbot-features-title">Key Features</h3>
-          <div className="chatbot-features-divider"></div>
-          <div className="chatbot-features-list">
-            {keyFeatures.map((feat, idx) => (
-              <div key={idx} className="chatbot-feature-item">
-                <span className="chatbot-feature-dot"></span>
-                <p className="chatbot-feature-text">{feat}</p>
-              </div>
-            ))}
-          </div>
-          <div className="chatbot-tip-card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-              <SparklesIconAlias style={{ width: '16px', height: '16px', color: 'var(--primary-maroon)' }} />
-              <span style={{ fontWeight: '800', fontSize: '13px', color: 'var(--primary-maroon)' }}>Pro Tip</span>
-            </div>
-            <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: '1.5', fontWeight: '500' }}>
-              Ask me about <strong>specific companies</strong> like TCS, Infosys, Zoho, Wipro — I'll give you drive dates, eligibility, and preparation tips instantly!
-            </p>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
-            <button className="chatbot-action-btn" onClick={() => sendMessage('What companies are visiting this month?')}>📅 Upcoming Drives</button>
-            <button className="chatbot-action-btn" onClick={() => sendMessage('How to improve my resume?')}>📄 Resume Help</button>
-            <button className="chatbot-action-btn" onClick={() => sendMessage('How do I prepare for aptitude tests?')}>📚 Preparation Tips</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function FeatureView({ activeTab, drives, setActiveTab, onApplyDrive, sharedProfile, setSharedProfile }) {
-  // ── Profile state ───────────────────────────────────────────────
-  const [profile, setProfile] = React.useState({
-    name: sharedProfile?.name || 'Jayasurya K',
-    regNo: '717822IT045',
-    degree: 'B.Tech - Information Technology',
-    year: 'IV Year',
-    department: 'Information Technology',
-    college: 'AIT Engineering College',
-    batch: '2022 - 2026',
-    cgpa: '8.74',
-    arrears: '0',
-    gender: sharedProfile?.gender || 'male',
-    email: 'jayasurya.k@ait.edu.in',
-    phone: '+91 98765 43210',
-    linkedin: 'linkedin.com/in/jayasuryak',
-    github: 'github.com/jayasuryak',
-  });
-
-  const [showEditModal, setShowEditModal] = React.useState(false);
-  const [editForm, setEditForm] = React.useState({ ...profile });
-
-  // Passport-style avatars: local generated images
-  const AVATARS = {
-    male:   avatarMale,
-    female: avatarFemale,
-    other:  avatarOther,
-  };
-  const avatarSrc = AVATARS[profile.gender] || AVATARS.male;
-  const previewAvatarSrc = AVATARS[editForm.gender] || AVATARS.male;
-
-  const handleSave = (e) => {
-    e.preventDefault();
-    setProfile({ ...editForm });
-    // Sync name + gender up to App so the header chip updates too
-    if (setSharedProfile) setSharedProfile({ name: editForm.name, gender: editForm.gender });
-    setShowEditModal(false);
-  };
-
-  const openEdit = () => {
-    setEditForm({ ...profile });
-    setShowEditModal(true);
-  };
-
-  // Modal overlay style
-  const overlayStyle = {
-    position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    zIndex: 3000, padding: '20px',
-  };
-  const modalStyle = {
-    backgroundColor: '#fff', borderRadius: '20px', padding: '32px',
-    width: '100%', maxWidth: '480px', maxHeight: '90vh', overflowY: 'auto',
-    boxShadow: '0 24px 60px rgba(0,0,0,0.2)',
-    border: '1px solid var(--border-light)',
-  };
-  const fieldStyle = {
-    display: 'flex', flexDirection: 'column', gap: '5px',
-  };
-  const labelStyle = {
-    fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px',
-  };
-  const inputStyle = {
-    padding: '9px 13px', borderRadius: '9px',
-    border: '1.5px solid var(--border-medium)',
-    fontSize: '13px', outline: 'none', fontFamily: 'var(--font-family)',
-    transition: 'border-color 0.2s',
-  };
-
-  if (activeTab === 'profile') {
-    return (
-      <div className="feature-page-container">
-
-        {/* ── Profile Header Card ── */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: '20px',
-          marginBottom: '24px', padding: '20px 24px',
-          border: '1.5px solid var(--border-light)', borderRadius: '16px',
-          backgroundColor: '#fff', boxShadow: 'var(--shadow-sm)',
-          position: 'relative',
-        }}>
-          {/* Passport-style Avatar */}
-          <div style={{
-            flexShrink: 0,
-            border: '2.5px solid var(--primary-maroon)',
-            borderRadius: '50%',
-            overflow: 'hidden',
-            width: '90px',
-            height: '90px',
-            boxShadow: '0 2px 10px rgba(76,21,54,0.15)',
-            backgroundColor: '#f0f0f0',
-          }}>
-            <img
-              src={avatarSrc}
-              alt={profile.name}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'top center',
-                display: 'block',
-              }}
-              onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=4C1536&color=fff&size=300`; }}
-            />
-          </div>
-
-          {/* Info */}
-          <div style={{ flex: 1 }}>
-            <h2 style={{ fontSize: '20px', fontWeight: '800', margin: '0 0 4px' }}>{profile.name}</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', fontWeight: '600', margin: '0 0 3px' }}>
-              {profile.degree} ({profile.year})
-            </p>
-            <p style={{ color: 'var(--primary-maroon)', fontSize: '12.5px', fontWeight: '700', margin: '0' }}>
-              Reg No: {profile.regNo} | CGPA: {profile.cgpa}
-            </p>
-          </div>
-
-          {/* Edit button */}
-          <button
-            onClick={openEdit}
-            style={{
-              position: 'absolute', top: '16px', right: '16px',
-              padding: '7px 18px', borderRadius: '9px',
-              border: '1.5px solid var(--primary-maroon)',
-              backgroundColor: 'transparent', color: 'var(--primary-maroon)',
-              fontSize: '12.5px', fontWeight: '700', cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(76,21,54,0.06)'; }}
-            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-          >
-            ✏️ Edit Profile
-          </button>
-        </div>
-
-        {/* ── Detail Cards ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
-          <div style={{ padding: '20px', border: '1px solid var(--border-light)', borderRadius: '16px', backgroundColor: 'var(--bg-card)' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: '800', marginBottom: '14px', color: 'var(--primary-maroon)' }}>Academic Details</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
-              <div><strong>Department:</strong> {profile.department}</div>
-              <div><strong>College:</strong> {profile.college}</div>
-              <div><strong>Batch:</strong> {profile.batch}</div>
-              <div><strong>Arrears:</strong> {profile.arrears} History of Arrears</div>
-            </div>
-          </div>
-
-          <div style={{ padding: '20px', border: '1px solid var(--border-light)', borderRadius: '16px', backgroundColor: 'var(--bg-card)' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: '800', marginBottom: '14px', color: 'var(--primary-maroon)' }}>Contact Details</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
-              <div><strong>Email:</strong> {profile.email}</div>
-              <div><strong>Phone:</strong> {profile.phone}</div>
-              <div><strong>LinkedIn:</strong> {profile.linkedin}</div>
-              <div><strong>GitHub:</strong> {profile.github}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Edit Profile Modal ── */}
-        {showEditModal && (
-          <div style={overlayStyle} onClick={(e) => { if (e.target === e.currentTarget) setShowEditModal(false); }}>
-            <div style={modalStyle}>
-              {/* Modal Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '17px', fontWeight: '800', color: 'var(--primary-maroon)', margin: 0 }}>Edit Profile</h3>
-                <button
-                  onClick={() => setShowEditModal(false)}
-                  style={{ border: 'none', background: 'transparent', fontSize: '20px', cursor: 'pointer', color: 'var(--text-muted)', lineHeight: 1 }}
-                >✕</button>
-              </div>
-
-              {/* Live passport-style avatar preview */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
-                <div style={{
-                  border: '2.5px solid var(--primary-maroon)',
-                  borderRadius: '6px',
-                  overflow: 'hidden',
-                  width: '80px',
-                  height: '106px',
-                  boxShadow: '0 4px 16px rgba(76,21,54,0.2)',
-                  backgroundColor: '#f0f0f0',
-                  transition: 'all 0.3s ease',
-                }}>
-                  <img
-                    src={previewAvatarSrc}
-                    alt="Preview"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      objectPosition: 'top center',
-                      display: 'block',
-                    }}
-                    onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(editForm.name)}&background=4C1536&color=fff&size=300`; }}
-                  />
-                </div>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>Profile photo updates with gender</span>
-              </div>
-
-              <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-
-                {/* Gender — top and prominent */}
-                <div style={fieldStyle}>
-                  <label style={labelStyle}>Gender *</label>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    {[
-                      { value: 'male',   label: '♂ Male',   bg: '#EFF6FF', color: '#1D4ED8', active: '#DBEAFE' },
-                      { value: 'female', label: '♀ Female', bg: '#FFF0F6', color: '#BE185D', active: '#FCE7F3' },
-                      { value: 'other',  label: '⚧ Other',  bg: '#F3F0FF', color: '#6D28D9', active: '#EDE9FE' },
-                    ].map(opt => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => setEditForm({ ...editForm, gender: opt.value })}
-                        style={{
-                          flex: 1, padding: '10px 6px', borderRadius: '10px', cursor: 'pointer',
-                          border: `2px solid ${editForm.gender === opt.value ? opt.color : 'var(--border-medium)'}`,
-                          backgroundColor: editForm.gender === opt.value ? opt.active : opt.bg,
-                          color: opt.color, fontWeight: '700', fontSize: '13px',
-                          transition: 'all 0.2s', fontFamily: 'var(--font-family)',
-                        }}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '4px' }} />
-
-                {/* Name */}
-                <div style={fieldStyle}>
-                  <label style={labelStyle}>Full Name</label>
-                  <input required type="text" style={inputStyle} value={editForm.name}
-                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
-                </div>
-
-                {/* Reg No + CGPA row */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div style={fieldStyle}>
-                    <label style={labelStyle}>Reg. No</label>
-                    <input required type="text" style={inputStyle} value={editForm.regNo}
-                      onChange={(e) => setEditForm({ ...editForm, regNo: e.target.value })} />
-                  </div>
-                  <div style={fieldStyle}>
-                    <label style={labelStyle}>CGPA</label>
-                    <input required type="text" style={inputStyle} value={editForm.cgpa}
-                      onChange={(e) => setEditForm({ ...editForm, cgpa: e.target.value })} />
-                  </div>
-                </div>
-
-                {/* Degree + Year row */}
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
-                  <div style={fieldStyle}>
-                    <label style={labelStyle}>Degree / Branch</label>
-                    <input required type="text" style={inputStyle} value={editForm.degree}
-                      onChange={(e) => setEditForm({ ...editForm, degree: e.target.value })} />
-                  </div>
-                  <div style={fieldStyle}>
-                    <label style={labelStyle}>Year</label>
-                    <select style={{ ...inputStyle, cursor: 'pointer' }} value={editForm.year}
-                      onChange={(e) => setEditForm({ ...editForm, year: e.target.value })}>
-                      <option>I Year</option>
-                      <option>II Year</option>
-                      <option>III Year</option>
-                      <option>IV Year</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Batch */}
-                <div style={fieldStyle}>
-                  <label style={labelStyle}>Batch</label>
-                  <input required type="text" style={inputStyle} value={editForm.batch}
-                    onChange={(e) => setEditForm({ ...editForm, batch: e.target.value })} />
-                </div>
-
-                {/* Email + Phone row */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div style={fieldStyle}>
-                    <label style={labelStyle}>Email</label>
-                    <input required type="email" style={inputStyle} value={editForm.email}
-                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
-                  </div>
-                  <div style={fieldStyle}>
-                    <label style={labelStyle}>Phone</label>
-                    <input required type="text" style={inputStyle} value={editForm.phone}
-                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
-                  </div>
-                </div>
-
-                {/* LinkedIn + GitHub row */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div style={fieldStyle}>
-                    <label style={labelStyle}>LinkedIn</label>
-                    <input type="text" style={inputStyle} value={editForm.linkedin}
-                      onChange={(e) => setEditForm({ ...editForm, linkedin: e.target.value })} />
-                  </div>
-                  <div style={fieldStyle}>
-                    <label style={labelStyle}>GitHub</label>
-                    <input type="text" style={inputStyle} value={editForm.github}
-                      onChange={(e) => setEditForm({ ...editForm, github: e.target.value })} />
-                  </div>
-                </div>
-
-                {/* Action buttons */}
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '6px' }}>
-                  <button type="button" onClick={() => setShowEditModal(false)}
-                    style={{
-                      padding: '9px 20px', borderRadius: '9px', border: '1.5px solid var(--border-medium)',
-                      backgroundColor: '#fff', color: 'var(--text-main)', fontSize: '13px', fontWeight: '700',
-                      cursor: 'pointer', fontFamily: 'var(--font-family)',
-                    }}>
-                    Cancel
-                  </button>
-                  <button type="submit"
-                    style={{
-                      padding: '9px 24px', borderRadius: '9px', border: 'none',
-                      backgroundColor: 'var(--primary-maroon)', color: '#fff',
-                      fontSize: '13px', fontWeight: '700', cursor: 'pointer',
-                      fontFamily: 'var(--font-family)',
-                    }}>
-                    Save Changes
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-      </div>
-    );
-  }
-
-  if (activeTab === 'applications') {
-    return (
-      <div className="feature-page-container">
-        <h2 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <ApplicationsIcon /> My Applications
-        </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {drives.map(drive => (
-            <div key={drive.id} style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '18px 24px', border: '1px solid var(--border-light)', borderRadius: '16px',
-              backgroundColor: 'var(--bg-card)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div className="company-logo" style={{ backgroundColor: drive.logoBg, color: drive.logoColor }}>
-                  {drive.logoText}
-                </div>
-                <div>
-                  <h4 style={{ fontSize: '16px', fontWeight: '800' }}>{drive.company}</h4>
-                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600' }}>{drive.role} • {drive.ctc}</p>
-                </div>
-              </div>
-
-              <div>
-                {drive.applied ? (
-                  <span style={{
-                    padding: '6px 14px', borderRadius: '12px', fontSize: '12px', fontWeight: '800',
-                    backgroundColor: '#DCFCE7', color: '#15803D', display: 'inline-flex', alignItems: 'center', gap: '4px'
-                  }}>
-                    <CheckIcon style={{ width: '14px', height: '14px' }} /> Applied & Under Review
-                  </span>
-                ) : (
-                  <button className="btn-apply" onClick={() => onApplyDrive(drive)}>Apply Now</button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (activeTab === 'calendar') {
-    return (
-      <div className="feature-page-container">
-        <h2 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <CalendarIcon /> Drive Calendar 2025
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-          {[
-            { date: '25 Jul 2025', company: 'Zoho Corporation', role: 'Software Developer', status: 'Upcoming' },
-            { date: '30 Jul 2025', company: 'Infosys', role: 'System Engineer', status: 'Upcoming' },
-            { date: '05 Aug 2025', company: 'TCS', role: 'Digital Engineer', status: 'Scheduled' },
-            { date: '12 Aug 2025', company: 'Accenture', role: 'Advanced App Engineering', status: 'Scheduled' },
-            { date: '18 Aug 2025', company: 'Cognizant', role: 'GenC Next Engineer', status: 'Scheduled' },
-            { date: '25 Aug 2025', company: 'Wipro', role: 'Elite Developer', status: 'Upcoming' },
-          ].map((item, idx) => (
-            <div key={idx} style={{
-              padding: '18px', border: '1px solid var(--border-light)', borderRadius: '16px',
-              backgroundColor: 'var(--bg-card)', display: 'flex', flexDirection: 'column', gap: '8px'
-            }}>
-              <span style={{ fontSize: '12px', fontWeight: '800', color: 'var(--primary-maroon)' }}>📅 {item.date}</span>
-              <span style={{ fontSize: '15px', fontWeight: '800' }}>{item.company}</span>
-              <span style={{ fontSize: '12.5px', color: 'var(--text-muted)', fontWeight: '600' }}>{item.role}</span>
-              <span style={{
-                fontSize: '11px', fontWeight: '800', padding: '4px 10px', borderRadius: '10px',
-                backgroundColor: '#EFF6FF', color: '#1D4ED8', alignSelf: 'flex-start', marginTop: '4px'
-              }}>{item.status}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (activeTab === 'resume') {
-    const [subTab, setSubTab] = useState('checker');
-
-    // Inbuilt Gemini API Key. Paste your key here or set VITE_GEMINI_API_KEY in your .env file
-    const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
+  // Inbuilt Gemini API Key. Paste your key here or set VITE_GEMINI_API_KEY in your .env file
+  const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
 
     // Checker states
     const [dragActive, setDragActive] = useState(false);
@@ -2068,7 +1046,7 @@ export default function FeatureView({ activeTab, drives, setActiveTab, onApplyDr
 
     // Builder states
     const [formData, setFormData] = useState({
-      name: 'Jayasurya K',
+      name: userName,
       role: 'Associate Software Engineer',
       email: 'jayasurya.k@ait.edu.in',
       phone: '+91 98765 43210',
@@ -2177,7 +1155,7 @@ PROJECTS:
       }
     };
 
-    const getMockResult = (name) => {
+    const getMockResult = (_name) => {
       return {
         score: 78,
         rating: "Good",
@@ -2311,7 +1289,7 @@ Do not return any markdown tags, trailing commas, or prefix commentary. Return O
         let parsed;
         try {
           parsed = JSON.parse(resultText.trim());
-        } catch (err) {
+        } catch {
           const jsonMatch = resultText.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             parsed = JSON.parse(jsonMatch[0].trim());
@@ -2498,7 +1476,13 @@ Report generated via AIT AI Resume Workspace.
                   </div>
 
                   {/* Actions Bar for Sample / Paste */}
-                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <button
+                      className="api-settings-btn"
+                      onClick={handleUseSample}
+                    >
+                      <SparklesIcon style={{ width: '14px', height: '14px' }} /> Try Sample Resume
+                    </button>
                     <button
                       className="api-settings-btn"
                       onClick={() => setShowPasteArea(!showPasteArea)}
@@ -2975,10 +1959,11 @@ Report generated via AIT AI Resume Workspace.
         </div>
       </div>
     );
-  }
+}
 
-  if (activeTab === 'training') {
-    const [subTab, setSubTab] = useState('aptitude');
+// ─── Standalone Training View Component ─────────────────────────────────
+function TrainingView() {
+  const [subTab, setSubTab] = useState('aptitude');
     const [practiceMode, setPracticeMode] = useState(false);
     const [testCompleted, setTestCompleted] = useState(false);
     const [scoreResult, setScoreResult] = useState(null);
@@ -3173,7 +2158,7 @@ Report generated via AIT AI Resume Workspace.
           status: "success",
           message: "Query executed successfully. 2 rows returned.",
           rows: [
-            { name: "Jayasurya K", department: "IT", salary: 75000 },
+            { name: userName, department: "IT", salary: 75000 },
             { name: "Abishek R", department: "IT", salary: 65000 }
           ]
         });
@@ -3636,179 +2621,293 @@ Report generated via AIT AI Resume Workspace.
         </div>
       </div>
     );
-  }
+}
 
-  // Notifications View
-  if (activeTab === 'notifications') {
-    const [filter, setFilter] = useState('all');
-    const [notifList, setNotifList] = useState([
-      {
-        id: 1,
-        title: "Zoho Drive Registration is Open",
-        sub: "Register before 24 Jul 2025",
-        time: "10:30 AM",
-        iconType: "orange",
-        icon: <DocumentsIcon style={{ width: '20px', height: '20px' }} />,
-        unread: true,
-        important: true
-      },
-      {
-        id: 2,
-        title: "TCS Online Test will be on 30 Jul 2025",
-        sub: "Check your email for test link",
-        time: "Yesterday",
-        iconType: "purple",
-        icon: <AssessmentsIcon style={{ width: '20px', height: '20px' }} />,
-        unread: true,
-        important: false
-      },
-      {
-        id: 3,
-        title: "Infosys Interview Shortlist Released",
-        sub: "Check your dashboard",
-        time: "19 Jul 2025",
-        iconType: "blue",
-        icon: <ProfileIcon style={{ width: '20px', height: '20px' }} />,
-        unread: false,
-        important: true
-      },
-      {
-        id: 4,
-        title: "Resume Writing Workshop on 25 Jul 2025",
-        sub: "Venue: Seminar Hall",
-        time: "19 Jul 2025",
-        iconType: "green",
-        icon: <ResumeIcon style={{ width: '20px', height: '20px' }} />,
-        unread: false,
-        important: false
-      }
-    ]);
+// ─── Standalone Notifications View Component ─────────────────────────────
+function NotificationsView() {
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState('All');
+  const [studentProfile, setStudentProfile] = useState(null);
+  const [toastMsg, setToastMsg] = useState(null);
 
-    const handleToggleRead = (id) => {
-      setNotifList(prev => prev.map(n => n.id === id ? { ...n, unread: !n.unread } : n));
-    };
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3500);
+  };
 
-    const handleMarkAllRead = () => {
-      setNotifList(prev => prev.map(n => ({ ...n, unread: false })));
-    };
+  const loadNotifications = async () => {
+    setLoading(true);
+    let profile = {};
+    try {
+      profile = JSON.parse(localStorage.getItem('ait-profile') || '{}');
+      setStudentProfile(profile);
+    } catch {}
 
-    const filteredNotifs = notifList.filter(n => {
-      if (filter === 'unread') return n.unread;
-      if (filter === 'important') return n.important;
-      return true;
-    });
+    const email = profile.email || '';
+    const regNo = profile.regNo || '';
 
-    return (
-      <div className="feature-page-container">
-        <div className="notifications-workspace">
-          {/* Header */}
-          <div className="resume-workspace-header" style={{ borderBottom: 'none', paddingBottom: 0 }}>
-            <div>
-              <h2 style={{ fontSize: '20px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <BellIcon style={{ color: 'var(--primary-maroon)' }} /> 16. Notifications
-              </h2>
+    const fsNotifs = await fetchNotificationsForStudent(email, regNo);
 
-            </div>
+    if (fsNotifs && fsNotifs.length > 0) {
+      setNotifications(fsNotifs);
+    } else {
+      // Default demo notifications for student view if no drive selection yet
+      setNotifications([
+        {
+          id: 'demo_1',
+          title: '🎉 Selected & Nominated: Zoho Corp Drive',
+          company: 'Zoho Corp',
+          role: 'Full Stack Engineer',
+          package: '8.5 LPA',
+          message: `Congratulations ${profile.name || 'Student'}! You are eligible & selected for Zoho Corp campus drive. You can log into your student account using Email: ${email || '710123205015@ait.edu.in'} and Password: ${regNo || '710123205015'}.`,
+          type: 'drive_selection',
+          read: false,
+          createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString()
+        },
+        {
+          id: 'demo_2',
+          title: '🎉 Nominated for TEAM TEXA Placement Drive',
+          company: 'TEAM TEXA',
+          role: 'Data Analyst',
+          package: '10 LPA',
+          message: 'You have been shortlisted and nominated for TEAM TEXA upcoming drive. Please keep your resume updated in your student profile.',
+          type: 'drive_selection',
+          read: true,
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString()
+        },
+        {
+          id: 'demo_3',
+          title: '📢 Placement Registration Closes Soon',
+          company: 'Placement Cell',
+          role: 'Notice',
+          message: 'Placement drive registrations for upcoming Q3 campus drives will close on 25th September. Ensure all CGPA & arrear details are verified.',
+          type: 'notice',
+          read: true,
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString()
+        }
+      ]);
+    }
+    setLoading(false);
+  };
 
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              {notifList.some(n => n.unread) && (
-                <button
-                  className="api-settings-btn"
-                  style={{ fontSize: '12.5px', padding: '6px 12px' }}
-                  onClick={handleMarkAllRead}
-                >
-                  ✓ Mark all as read
-                </button>
-              )}
+  useEffect(() => {
+    loadNotifications();
+  }, []);
 
-              <div className="resume-tabs" style={{ margin: 0 }}>
-                <button
-                  className={`resume-tab-btn ${filter === 'all' ? 'active' : ''}`}
-                  onClick={() => setFilter('all')}
-                >
-                  All
-                </button>
-                <button
-                  className={`resume-tab-btn ${filter === 'unread' ? 'active' : ''}`}
-                  onClick={() => setFilter('unread')}
-                >
-                  Unread
-                </button>
-                <button
-                  className={`resume-tab-btn ${filter === 'important' ? 'active' : ''}`}
-                  onClick={() => setFilter('important')}
-                >
-                  Important
-                </button>
-              </div>
-            </div>
-          </div>
+  const handleMarkAsRead = async (id) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    await markNotificationAsReadInFirestore(id);
+    showToast('✓ Marked notification as read');
+  };
 
-          {/* List */}
-          <div className="notifications-list">
-            {filteredNotifs.length > 0 ? (
-              filteredNotifs.map(notif => (
-                <div
-                  key={notif.id}
-                  className={`notification-row-item ${notif.unread ? 'unread' : ''}`}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => handleToggleRead(notif.id)}
-                  title="Click to toggle read status"
-                >
-                  <div className="notification-left-content">
-                    <div className={`notification-icon-badge ${notif.iconType}`}>
-                      {notif.icon}
-                    </div>
-                    <div>
-                      <div className="notification-text-title">{notif.title}</div>
-                      <div className="notification-text-sub">{notif.sub}</div>
-                    </div>
-                  </div>
+  const handleMarkAllAsRead = async () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    for (const n of notifications) {
+      if (!n.read) await markNotificationAsReadInFirestore(n.id);
+    }
+    showToast('✓ All notifications marked as read!');
+  };
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    {notif.important && (
-                      <span style={{
-                        fontSize: '10.5px',
-                        fontWeight: '800',
-                        color: 'var(--primary-maroon)',
-                        backgroundColor: 'var(--primary-maroon-light)',
-                        padding: '2px 8px',
-                        borderRadius: '8px'
-                      }}>
-                        Urgent
-                      </span>
-                    )}
-                    <div className="notification-right-meta">
-                      {notif.time}
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)', fontSize: '14.5px' }}>
-                📭 No {filter === 'all' ? '' : filter} notifications found. All caught up!
-              </div>
+  const filteredNotifs = notifications.filter(n => {
+    if (activeFilter === 'Drive Selections') return n.type === 'drive_selection' || (n.title || '').includes('Selected');
+    if (activeFilter === 'Unread') return !n.read;
+    return true;
+  });
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  return (
+    <div className="feature-page-container">
+      {toastMsg && (
+        <div style={{
+          position: 'fixed', bottom: '28px', right: '100px',
+          backgroundColor: 'var(--primary-maroon)', color: '#fff',
+          padding: '12px 20px', borderRadius: '14px',
+          fontWeight: '700', fontSize: '13.5px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+          zIndex: 3000, animation: 'fadeIn 0.2s ease-out',
+        }}>
+          {toastMsg}
+        </div>
+      )}
+
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
+        <div>
+          <h2 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span>Student Notifications</span>
+            {unreadCount > 0 && (
+              <span style={{
+                backgroundColor: '#EF4444', color: '#fff', fontSize: '12px', fontWeight: '800',
+                padding: '3px 10px', borderRadius: '999px'
+              }}>
+                {unreadCount} Unread
+              </span>
             )}
-          </div>
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', marginTop: '4px', fontWeight: '500' }}>
+            Real-time drive eligibility &amp; candidate selection alerts sent to {studentProfile?.name || 'your student page'}
+          </p>
+        </div>
 
-          {/* Footer Action Button */}
-          <div className="notification-footer-btn-container">
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button
+            onClick={loadNotifications}
+            style={{
+              padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border-medium)',
+              backgroundColor: '#fff', color: 'var(--text-main)', fontSize: '13px', fontWeight: '700',
+              cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px'
+            }}
+          >
+            <RefreshIcon style={{ width: '15px', height: '15px' }} /> Refresh
+          </button>
+
+          {unreadCount > 0 && (
             <button
-              className="btn-apply"
-              style={{ width: '100%', maxWidth: '240px', padding: '12px', fontSize: '13px' }}
-              onClick={() => alert("All catchable notifications loaded. You are viewing the latest status updates.")}
+              onClick={handleMarkAllAsRead}
+              style={{
+                padding: '10px 18px', borderRadius: '12px', border: 'none',
+                backgroundColor: 'var(--primary-maroon)', color: '#fff', fontSize: '13px', fontWeight: '700',
+                cursor: 'pointer'
+              }}
             >
-              View All Notifications
+              ✓ Mark All as Read
             </button>
+          )}
+        </div>
+      </div>
+
+      {/* Login Credentials Notice Card */}
+      <div style={{
+        padding: '16px 20px', borderRadius: '16px', backgroundColor: '#EFF6FF',
+        border: '1px solid #BFDBFE', color: '#1E40AF', marginBottom: '24px',
+        display: 'flex', alignItems: 'center', gap: '14px'
+      }}>
+        <div style={{ fontSize: '24px' }}>🔑</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: '800', fontSize: '14px' }}>Student Login Credentials Info</div>
+          <div style={{ fontSize: '12.5px', color: '#1E3A8A', marginTop: '2px' }}>
+            Once selected by Admin Drive, your separate student page login is created automatically in Firebase database.
+            Log in anytime with <strong>Email / RegNo:</strong> {studentProfile?.email || 'Your Student Email'} &amp; <strong>Password:</strong> {studentProfile?.regNo || 'Your Register Number'}.
           </div>
         </div>
       </div>
-    );
-  }
 
-  // Documents View
-  if (activeTab === 'documents') {
-    const [offerLetterUploaded, setOfferLetterUploaded] = useState(false);
+      {/* Filter Chips */}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        {['All', 'Drive Selections', 'Unread'].map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveFilter(tab)}
+            style={{
+              padding: '8px 16px', borderRadius: '10px', border: 'none',
+              fontWeight: '700', fontSize: '13px', cursor: 'pointer',
+              backgroundColor: activeFilter === tab ? 'var(--primary-maroon)' : '#F1F5F9',
+              color: activeFilter === tab ? '#fff' : '#64748b',
+              transition: 'all 0.2s'
+            }}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* Notifications List */}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
+          Fetching student notifications from Firebase...
+        </div>
+      ) : filteredNotifs.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
+          <BellIcon style={{ width: '40px', height: '40px', margin: '0 auto 12px', display: 'block', stroke: 'var(--border-medium)' }} />
+          <p style={{ fontWeight: '700', fontSize: '15px' }}>No notifications found for "{activeFilter}"</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {filteredNotifs.map(n => (
+            <div
+              key={n.id}
+              style={{
+                padding: '20px', borderRadius: '16px',
+                backgroundColor: n.read ? '#ffffff' : '#FEF2F2',
+                border: n.read ? '1px solid var(--border-light)' : '1px solid #FECACA',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                display: 'flex', gap: '16px', alignItems: 'flex-start',
+                position: 'relative'
+              }}
+            >
+              {/* Left Badge Icon */}
+              <div style={{
+                width: '44px', height: '44px', borderRadius: '12px',
+                backgroundColor: n.type === 'drive_selection' || (n.title || '').includes('Selected') ? '#DCFCE7' : '#F3E8FF',
+                color: n.type === 'drive_selection' || (n.title || '').includes('Selected') ? '#15803D' : '#7E22CE',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '20px', flexShrink: 0
+              }}>
+                {n.type === 'drive_selection' || (n.title || '').includes('Selected') ? '🎉' : '📢'}
+              </div>
+
+              {/* Main Content */}
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
+                  <h4 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
+                    {n.title}
+                  </h4>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                    {n.createdAt ? new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' }) : (n.time || 'Recently')}
+                  </span>
+                </div>
+
+                {/* Company & Role Badges */}
+                {n.company && (
+                  <div style={{ display: 'flex', gap: '8px', margin: '8px 0', flexWrap: 'wrap' }}>
+                    <span style={{ backgroundColor: '#F1F5F9', color: '#334155', padding: '3px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700' }}>
+                      🏢 {n.company}
+                    </span>
+                    {n.role && (
+                      <span style={{ backgroundColor: '#FAF5FF', color: '#7E22CE', padding: '3px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700' }}>
+                        💼 {n.role}
+                      </span>
+                    )}
+                    {n.package && (
+                      <span style={{ backgroundColor: '#ECFDF5', color: '#047857', padding: '3px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700' }}>
+                        💰 {n.package}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                <p style={{ fontSize: '13.5px', color: '#334155', lineHeight: '1.6', margin: '6px 0 0 0' }}>
+                  {n.message}
+                </p>
+              </div>
+
+              {/* Read Action Button */}
+              {!n.read && (
+                <button
+                  onClick={() => handleMarkAsRead(n.id)}
+                  title="Mark as read"
+                  style={{
+                    padding: '6px 12px', borderRadius: '8px', border: '1px solid #FCA5A5',
+                    backgroundColor: '#fff', color: '#DC2626', fontSize: '12px', fontWeight: '700',
+                    cursor: 'pointer', flexShrink: 0
+                  }}
+                >
+                  Mark Read
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Standalone Documents View Component ───────────────────────────────
+function DocumentsView() {
+  const [offerLetterUploaded, setOfferLetterUploaded] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [showLetterModal, setShowLetterModal] = useState(false);
@@ -3870,7 +2969,9 @@ Zoho Corporation`;
               <h2 style={{ fontSize: '20px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <DocumentsIcon style={{ color: 'var(--primary-maroon)' }} /> Offer Letter
               </h2>
-
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>
+                Access and submit academic marksheets, verification reports, and official selection letters.
+              </p>
             </div>
           </div>
 
@@ -4061,10 +3162,11 @@ Zoho Corporation`;
         )}
       </div>
     );
-  }
+}
 
-  if (activeTab === 'mock-interview') {
-    const [interviewType, setInterviewType] = useState('Technical');
+// ─── Standalone Mock Interview View Component ───────────────────────────
+function MockInterviewView() {
+  const [interviewType, setInterviewType] = useState('Technical');
     const [difficulty, setDifficulty] = useState('Mid-Level');
     const [interviewStarted, setInterviewStarted] = useState(false);
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -4346,7 +3448,7 @@ Generated by AIT Placement Portal AI Engine
                   {/* Header */}
                   <div className="mock-interview-header">
                     <h2 className="mock-interview-title">AI Mock Interview</h2>
-                    <p className="mock-interview-subtitle">Practice. Improve. Succeed.</p>
+
                   </div>
 
                   {/* Type Selector */}
@@ -4760,11 +3862,11 @@ Generated by AIT Placement Portal AI Engine
         )}
       </div>
     );
-  }
+}
 
-  // Resources & Materials View
-  if (activeTab === 'resources') {
-    const [searchQuery, setSearchQuery] = useState('');
+// ─── Standalone Resources View Component ───────────────────────────────
+function ResourcesView() {
+  const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('All');
     const [downloadingId, setDownloadingId] = useState(null);
 
@@ -4998,27 +4100,23 @@ Generated by AIT Placement Portal AI Engine
         )}
       </div>
     );
-  }
+}
 
-  // ─── Chatbot / Support View ────────────────────────────────
-  if (activeTab === 'chatbot') {
-    return <ChatbotView />;
-  }
+function FeatureViewPanel({ activeTab, setActiveTab, userName = 'Jayasurya K' }) {
+  if (activeTab === 'profile') return <ProfilePage />;
+  if (activeTab === 'applications') return <ApplicationsPage />;
+  if (activeTab === 'calendar') return <DriveCalendarPage />;
+  if (activeTab === 'settings') return <SettingsPage />;
+  if (activeTab === 'resume') return <ResumeView userName={userName} />;
+  if (activeTab === 'training') return <TrainingView />;
+  if (activeTab === 'notifications') return <NotificationsView />;
+  if (activeTab === 'documents') return <DocumentsView />;
+  if (activeTab === 'mock-interview') return <MockInterviewView />;
+  if (activeTab === 'resources') return <ResourcesView />;
+  if (activeTab === 'chatbot') return <ChatbotView userName={userName} />;
+  if (activeTab === 'certificates') return <CertificatesView />;
+  if (activeTab === 'alumni') return <AlumniView />;
 
-  // ─── Certificates View ──────────────────────────────────────
-  if (activeTab === 'certificates') {
-    return <CertificatesView />;
-  }
-
-  // ─── Company Details View ────────────────────────────────────
-  if (activeTab === 'company-details' || activeTab === 'company') {
-    return <CompanyDetailsView onApplyDrive={onApplyDrive} />;
-  }
-
-  // ─── Alumni Network View ────────────────────────────────────
-  if (activeTab === 'alumni') {
-    return <AlumniView />;
-  }
   // Fallback view for other left menu tabs
   return (
     <div className="feature-page-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
@@ -5031,7 +4129,9 @@ Generated by AIT Placement Portal AI Engine
       <h2 style={{ fontSize: '22px', fontWeight: '800', textTransform: 'capitalize' }}>
         {activeTab.replace('-', ' ')}
       </h2>
-
+      <p style={{ color: 'var(--text-muted)', fontSize: '14px', maxWidth: '400px', marginTop: '8px' }}>
+        Welcome to the {activeTab.replace('-', ' ')} module. Explore placement resources, tests, and active updates tailored for {userName}.
+      </p>
       <button
         className="btn-apply"
         style={{ marginTop: '24px' }}
@@ -5041,5 +4141,8 @@ Generated by AIT Placement Portal AI Engine
       </button>
     </div>
   );
+}
 
+export default function FeatureView(props) {
+  return <FeatureViewPanel key={props.activeTab} {...props} />;
 }

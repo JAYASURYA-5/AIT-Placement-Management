@@ -24,10 +24,11 @@ import {
   Building,
   Mail,
   Award,
-  DollarSign
+  DollarSign,
+  LogOut
 } from 'lucide-react';
 
-export default function CompanyManagement({ onNavigate }) {
+export default function CompanyManagement({ onNavigate, onLogout }) {
   const [activeNav, setActiveNav] = useState('Companies');
   const [toast, setToast] = useState(null);
 
@@ -490,9 +491,6 @@ export default function CompanyManagement({ onNavigate }) {
           <div style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
             Company Management
           </div>
-          <div style={{ fontSize: '15px', color: '#64748b', marginTop: '2px', fontWeight: 500 }}>
-            Manage corporate partners, hiring tiers, package details, and HR contacts
-          </div>
         </div>
 
         {/* Action Buttons Group */}
@@ -571,7 +569,7 @@ export default function CompanyManagement({ onNavigate }) {
           display: 'flex',
           flexDirection: 'column',
           padding: '32px 20px',
-          flexShrink: 0,
+          flexShrink: 0, alignSelf: 'flex-start', position: 'sticky', top: '24px',
           borderRadius: '24px',
           margin: '12px 0 16px 20px',
           boxShadow: '0 12px 36px rgba(0,0,0,0.22)'
@@ -583,7 +581,7 @@ export default function CompanyManagement({ onNavigate }) {
             </span>
           </div>
 
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeNav === item.label;
@@ -614,6 +612,35 @@ export default function CompanyManagement({ onNavigate }) {
                 </button>
               );
             })}
+
+            {/* Logout Button right near Settings */}
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '14px',
+                  padding: '14px 22px',
+                  borderRadius: '14px',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                  color: '#fca5a5',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+                  textAlign: 'left',
+                  marginTop: '10px',
+                  width: '100%'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.25)'; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#fca5a5'; }}
+              >
+                <LogOut size={20} color="currentColor" strokeWidth={2.3} />
+                <span>Logout</span>
+              </button>
+            )}
           </nav>
         </aside>
 
@@ -894,7 +921,7 @@ export default function CompanyManagement({ onNavigate }) {
                   <input type="text" required placeholder="e.g. TCS, Amazon, Microsoft" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} style={inputStyle} />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Industry / Sector</label>
                     <input type="text" placeholder="e.g. IT Services & Software" value={formData.industry} onChange={(e) => setFormData({ ...formData, industry: e.target.value })} style={inputStyle} />
@@ -905,7 +932,7 @@ export default function CompanyManagement({ onNavigate }) {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Tier Category *</label>
                     <select value={formData.tier} onChange={(e) => setFormData({ ...formData, tier: e.target.value })} style={inputStyle}>
@@ -925,7 +952,7 @@ export default function CompanyManagement({ onNavigate }) {
                   <input type="text" required placeholder="e.g. Software Engineer; Cloud Developer" value={formData.roles} onChange={(e) => setFormData({ ...formData, roles: e.target.value })} style={inputStyle} />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Partnership Status *</label>
                     <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} style={inputStyle}>

@@ -1,49 +1,39 @@
 import React from 'react';
+import AITLogo from './AITLogo';
 import {
   DashboardIcon,
-  ProfileIcon,
   ApplicationsIcon,
   CalendarIcon,
-  AssessmentsIcon,
   ResumeIcon,
   TrainingIcon,
   MockInterviewIcon,
   CertificatesIcon,
-  LeaderboardIcon,
-  StatsIcon,
   DocumentsIcon,
-  SettingsIcon,
   LogoutIcon,
   ResourcesIcon,
-  AlumniIcon,
-  CompanyIcon,
-  BellIcon
+  AlumniIcon
 } from './Icons';
 
 export const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: DashboardIcon },
   { id: 'applications', label: 'Applications', icon: ApplicationsIcon },
   { id: 'calendar', label: 'Drive Calendar', icon: CalendarIcon },
-  { id: 'assessments', label: 'Assessments', icon: AssessmentsIcon },
   { id: 'resume', label: 'Resume Builder', icon: ResumeIcon },
   { id: 'training', label: 'Training', icon: TrainingIcon },
   { id: 'mock-interview', label: 'Mock Interview', icon: MockInterviewIcon },
   { id: 'certificates', label: 'Certificates', icon: CertificatesIcon },
-  { id: 'company-details', label: 'Company Details', icon: CompanyIcon },
   { id: 'resources', label: 'Resources', icon: ResourcesIcon },
   { id: 'alumni', label: 'Alumni Network', icon: AlumniIcon },
   { id: 'documents', label: 'Documents', icon: DocumentsIcon },
 ];
 
-export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
+export default function Sidebar({ activeTab, setActiveTab, onLogout, isOpen, onClose }) {
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       {/* Brand Header */}
       <div className="brand-header">
-        <div className="brand-logo-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+        <div className="brand-logo-icon" style={{ background: 'none', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <AITLogo size={32} />
         </div>
         <div className="brand-info">
           <span className="brand-title">AIT</span>
@@ -67,15 +57,15 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
             </button>
           );
         })}
-      </nav>
 
-      {/* Footer / Logout */}
-      <div className="sidebar-footer">
-        <button className="logout-btn" onClick={onLogout}>
-          <LogoutIcon />
-          <span>Logout</span>
-        </button>
-      </div>
+        {/* Footer / Logout - positioned right below Documents */}
+        <div className="sidebar-footer">
+          <button className="logout-btn" onClick={onLogout}>
+            <LogoutIcon />
+            <span>Logout</span>
+          </button>
+        </div>
+      </nav>
     </aside>
   );
 }

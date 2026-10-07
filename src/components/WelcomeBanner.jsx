@@ -5,7 +5,7 @@ export default function WelcomeBanner({ userName = "Jayasurya" }) {
     try {
       const raw = localStorage.getItem('ait-profile')
       if (raw) return JSON.parse(raw).name || userName
-    } catch (e) {}
+    } catch {}
     return userName
   }, [userName])
 
@@ -14,9 +14,6 @@ export default function WelcomeBanner({ userName = "Jayasurya" }) {
       <h1 className="welcome-title">
         Welcome back, {name}! 👋
       </h1>
-      <p className="welcome-subtitle">
-        Keep learning, keep growing.
-      </p>
     </div>
   );
 }

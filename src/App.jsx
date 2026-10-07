@@ -1,36 +1,108 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import WelcomeBanner from './components/WelcomeBanner';
 import StatCards from './components/StatCards';
 import UpcomingDrives, { initialDrivesData } from './components/UpcomingDrives';
-import PlacementPrep, { prepModules } from './components/PlacementPrep';
+import PlacementPrep from './components/PlacementPrep';
 import FeatureView from './components/FeatureViews';
+import DashboardExtras from './components/DashboardExtras';
 import { ApplyModal, CalendarModal, PrepModal } from './components/Modals';
 import ChatbotView from './components/ChatbotWidget';
-
-import avatarMale   from './assets/avatar_male.jpg';
-import avatarFemale from './assets/avatar_female.jpg';
-import avatarOther  from './assets/avatar_other.jpg';
-
-// Gender-based passport-style avatar photos
-export const AVATARS = {
-  male:   avatarMale,
-  female: avatarFemale,
-  other:  avatarOther,
-};
+import { RobotIcon } from './components/Icons';
+import LandingPage from './pages/LandingPage';
+import AuthPage from './pages/AuthPage';
+import AdminDashboard from './admin/AdminDashboard';
+import { auth, onAuthStateChanged, logoutFirebase, fetchDrivesFromFirestore } from './firebase';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
-
-  // Shared profile state — drives both the header chip and the profile page
-  const [sharedProfile, setSharedProfile] = useState({
-    name: 'Jayasurya K',
-    gender: 'male',
+  // Navigation Flow: 'landing' -> 'auth' -> 'app' | 'admin'
+  const [currentScreen, setCurrentScreen] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
+      return 'admin';
+    }
+    return 'landing';
   });
-  const headerAvatarSrc = AVATARS[sharedProfile.gender] || AVATARS.male;
+
+  const [authRole, setAuthRole] = useState('Student');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
+  const [user, setUser] = useState(() => {
+    try {
+      const savedProfile = JSON.parse(localStorage.getItem('ait-profile') || '{}');
+      return { name: savedProfile.name || 'Jayasurya', role: savedProfile.role || 'Student' };
+    } catch {
+      return { name: 'Jayasurya', role: 'Student' };
+    }
+  });
+
+  // Drives State initialized from Firestore database
+  const [drives, setDrives] = useState([]);
+
+  // Sync current screen to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      if (currentScreen) {
+        localStorage.setItem('ait-screen', currentScreen);
+      }
+    } catch (e) {
+      console.warn('Unable to persist screen state:', e);
+    }
+  }, [currentScreen]);
+
+  useEffect(() => {
+    const handleProfileUpdate = (event) => {
+      const name = event.detail?.name;
+      if (name) setUser((currentUser) => ({ ...currentUser, name }));
+    };
+
+    window.addEventListener('profile:update', handleProfileUpdate);
+
+    // Listen to Firebase auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+      if (fbUser) {
+        try {
+          const savedProfile = JSON.parse(localStorage.getItem('ait-profile') || '{}');
+          const name = savedProfile.name || fbUser.displayName || fbUser.email?.split('@')[0] || 'User';
+          const role = savedProfile.role || 'Student';
+          setUser({ name, role, email: fbUser.email, uid: fbUser.uid, provider: 'firebase' });
+        } catch {
+          setUser({ name: fbUser.email?.split('@')[0] || 'User', role: 'Student', email: fbUser.email });
+        }
+      }
+    });
+
+    async function loadFirestoreDrives() {
+      const fsDrives = await fetchDrivesFromFirestore();
+      if (fsDrives && fsDrives.length > 0) {
+        const bgColors = ['#FEF2F2', '#EFF6FF', '#FAF5FF', '#F0FDF4', '#FEF3C7'];
+        const textColors = ['#DC2626', '#0284C7', '#7C3AED', '#166534', '#B45309'];
+        const formatted = fsDrives.map((d, idx) => ({
+          id: d.id,
+          company: d.company || 'Company',
+          logoBg: bgColors[idx % bgColors.length],
+          logoText: d.company ? d.company.substring(0, 4) : 'COMP',
+          logoColor: textColors[idx % textColors.length],
+          role: d.role || 'Software Engineer',
+          ctc: d.package ? (d.package.toLowerCase().includes('ctc') || d.package.toLowerCase().includes('lpa') ? d.package : `CTC: ${d.package}`) : 'CTC: Market Standard',
+          date: d.date || 'TBA',
+          applied: false
+        }));
+        setDrives(formatted);
+      } else {
+        setDrives([]);
+      }
+    }
+
+    loadFirestoreDrives();
+
+    return () => {
+      window.removeEventListener('profile:update', handleProfileUpdate);
+      unsubscribe();
+    };
+  }, []);
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
-  const [drives, setDrives] = useState(initialDrivesData);
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [stats, setStats] = useState({
     applied: 5,
@@ -39,7 +111,7 @@ export default function App() {
     offers: 0
   });
 
-  const [notifications, setNotifications] = useState([
+  const [notifications] = useState([
     { id: 1, title: 'Zoho Shortlist Announced', time: '10m ago', read: false },
     { id: 2, title: 'Infosys Drive Registration Closes Soon', time: '2h ago', read: false },
     { id: 3, title: 'Mock Interview Feedback Available', time: '1d ago', read: true }
@@ -66,7 +138,35 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    logoutFirebase();
+    try {
+      localStorage.removeItem('ait-screen');
+      localStorage.removeItem('ait-profile');
+    } catch {}
+    setCurrentScreen('landing');
     showToast('👋 You have been logged out.');
+  };
+
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+    if (userData.role === 'Admin') {
+      setCurrentScreen('admin');
+      showToast(`⚙️ Welcome ${userData.name}! Admin Portal loaded.`);
+    } else {
+      setCurrentScreen('app');
+      // Role-based view redirection:
+      if (userData.role === 'HR / Company') {
+        setActiveTab('applications');
+        showToast(`🏢 Welcome ${userData.name}! Redirected to Company & Applications View.`);
+      } else if (userData.role === 'Placement Officer') {
+        setActiveTab('calendar');
+        showToast(`🎓 Welcome ${userData.name}! Redirected to Placement Drives Calendar.`);
+      } else {
+        // Student default
+        setActiveTab('dashboard');
+        showToast(`✨ Welcome back, ${userData.name}!`);
+      }
+    }
   };
 
   // Filter drives according to top header search input
@@ -75,13 +175,79 @@ export default function App() {
     d.role.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  if (currentScreen === 'landing') {
+    return (
+      <LandingPage
+        onStudentLogin={() => {
+          setAuthRole('Student');
+          setCurrentScreen('auth');
+        }}
+        onCompanyLogin={() => {
+          setAuthRole('Student');
+          setCurrentScreen('auth');
+        }}
+      />
+    );
+  }
+
+  if (currentScreen === 'auth') {
+    return (
+      <AuthPage
+        initialRole={authRole}
+        onLoginSuccess={handleLoginSuccess}
+        onBackToHome={() => setCurrentScreen('landing')}
+      />
+    );
+  }
+
+
+
+  if (currentScreen === 'admin') {
+    return (
+      <div className={`admin-layout-wrapper ${isAdminMenuOpen ? 'menu-open' : ''}`}>
+        <button 
+          className="admin-mobile-menu-btn"
+          onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
+        >
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        {isAdminMenuOpen && (
+          <div className="admin-sidebar-overlay" onClick={() => setIsAdminMenuOpen(false)} />
+        )}
+        <div onClick={() => { if(isAdminMenuOpen) setIsAdminMenuOpen(false) }}>
+          <AdminDashboard
+            onLogout={() => {
+              setCurrentScreen('landing');
+              showToast('👋 Logged out of Admin Portal.');
+            }}
+            onNavChange={() => setIsAdminMenuOpen(false)}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="app-container">
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div className="mobile-sidebar-overlay" onClick={() => setIsMobileMenuOpen(false)} />
+      )}
+
       {/* Left Feature Navigation Sidebar */}
       <Sidebar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
+          setIsMobileMenuOpen(false); // Close menu on select
+        }}
         onLogout={handleLogout}
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
       />
 
       {/* Main Content Dashboard Shell */}
@@ -92,14 +258,13 @@ export default function App() {
           notifications={notifications}
           setActiveTab={setActiveTab}
           onLogout={handleLogout}
-          avatarSrc={headerAvatarSrc}
-          profileName={sharedProfile.name}
+          onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         />
 
         {/* Dynamic View rendering depending on active left feature menu */}
         {activeTab === 'dashboard' ? (
           <>
-            <WelcomeBanner userName="Jayasurya" />
+            <WelcomeBanner userName={user.name} />
             <StatCards
               stats={stats}
               onSelectStat={(key) => {
@@ -114,6 +279,7 @@ export default function App() {
             <PlacementPrep
               onSelectPrep={(module) => setSelectedPrepModule(module)}
             />
+            <DashboardExtras setActiveTab={setActiveTab} />
           </>
         ) : (
           <FeatureView
@@ -121,8 +287,7 @@ export default function App() {
             drives={drives}
             setActiveTab={setActiveTab}
             onApplyDrive={(drive) => setSelectedDriveToApply(drive)}
-            sharedProfile={sharedProfile}
-            setSharedProfile={setSharedProfile}
+            userName={user.name}
           />
         )}
       </main>
@@ -194,13 +359,7 @@ export default function App() {
               <line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           ) : (
-            <>
-              {/* Sparkle / AI star icon */}
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: '26px', height: '26px' }}>
-                <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" fill="rgba(255,255,255,0.15)" stroke="white" strokeWidth="1.5"/>
-              </svg>
-              <span style={{ fontSize: '8px', fontWeight: '900', letterSpacing: '0.5px', lineHeight: 1, color: 'rgba(255,255,255,0.9)' }}>AI</span>
-            </>
+            <RobotIcon size={28} />
           )}
         </button>
       </div>
@@ -247,10 +406,7 @@ export default function App() {
               backgroundColor: 'rgba(255,255,255,0.2)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '20px', height: '20px' }}>
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 16v-4M12 8h.01"/>
-              </svg>
+              <RobotIcon size={22} />
             </div>
             <div>
               <div style={{ fontWeight: '800', fontSize: '14px' }}>AIT Placement Assistant</div>
@@ -259,7 +415,7 @@ export default function App() {
           </div>
           {/* Chatbot body */}
           <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-            <ChatbotView />
+            <ChatbotView userName={user.name} />
           </div>
         </div>
       )}
@@ -281,6 +437,10 @@ export default function App() {
         <PrepModal
           module={selectedPrepModule}
           onClose={() => setSelectedPrepModule(null)}
+          onStartPractice={() => {
+            setSelectedPrepModule(null);
+            setActiveTab('training');
+          }}
         />
       )}
 

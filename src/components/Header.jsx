@@ -1,66 +1,118 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SearchIcon, BellIcon, ChevronDownIcon, ProfileIcon, SettingsIcon, LogoutIcon } from './Icons';
+import { fetchNotificationsForStudent } from '../firebase';
 
-export default function Header({ searchQuery, setSearchQuery, notifications, setActiveTab, onLogout, avatarSrc, profileName: profileNameProp }) {
+export default function Header({ searchQuery, setSearchQuery, notifications: propNotifications, setActiveTab, onLogout, onMenuToggle }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [profileName, setProfileName] = useState(profileNameProp || 'Jayasurya K');
+  const [liveNotifications, setLiveNotifications] = useState([]);
+
+  const [profileName, setProfileName] = useState(() => {
+    try {
+      const raw = localStorage.getItem('ait-profile');
+      if (raw) return JSON.parse(raw).name || 'Jayasurya K';
+    } catch {}
+    return 'Jayasurya K';
+  });
+
   const [profileRole, setProfileRole] = useState(() => {
     try {
-      const raw = localStorage.getItem('ait-profile')
+      const raw = localStorage.getItem('ait-profile');
       if (raw) {
-        const parsed = JSON.parse(raw)
-        // derive simple role like 'IV - IT'
-        const branch = parsed.branch || ''
-        const batch = parsed.batch || ''
-        const startYearMatch = batch.match(/(\d{4})/)
-        const startYear = startYearMatch ? parseInt(startYearMatch[0], 10) : null
-        let yearNum = null
+        const parsed = JSON.parse(raw);
+        const branch = parsed.branch || '';
+        const batch = parsed.batch || '';
+        const startYearMatch = batch.match(/(\d{4})/);
+        const startYear = startYearMatch ? parseInt(startYearMatch[0], 10) : null;
+        let yearNum = null;
         if (startYear) {
-          const cur = new Date().getFullYear()
-          yearNum = Math.min(5, Math.max(1, cur - startYear + 1))
+          const cur = new Date().getFullYear();
+          yearNum = Math.min(5, Math.max(1, cur - startYear + 1));
         }
-        const romans = ['I','II','III','IV','V']
-        const yearRoman = yearNum ? romans[yearNum-1] : 'IV'
-        const dept = branch.includes('Information') ? 'IT' : branch.split(' ').slice(-1)[0]
-        return `${yearRoman} - ${dept}`
+        const romans = ['I','II','III','IV','V'];
+        const yearRoman = yearNum ? romans[yearNum-1] : 'IV';
+        const dept = branch.includes('Information') ? 'IT' : branch.split(' ').slice(-1)[0];
+        return `${yearRoman} - ${dept}`;
       }
-    } catch (e) {}
-    return 'IV - IT'
-  })
+    } catch {}
+    return 'IV - IT';
+  });
 
-  React.useEffect(() => {
-    const handler = (e) => {
-      const d = e?.detail || {}
-      if (d.name) setProfileName(d.name)
-      if (d.branch || d.batch) {
-        const branch = d.branch || ''
-        const batch = d.batch || ''
-        const startYearMatch = batch.match(/(\d{4})/)
-        const startYear = startYearMatch ? parseInt(startYearMatch[0], 10) : null
-        let yearNum = null
-        if (startYear) {
-          const cur = new Date().getFullYear()
-          yearNum = Math.min(5, Math.max(1, cur - startYear + 1))
+  useEffect(() => {
+    async function loadFsNotifications() {
+      try {
+        const rawProfile = JSON.parse(localStorage.getItem('ait-profile') || '{}');
+        const fsNotifs = await fetchNotificationsForStudent(rawProfile.email || '', rawProfile.regNo || '');
+
+        if (fsNotifs && fsNotifs.length > 0) {
+          const formatted = fsNotifs.map(n => ({
+            id: n.id,
+            title: n.title,
+            time: n.createdAt ? new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently',
+            read: Boolean(n.read),
+            message: n.message,
+            company: n.company
+          }));
+          setLiveNotifications(formatted);
+        } else {
+          setLiveNotifications(propNotifications || []);
         }
-        const romans = ['I','II','III','IV','V']
-        const yearRoman = yearNum ? romans[yearNum-1] : 'IV'
-        const dept = branch.includes('Information') ? 'IT' : branch.split(' ').slice(-1)[0]
-        setProfileRole(`${yearRoman} - ${dept}`)
+      } catch (err) {
+        setLiveNotifications(propNotifications || []);
       }
     }
-    window.addEventListener('profile:update', handler)
-    return () => window.removeEventListener('profile:update', handler)
-  }, [])
+
+    loadFsNotifications();
+    const interval = setInterval(loadFsNotifications, 8000); // Poll for real-time notifications
+
+    const handler = (e) => {
+      const d = e?.detail || {};
+      if (d.name) setProfileName(d.name);
+      if (d.branch || d.batch) {
+        const branch = d.branch || '';
+        const batch = d.batch || '';
+        const startYearMatch = batch.match(/(\d{4})/);
+        const startYear = startYearMatch ? parseInt(startYearMatch[0], 10) : null;
+        let yearNum = null;
+        if (startYear) {
+          const cur = new Date().getFullYear();
+          yearNum = Math.min(5, Math.max(1, cur - startYear + 1));
+        }
+        const romans = ['I','II','III','IV','V'];
+        const yearRoman = yearNum ? romans[yearNum-1] : 'IV';
+        const dept = branch.includes('Information') ? 'IT' : branch.split(' ').slice(-1)[0];
+        setProfileRole(`${yearRoman} - ${dept}`);
+      }
+    };
+    window.addEventListener('profile:update', handler);
+    return () => {
+      window.removeEventListener('profile:update', handler);
+      clearInterval(interval);
+    };
+  }, [propNotifications]);
+
+  const activeNotifications = liveNotifications.length > 0 ? liveNotifications : (propNotifications || []);
 
   return (
     <header className="top-header">
-      {/* Search Input Bar */}
-      <div className="search-container">
-        <div className="search-icon-wrapper">
-          <SearchIcon />
-        </div>
-        <input
+      {/* Mobile Menu Toggle & Search Input Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+        <button 
+          className="mobile-menu-btn" 
+          onClick={onMenuToggle}
+          title="Toggle Menu"
+        >
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <div className="search-container">
+          <div className="search-icon-wrapper">
+            <SearchIcon />
+          </div>
+          <input
           type="text"
           className="search-input"
           placeholder="Search drives, companies..."
@@ -68,7 +120,8 @@ export default function Header({ searchQuery, setSearchQuery, notifications, set
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
-
+      </div>
+      
       {/* Right Header Actions */}
       <div className="header-right">
         {/* Notifications Icon Button */}
@@ -83,14 +136,14 @@ export default function Header({ searchQuery, setSearchQuery, notifications, set
             title="Notifications"
           >
             <BellIcon />
-            {notifications.some(n => !n.read) && <span className="notification-badge" />}
+            {activeNotifications.some(n => !n.read) && <span className="notification-badge" />}
           </button>
 
           {showNotifications && (
             <div className="dropdown-menu">
-              <div className="dropdown-header">Notifications ({notifications.length})</div>
+              <div className="dropdown-header">Notifications ({activeNotifications.length})</div>
               <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                {notifications.map((notif) => (
+                {activeNotifications.map((notif) => (
                   <div key={notif.id} className="dropdown-item" onClick={() => { setActiveTab('notifications'); setShowNotifications(false); }}>
                     <div style={{
                       width: '8px', height: '8px', borderRadius: '50%',
@@ -138,10 +191,11 @@ export default function Header({ searchQuery, setSearchQuery, notifications, set
             }}
           >
             <img
-              src={avatarSrc || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileName)}&background=4C1536&color=fff`}
+              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
               alt={profileName}
               className="profile-avatar"
               onError={(e) => {
+                // Fallback avatar if image offline
                 e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profileName)}&background=4C1536&color=fff`;
               }}
             />

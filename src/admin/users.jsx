@@ -29,12 +29,13 @@ import {
   ExternalLink,
   Calendar,
   Check,
-  Filter
+  Filter,
+  LogOut
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { fetchUsersFromFirestore, addStudentToFirestore, updateStudentInFirestore, batchAddStudentsToFirestore, deleteStudentFromFirestore, clearAllUsersFromFirestore } from '../firebase';
 
-export default function UsersPage({ onNavigate }) {
+export default function UsersPage({ onNavigate, onLogout }) {
   const [activeNav, setActiveNav] = useState('Student');
   const [searchQuery, setSearchQuery] = useState('');
   const [deptFilter, setDeptFilter] = useState('All');
@@ -544,7 +545,7 @@ export default function UsersPage({ onNavigate }) {
       {/* Top Header Label */}
       <div style={{
         padding: '22px 36px 10px 36px',
-        fontSize: '24px',
+        fontSize: '30px',
         fontWeight: 800,
         color: '#0f172a',
         letterSpacing: '-0.02em'
@@ -562,7 +563,7 @@ export default function UsersPage({ onNavigate }) {
           display: 'flex',
           flexDirection: 'column',
           padding: '32px 20px',
-          flexShrink: 0,
+          flexShrink: 0, alignSelf: 'flex-start', position: 'sticky', top: '24px',
           borderRadius: '24px',
           margin: '12px 0 16px 20px',
           boxShadow: '0 12px 36px rgba(0,0,0,0.22)'
@@ -576,7 +577,7 @@ export default function UsersPage({ onNavigate }) {
           </div>
 
           {/* Navigation Links */}
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeNav === item.label;
@@ -607,6 +608,35 @@ export default function UsersPage({ onNavigate }) {
                 </button>
               );
             })}
+
+            {/* Logout Button right near Settings */}
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '14px',
+                  padding: '14px 22px',
+                  borderRadius: '14px',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                  color: '#fca5a5',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+                  textAlign: 'left',
+                  marginTop: '10px',
+                  width: '100%'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.25)'; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#fca5a5'; }}
+              >
+                <LogOut size={20} color="currentColor" strokeWidth={2.3} />
+                <span>Logout</span>
+              </button>
+            )}
           </nav>
         </aside>
 
@@ -614,7 +644,7 @@ export default function UsersPage({ onNavigate }) {
         <main style={{ flex: 1, padding: '12px 36px 24px 30px', overflowY: 'auto' }}>
           
           {/* Top Row: 4 Metric Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '28px' }}>
+          <div className="admin-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '28px' }}>
             {statCards.map((card, idx) => (
               <div
                 key={idx}
@@ -1232,14 +1262,14 @@ export default function UsersPage({ onNavigate }) {
             </div>
 
             {/* 4 Organised Sections Cards for 26 Attributes */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               
               {/* Card 1: Academic Performance */}
               <div style={{ backgroundColor: '#f8fafc', borderRadius: '16px', padding: '20px', border: '1px solid #e2e8f0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: 700, color: '#1e293b', marginBottom: '14px' }}>
                   <GraduationCap size={20} color="#2563eb" /> Academic Performance
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '14px' }}>
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '14px' }}>
                   <div><span style={{ color: '#64748b', fontSize: '12px' }}>10th Score</span><div style={{ fontWeight: 700, color: '#0f172a' }}>{viewingUser.tenthPercentage ? `${viewingUser.tenthPercentage}%` : 'N/A'}</div></div>
                   <div><span style={{ color: '#64748b', fontSize: '12px' }}>12th / Diploma</span><div style={{ fontWeight: 700, color: '#0f172a' }}>{viewingUser.twelfthPercentage ? `${viewingUser.twelfthPercentage}%` : 'N/A'}</div></div>
                   <div><span style={{ color: '#64748b', fontSize: '12px' }}>CGPA (till VI Sem)</span><div style={{ fontWeight: 800, color: '#2563eb', fontSize: '16px' }}>{viewingUser.cgpa || 'N/A'}</div></div>
@@ -1292,7 +1322,7 @@ export default function UsersPage({ onNavigate }) {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
                   <div><span style={{ color: '#64748b' }}>Wish to Work:</span> <strong style={{ color: '#0f172a' }}>{viewingUser.wishToWork || 'IT / Software Industry'}</strong></div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '12.5px' }}>
+                  <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '12.5px' }}>
                     <div><span>Interview Anywhere:</span> <strong style={{ color: '#166534' }}>{viewingUser.willingInterviewAnyLocation || 'Yes'}</strong></div>
                     <div><span>Work Anywhere:</span> <strong style={{ color: '#166534' }}>{viewingUser.willingWorkAnyLocation || 'Yes'}</strong></div>
                     <div><span>Work in TN:</span> <strong style={{ color: '#166534' }}>{viewingUser.willingWorkTN || 'Yes'}</strong></div>
@@ -1364,7 +1394,7 @@ export default function UsersPage({ onNavigate }) {
               {/* Section 1: Personal & Basic Info */}
               <div style={{ marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
                 <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#be185d', margin: '0 0 12px 0' }}>1. Basic & Contact Details</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>Full Name *</label>
                     <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. Ananya Rao" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
@@ -1379,7 +1409,28 @@ export default function UsersPage({ onNavigate }) {
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>Department / Branch</label>
-                    <input type="text" value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })} placeholder="e.g. CSE / IT" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '6px' }}>
+                      {['AI&DS', 'CSE', 'IT', 'ECE', 'EEE', 'MECH', 'CIVIL'].map(dept => (
+                        <button
+                          key={dept}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, department: dept })}
+                          style={{
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            border: (formData.department || '').toUpperCase() === dept ? '1px solid #be185d' : '1px solid #cbd5e1',
+                            backgroundColor: (formData.department || '').toUpperCase() === dept ? '#fce7f3' : '#ffffff',
+                            color: (formData.department || '').toUpperCase() === dept ? '#be185d' : '#475569',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {dept}
+                        </button>
+                      ))}
+                    </div>
+                    <input type="text" value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })} placeholder="e.g. CSE / IT / AI&DS" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>Student Mobile</label>
@@ -1395,7 +1446,7 @@ export default function UsersPage({ onNavigate }) {
               {/* Section 2: Academic Record */}
               <div style={{ marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #f1f5f9' }}>
                 <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#2563eb', margin: '0 0 12px 0' }}>2. Academic Marks & Arrears</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
+                <div className="admin-grid-4" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>10th %</label>
                     <input type="text" value={formData.tenthPercentage} onChange={(e) => setFormData({ ...formData, tenthPercentage: e.target.value })} placeholder="e.g. 88.5" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
@@ -1426,7 +1477,7 @@ export default function UsersPage({ onNavigate }) {
               {/* Section 3: Skills & Preferences */}
               <div style={{ marginBottom: '20px' }}>
                 <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#7c3aed', margin: '0 0 12px 0' }}>3. Technical Skills & Placement Preferences</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>Technical Skills</label>
                     <input type="text" value={formData.technicalSkills} onChange={(e) => setFormData({ ...formData, technicalSkills: e.target.value })} placeholder="e.g. Java, React, Python, SQL" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />

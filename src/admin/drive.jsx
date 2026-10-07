@@ -40,7 +40,8 @@ import {
   CheckCircle2,
   Eye,
   Phone,
-  ExternalLink
+  ExternalLink,
+  LogOut
 } from 'lucide-react';
 import {
   fetchDrivesFromFirestore,
@@ -53,8 +54,138 @@ import {
   sendSelectionNotificationToStudent
 } from '../firebase';
 import { sendBatchDriveEmails, generateDriveInvitationEmail, openWebEmailClient } from '../utils/emailService';
+import DriveCircularModal from '../components/DriveCircularModal';
 
-export default function DriveManagement({ onNavigate }) {
+const DEPARTMENT_OPTIONS = [
+  { id: 'AI&DS', label: 'AI&DS' },
+  { id: 'CSE', label: 'CSE' },
+  { id: 'IT', label: 'IT' },
+  { id: 'ECE', label: 'ECE' },
+  { id: 'EEE', label: 'EEE' },
+  { id: 'MECH', label: 'MECH' },
+  { id: 'CIVIL', label: 'CIVIL' }
+];
+
+function DepartmentMultiSelect({ value = '', onChange, placeholder = "e.g. CSE, IT, ECE, AI&DS", style }) {
+  const getSelectedArray = () => {
+    if (!value) return [];
+    return value.split(',').map(s => s.trim()).filter(Boolean);
+  };
+
+  const selectedList = getSelectedArray();
+
+  const isSelected = (deptId) => {
+    return selectedList.some(item => {
+      const cleanItem = item.toUpperCase().replace(/[^A-Z0-9&]/g, '');
+      const cleanDept = deptId.toUpperCase().replace(/[^A-Z0-9&]/g, '');
+      return cleanItem === cleanDept;
+    });
+  };
+
+  const handleToggle = (deptId) => {
+    let newSelected;
+    if (isSelected(deptId)) {
+      newSelected = selectedList.filter(item => {
+        const cleanItem = item.toUpperCase().replace(/[^A-Z0-9&]/g, '');
+        const cleanDept = deptId.toUpperCase().replace(/[^A-Z0-9&]/g, '');
+        return cleanItem !== cleanDept;
+      });
+    } else {
+      newSelected = [...selectedList, deptId];
+    }
+    onChange(newSelected.join(', '));
+  };
+
+  const handleSelectAll = () => {
+    const allIds = DEPARTMENT_OPTIONS.map(d => d.id);
+    onChange(allIds.join(', '));
+  };
+
+  const handleClearAll = () => {
+    onChange('');
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+        {DEPARTMENT_OPTIONS.map(dept => {
+          const active = isSelected(dept.id);
+          return (
+            <button
+              key={dept.id}
+              type="button"
+              onClick={() => handleToggle(dept.id)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '5px 11px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontWeight: 700,
+                border: active ? '1.5px solid #be185d' : '1px solid #cbd5e1',
+                backgroundColor: active ? '#fce7f3' : '#ffffff',
+                color: active ? '#be185d' : '#475569',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                boxShadow: active ? '0 2px 6px rgba(190, 24, 93, 0.18)' : 'none'
+              }}
+            >
+              <span style={{ fontSize: '11px' }}>{active ? '✓' : '+'}</span>
+              <span>{dept.label}</span>
+            </button>
+          );
+        })}
+
+        <button
+          type="button"
+          onClick={handleSelectAll}
+          style={{
+            padding: '4px 9px',
+            borderRadius: '6px',
+            fontSize: '11px',
+            fontWeight: 700,
+            border: '1px solid #cbd5e1',
+            backgroundColor: '#f8fafc',
+            color: '#334155',
+            cursor: 'pointer'
+          }}
+        >
+          Select All
+        </button>
+
+        {selectedList.length > 0 && (
+          <button
+            type="button"
+            onClick={handleClearAll}
+            style={{
+              padding: '4px 9px',
+              borderRadius: '6px',
+              fontSize: '11px',
+              fontWeight: 700,
+              border: '1px dashed #ef4444',
+              backgroundColor: '#fef2f2',
+              color: '#ef4444',
+              cursor: 'pointer'
+            }}
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
+      <input
+        type="text"
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={style}
+      />
+    </div>
+  );
+}
+
+export default function DriveManagement({ onNavigate, onLogout }) {
   const [activeNav, setActiveNav] = useState('Drives');
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -86,6 +217,9 @@ export default function DriveManagement({ onNavigate }) {
     date: '',
     role: '',
     minCGPA: '6.5',
+    min10thMark: '60%',
+    min12thMark: '60%',
+    gender: 'Both',
     branches: 'CSE, IT, ECE, AI&DS',
     maxBacklogs: '0',
     bond: 'No Bond',
@@ -93,6 +227,8 @@ export default function DriveManagement({ onNavigate }) {
     location: '',
     status: 'Upcoming'
   });
+
+  const [formErrors, setFormErrors] = useState([]);
 
   // Modal State for Auto-Suggested Eligible Candidates
   const [selectedDriveForCandidates, setSelectedDriveForCandidates] = useState(null);
@@ -108,6 +244,9 @@ export default function DriveManagement({ onNavigate }) {
   // Modal State for Viewing Nominated Candidate Student Names & Profiles
   const [selectedCandidatesModal, setSelectedCandidatesModal] = useState(null);
   const [viewingStudentProfile, setViewingStudentProfile] = useState(null);
+
+  // Modal State for Campus Drive Circular Generator
+  const [selectedCircularDrive, setSelectedCircularDrive] = useState(null);
 
   const navItems = [
     { label: 'Dashboard', icon: LayoutDashboard },
@@ -162,19 +301,60 @@ export default function DriveManagement({ onNavigate }) {
     if (!studentsList || studentsList.length === 0) return [];
 
     const minCgpa = parseFloat(driveCriteria.minCGPA) || 0;
+    const min10th = parseFloat(driveCriteria.min10thMark || driveCriteria.min10th || driveCriteria.tenthMark || driveCriteria.tenthPercentage) || 0;
+    const min12th = parseFloat(driveCriteria.min12thMark || driveCriteria.min12th || driveCriteria.twelfthMark || driveCriteria.twelfthPercentage) || 0;
     const maxBacklogs = parseInt(driveCriteria.maxBacklogs) || 0;
     const branchesStr = (driveCriteria.branches || '').toLowerCase();
+    const genderReq = (driveCriteria.gender || driveCriteria.eligibleGender || 'Both').toLowerCase().trim();
 
     return studentsList.filter(student => {
       // 1. CGPA Cutoff Check
       const studentCgpa = parseFloat(student.cgpa) || 0;
       if (studentCgpa < minCgpa) return false;
 
-      // 2. Current Arrears / Backlogs Check
+      // 2. 10th Mark Cutoff Check
+      if (min10th > 0) {
+        const student10thVal = parseFloat(
+          student.tenthPercentage ||
+          student.tenthMark ||
+          student['10thMark'] ||
+          student.min10thMark ||
+          student.mark10th ||
+          student['10th'] ||
+          0
+        );
+        if (student10thVal < min10th) return false;
+      }
+
+      // 3. 12th Mark Cutoff Check
+      if (min12th > 0) {
+        const student12thVal = parseFloat(
+          student.twelfthPercentage ||
+          student.twelfthMark ||
+          student['12thMark'] ||
+          student.min12thMark ||
+          student.mark12th ||
+          student['12th'] ||
+          0
+        );
+        if (student12thVal < min12th) return false;
+      }
+
+      // 4. Gender Requirement Check
+      if (genderReq && !genderReq.includes('any') && !genderReq.includes('all') && !genderReq.includes('both')) {
+        const studentGender = (student.gender || '').toLowerCase().trim();
+        if (genderReq.includes('male') && !genderReq.includes('female')) {
+          if (studentGender !== 'male' && studentGender !== 'm') return false;
+        } else if (genderReq.includes('female')) {
+          if (studentGender !== 'female' && studentGender !== 'f') return false;
+        }
+      }
+
+      // 4. Current Arrears / Backlogs Check
       const studentArrears = parseInt(student.currentArrears) || 0;
       if (studentArrears > maxBacklogs) return false;
 
-      // 3. Department / Branch Check
+      // 5. Department / Branch Check
       if (!branchesStr.includes('all') && branchesStr.trim() !== '') {
         const dept = (student.department || student.branch || '').toLowerCase().trim();
         if (!dept) return false;
@@ -468,11 +648,15 @@ export default function DriveManagement({ onNavigate }) {
 
   const handleOpenCreateModal = () => {
     setEditingDrive(null);
+    setFormErrors([]);
     setFormData({
       company: '',
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
       role: '',
       minCGPA: '6.5',
+      min10thMark: '60%',
+      min12thMark: '60%',
+      gender: 'Both',
       branches: 'CSE, IT, ECE, AI&DS',
       maxBacklogs: '0',
       bond: 'No Bond',
@@ -485,17 +669,37 @@ export default function DriveManagement({ onNavigate }) {
 
   const handleOpenEditModal = (drive) => {
     setEditingDrive(drive);
-    setFormData({ ...drive });
+    setFormErrors([]);
+    setFormData({ min10thMark: '60%', min12thMark: '60%', gender: drive.gender || 'Both', ...drive });
     setIsModalOpen(true);
   };
 
   // Submit Handler for Create / Edit Drive with Firestore Persistence & Auto Candidate Suggestion Prompt
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.company || !formData.role || !formData.package) {
-      showToast('Please fill in all required fields!', 'error');
+
+    const missingFields = [];
+    if (!formData.company?.trim()) missingFields.push('company');
+    if (!formData.role?.trim()) missingFields.push('role');
+    if (!formData.minCGPA?.trim()) missingFields.push('minCGPA');
+    if (!formData.min12thMark?.trim()) missingFields.push('min12thMark');
+    if (!formData.branches?.trim()) missingFields.push('branches');
+    if (!formData.package?.trim()) missingFields.push('package');
+
+    if (missingFields.length > 0) {
+      setFormErrors(missingFields);
+      const fieldNamesMap = {
+        company: 'Company Name',
+        role: 'Job Role',
+        minCGPA: 'Min CGPA Cutoff',
+        min12thMark: '12th Mark Cutoff',
+        branches: 'Eligible Branches',
+        package: 'Package (LPA)'
+      };
+      showToast(`Please fill in required field(s): ${missingFields.map(f => fieldNamesMap[f] || f).join(', ')}`, 'error');
       return;
     }
+    setFormErrors([]);
 
     setIsSaving(true);
 
@@ -643,6 +847,12 @@ export default function DriveManagement({ onNavigate }) {
     backgroundColor: '#ffffff'
   };
 
+  const getInputStyle = (fieldName) => ({
+    ...inputStyle,
+    border: formErrors.includes(fieldName) ? '2px solid #ef4444' : '1px solid #cbd5e1',
+    backgroundColor: formErrors.includes(fieldName) ? '#fef2f2' : '#ffffff'
+  });
+
   // Filtered candidate list inside the selection modal
   const filteredCandidatesInModal = eligibleCandidates.filter(c =>
     (c.name || '').toLowerCase().includes(candidateSearchTerm.toLowerCase()) ||
@@ -698,7 +908,7 @@ export default function DriveManagement({ onNavigate }) {
             Drive Management
           </div>
           <div style={{ fontSize: '15px', color: '#64748b', marginTop: '2px', fontWeight: 500 }}>
-            Manage campus placement drives in Firebase & auto-suggest eligible student candidates
+            
           </div>
         </div>
 
@@ -778,7 +988,7 @@ export default function DriveManagement({ onNavigate }) {
           display: 'flex',
           flexDirection: 'column',
           padding: '32px 20px',
-          flexShrink: 0,
+          flexShrink: 0, alignSelf: 'flex-start', position: 'sticky', top: '24px',
           borderRadius: '24px',
           margin: '12px 0 16px 20px',
           boxShadow: '0 12px 36px rgba(0,0,0,0.22)'
@@ -790,7 +1000,7 @@ export default function DriveManagement({ onNavigate }) {
             </span>
           </div>
 
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeNav === item.label;
@@ -821,6 +1031,35 @@ export default function DriveManagement({ onNavigate }) {
                 </button>
               );
             })}
+
+            {/* Logout Button right near Settings */}
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '14px',
+                  padding: '14px 22px',
+                  borderRadius: '14px',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                  color: '#fca5a5',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+                  textAlign: 'left',
+                  marginTop: '10px',
+                  width: '100%'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.25)'; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#fca5a5'; }}
+              >
+                <LogOut size={20} color="currentColor" strokeWidth={2.3} />
+                <span>Logout</span>
+              </button>
+            )}
           </nav>
         </aside>
 
@@ -1035,6 +1274,15 @@ export default function DriveManagement({ onNavigate }) {
                           {/* ACTIONS */}
                           <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+                              {/* CIRCULAR PDF BUTTON */}
+                              <button
+                                onClick={() => setSelectedCircularDrive(drive)}
+                                title="Generate & Download Campus Drive Circular PDF"
+                                style={{ border: '1px solid #fde68a', backgroundColor: '#fffbeb', color: '#b45309', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 700 }}
+                              >
+                                <FileText size={14} color="#b45309" /> Circular
+                              </button>
+
                               {/* AUTO-SUGGEST CANDIDATES BUTTON */}
                               <button
                                 onClick={() => handleOpenEligibleCandidatesModal(drive)}
@@ -1486,59 +1734,84 @@ export default function DriveManagement({ onNavigate }) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '24px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Company Name *</label>
-                  <input type="text" required placeholder="e.g. Google, Microsoft, TCS" value={formData.company} onChange={(e) => setFormData({ ...formData, company: e.target.value })} style={inputStyle} />
+                  <input type="text" placeholder="e.g. Google, Microsoft, TCS" value={formData.company} onChange={(e) => { setFormData({ ...formData, company: e.target.value }); setFormErrors(formErrors.filter(f => f !== 'company')); }} style={getInputStyle('company')} />
+                  {formErrors.includes('company') && <span style={{ color: '#ef4444', fontSize: '11.5px', fontWeight: 600, display: 'block', marginTop: '4px' }}>⚠️ Company Name is required!</span>}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Drive Date *</label>
                     <input type="text" placeholder="e.g. Aug 25, 2025" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} style={inputStyle} />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Job Role *</label>
-                    <input type="text" required placeholder="e.g. Software Engineer" value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })} style={inputStyle} />
+                    <input type="text" placeholder="e.g. Software Engineer" value={formData.role} onChange={(e) => { setFormData({ ...formData, role: e.target.value }); setFormErrors(formErrors.filter(f => f !== 'role')); }} style={getInputStyle('role')} />
+                    {formErrors.includes('role') && <span style={{ color: '#ef4444', fontSize: '11.5px', fontWeight: 600, display: 'block', marginTop: '4px' }}>⚠️ Job Role is required!</span>}
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Min CGPA Cutoff *</label>
-                    <input type="text" required placeholder="e.g. 6.5" value={formData.minCGPA} onChange={(e) => setFormData({ ...formData, minCGPA: e.target.value })} style={inputStyle} />
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>10th Mark Cutoff (%) *</label>
+                    <input type="text" placeholder="e.g. 60%" value={formData.min10thMark || ''} onChange={(e) => { setFormData({ ...formData, min10thMark: e.target.value }); setFormErrors(formErrors.filter(f => f !== 'min10thMark')); }} style={getInputStyle('min10thMark')} />
+                    {formErrors.includes('min10thMark') && <span style={{ color: '#ef4444', fontSize: '11.5px', fontWeight: 600, display: 'block', marginTop: '4px' }}>⚠️ 10th Mark Cutoff is required!</span>}
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Service Bond Period *</label>
-                    <select value={formData.bond} onChange={(e) => setFormData({ ...formData, bond: e.target.value })} style={inputStyle}>
-                      <option value="No Bond">No Bond</option>
-                      <option value="1 Year">1 Year Bond</option>
-                      <option value="2 Years">2 Years Bond</option>
-                      <option value="18 Months">18 Months Bond</option>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>12th Mark Cutoff (%) *</label>
+                    <input type="text" placeholder="e.g. 60%" value={formData.min12thMark || ''} onChange={(e) => { setFormData({ ...formData, min12thMark: e.target.value }); setFormErrors(formErrors.filter(f => f !== 'min12thMark')); }} style={getInputStyle('min12thMark')} />
+                    {formErrors.includes('min12thMark') && <span style={{ color: '#ef4444', fontSize: '11.5px', fontWeight: 600, display: 'block', marginTop: '4px' }}>⚠️ 12th Mark Cutoff is required!</span>}
+                  </div>
+                </div>
+
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Min CGPA Cutoff *</label>
+                    <input type="text" placeholder="e.g. 6.5" value={formData.minCGPA} onChange={(e) => { setFormData({ ...formData, minCGPA: e.target.value }); setFormErrors(formErrors.filter(f => f !== 'minCGPA')); }} style={getInputStyle('minCGPA')} />
+                    {formErrors.includes('minCGPA') && <span style={{ color: '#ef4444', fontSize: '11.5px', fontWeight: 600, display: 'block', marginTop: '4px' }}>⚠️ Min CGPA Cutoff is required!</span>}
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Eligible Gender *</label>
+                    <select value={formData.gender || 'Both'} onChange={(e) => setFormData({ ...formData, gender: e.target.value })} style={inputStyle}>
+                      <option value="Both">Both</option>
+                      <option value="Male Only">Male Only</option>
+                      <option value="Female Only">Female Only</option>
                     </select>
                   </div>
                 </div>
 
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Eligible Branches *</label>
-                  <input type="text" required placeholder="e.g. CSE, IT, ECE, AI&DS" value={formData.branches} onChange={(e) => setFormData({ ...formData, branches: e.target.value })} style={inputStyle} />
-                </div>
-
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Package (LPA) *</label>
-                    <input type="text" required placeholder="e.g. 8 LPA" value={formData.package} onChange={(e) => setFormData({ ...formData, package: e.target.value })} style={inputStyle} />
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Eligible Branches *</label>
+                    <DepartmentMultiSelect
+                      value={formData.branches}
+                      onChange={(val) => {
+                        setFormData({ ...formData, branches: val });
+                        setFormErrors(formErrors.filter(f => f !== 'branches'));
+                      }}
+                      style={getInputStyle('branches')}
+                    />
+                    {formErrors.includes('branches') && <span style={{ color: '#ef4444', fontSize: '11.5px', fontWeight: 600, display: 'block', marginTop: '4px' }}>⚠️ Eligible Branches is required!</span>}
                   </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Package (LPA) *</label>
+                    <input type="text" placeholder="e.g. 8 LPA" value={formData.package} onChange={(e) => { setFormData({ ...formData, package: e.target.value }); setFormErrors(formErrors.filter(f => f !== 'package')); }} style={getInputStyle('package')} />
+                    {formErrors.includes('package') && <span style={{ color: '#ef4444', fontSize: '11.5px', fontWeight: 600, display: 'block', marginTop: '4px' }}>⚠️ Package (LPA) is required!</span>}
+                  </div>
+                </div>
+
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Location</label>
                     <input type="text" placeholder="e.g. Chennai" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} style={inputStyle} />
                   </div>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Status *</label>
-                  <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} style={inputStyle}>
-                    <option value="Upcoming">Upcoming</option>
-                    <option value="Ongoing">Ongoing</option>
-                    <option value="Completed">Completed</option>
-                  </select>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Status *</label>
+                    <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} style={inputStyle}>
+                      <option value="Upcoming">Upcoming</option>
+                      <option value="Ongoing">Ongoing</option>
+                      <option value="Completed">Completed</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div>
@@ -1915,14 +2188,14 @@ export default function DriveManagement({ onNavigate }) {
             </div>
 
             {/* 4 Organised Sections Cards for 26 Attributes */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
 
               {/* Card 1: Academic Performance */}
               <div style={{ backgroundColor: '#f8fafc', borderRadius: '16px', padding: '20px', border: '1px solid #e2e8f0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: 700, color: '#1e293b', marginBottom: '14px' }}>
                   <GraduationCap size={20} color="#2563eb" /> Academic Performance
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '14px' }}>
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '14px' }}>
                   <div><span style={{ color: '#64748b', fontSize: '12px' }}>10th Score</span><div style={{ fontWeight: 700, color: '#0f172a' }}>{viewingStudentProfile.tenthPercentage ? `${viewingStudentProfile.tenthPercentage}%` : 'N/A'}</div></div>
                   <div><span style={{ color: '#64748b', fontSize: '12px' }}>12th / Diploma</span><div style={{ fontWeight: 700, color: '#0f172a' }}>{viewingStudentProfile.twelfthPercentage ? `${viewingStudentProfile.twelfthPercentage}%` : 'N/A'}</div></div>
                   <div><span style={{ color: '#64748b', fontSize: '12px' }}>CGPA (till VI Sem)</span><div style={{ fontWeight: 800, color: '#2563eb', fontSize: '16px' }}>{viewingStudentProfile.cgpa || 'N/A'}</div></div>
@@ -1975,7 +2248,7 @@ export default function DriveManagement({ onNavigate }) {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13.5px' }}>
                   <div><span style={{ color: '#64748b' }}>Wish to Work:</span> <strong style={{ color: '#0f172a' }}>{viewingStudentProfile.wishToWork || 'IT / Software Industry'}</strong></div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '12.5px' }}>
+                  <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '12.5px' }}>
                     <div><span>Interview Anywhere:</span> <strong style={{ color: '#166534' }}>{viewingStudentProfile.willingInterviewAnyLocation || 'Yes'}</strong></div>
                     <div><span>Work Anywhere:</span> <strong style={{ color: '#166534' }}>{viewingStudentProfile.willingWorkAnyLocation || 'Yes'}</strong></div>
                     <div><span>Work in TN:</span> <strong style={{ color: '#166534' }}>{viewingStudentProfile.willingWorkTN || 'Yes'}</strong></div>
@@ -2006,6 +2279,14 @@ export default function DriveManagement({ onNavigate }) {
 
           </div>
         </div>
+      )}
+
+      {/* CAMPUS DRIVE CIRCULAR GENERATOR & PDF DOWNLOAD MODAL */}
+      {selectedCircularDrive && (
+        <DriveCircularModal
+          drive={selectedCircularDrive}
+          onClose={() => setSelectedCircularDrive(null)}
+        />
       )}
 
     </div>

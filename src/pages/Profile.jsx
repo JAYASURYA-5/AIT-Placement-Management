@@ -1,623 +1,909 @@
-import React, { useState, useMemo } from 'react';
-import avatarMale   from '../assets/avatar_male.jpg';
-import avatarFemale from '../assets/avatar_female.jpg';
-import avatarOther  from '../assets/avatar_other.jpg';
+import React, { useState, useRef } from 'react'
+import avatarImg from '../avatar.png'
+import { fetchStudentProfileFromFirestore, saveStudentProfileToFirestore } from '../firebase'
 
-export default function ProfilePage() {
-  // Returns a gender-appropriate passport-style avatar
-  const getDefaultAvatar = (gender) => {
-    if (gender === 'female') return avatarFemale;
-    if (gender === 'other')  return avatarOther;
-    return avatarMale;
-  };
+const tabs = ['Overview', 'Placements', 'Academic Info', 'Education', 'Skills', 'Projects', 'Certificates']
 
-  const [profile, setProfile] = useState({
-    name: 'Jayasurya K',
-    regNo: '20IT30104',
-    degree: 'B.Tech - Information Technology',
-    batch: '2023 - 2027',
-    completion: 90,
-    gender: 'male',
-    email: 'jayasurya.k@ait.edu.in',
-    phone: '+91 63749 09350',
-    location: 'Coimbatore, Tamil Nadu',
-    github: 'github.com/jayasurya-k',
-    linkedin: 'linkedin.com/in/jayasurya-k',
-    
-    // Additional education details
-    education: {
-      tenth: { school: 'KV Matriculation School', year: '2021', score: '94.2%' },
-      twelfth: { school: 'KV Higher Secondary School', year: '2023', score: '96.5%' },
-      college: { cgpa: '8.74', arrears: '0' }
-    },
-    // Skills categories
-    skills: {
-      languages: ['Java', 'Python', 'JavaScript (ES6+)', 'SQL', 'HTML5/CSS3'],
-      frameworks: ['React.js', 'Node.js', 'Express', 'Bootstrap', 'TailwindCSS'],
-      tools: ['Git & GitHub', 'Postman', 'VS Code', 'Figma']
-    },
-    // Projects
-    projects: [
-      { title: 'AIT Placement Management Portal', desc: 'A comprehensive web application to streamline college placements, featuring mock interviews, calendar tracking, and resume builders.', tech: 'React, Node.js, Express, MongoDB' },
-      { title: 'Smart Farm Companion', desc: 'An IoT and web-based crop recommendation and health analysis platform using machine learning.', tech: 'React Native, Python, Flask, ML' }
-    ],
-    // Certificates
-    certificates: [
-      { name: 'Google Cloud Certified Associate Cloud Engineer', issuer: 'Google Cloud', date: 'Dec 2025' },
-      { name: 'Full Stack Web Development Professional Certificate', issuer: 'Coursera', date: 'Jul 2025' }
-    ]
-  });
+const femaleAvatarUrl = 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=320&auto=format&fit=crop&q=80'
 
-  const [activeTab, setActiveTab] = useState('Overview');
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [tempProfile, setTempProfile] = useState({ ...profile });
-
-  const handleUpdateProfile = (e) => {
-    e.preventDefault();
-    setProfile({ ...tempProfile });
-    setShowEditModal(false);
-  };
-
-  const openEditModal = () => {
-    setTempProfile({ ...profile });
-    setShowEditModal(true);
-  };
+function Avatar({ profileData }) {
+  const defaultAvatar = profileData.gender === 'Female' ? femaleAvatarUrl : avatarImg
 
   return (
-    <div style={{ fontFamily: 'var(--font-family)', display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '800px', margin: '0 auto', padding: '10px 0' }}>
-      
-      {/* 1. TOP MY PROFILE CARD */}
-      <div style={{
-        backgroundColor: '#ffffff',
-        border: '1.5px solid var(--border-light)',
-        borderRadius: '16px',
-        padding: '24px',
-        boxShadow: 'var(--shadow-sm)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px',
-        position: 'relative'
-      }}>
-        {/* Header row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '17px', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>My Profile</h2>
-          <button
-            onClick={openEditModal}
-            style={{
-              padding: '6px 16px',
-              borderRadius: '8px',
-              border: '1.5px solid #C18B63',
-              backgroundColor: 'transparent',
-              color: '#C18B63',
-              fontSize: '12.5px',
-              fontWeight: '700',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              fontFamily: 'var(--font-family)'
-            }}
-            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(193, 139, 99, 0.05)' }}
-            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
-          >
-            Edit Profile
-          </button>
-        </div>
+    <div className="avatar-photo">
+      <img src={profileData.photo || defaultAvatar} alt={`${profileData.name} profile`} />
+    </div>
+  )
+}
 
-        {/* Profile Info Row */}
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <img
-            src={getDefaultAvatar(profile.gender, profile.name)}
-            alt={profile.name}
-            style={{
-              width: '90px',
-              height: '90px',
-              borderRadius: '50%',
-              objectFit: 'cover',
-              border: '1.5px solid var(--border-light)'
-            }}
-            onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=4C1536&color=fff`; }}
-          />
-
-          <div style={{ flex: 1, minWidth: '200px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-main)', margin: '0 0 6px 0' }}>{profile.name}</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600' }}>
-              <div>Reg. No: {profile.regNo}</div>
-              <div>{profile.degree}</div>
-              <div>Batch: {profile.batch}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Profile Completion Bar */}
-        <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '16px', marginTop: '4px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>Profile Completion</span>
-            <div style={{ flex: 1, height: '6px', backgroundColor: '#F3ECE6', borderRadius: '3px', position: 'relative' }}>
-              <div style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                height: '100%',
-                width: `${profile.completion}%`,
-                backgroundColor: '#C18B63',
-                borderRadius: '3px'
-              }} />
-            </div>
-            <span style={{ fontSize: '12.5px', fontWeight: '800', color: 'var(--text-main)' }}>{profile.completion}%</span>
-          </div>
-        </div>
+function InfoItem({ icon, title, value }) {
+  return (
+    <div className="info-item">
+      <div className="icon-box">{icon}</div>
+      <div className="info-text">
+        <div className="info-title">{title}</div>
+        <div className="info-value">{value}</div>
       </div>
+    </div>
+  )
+}
 
-      {/* 2. BOTTOM DETAILS CARD WITH TABBED NAVIGATION */}
-      <div style={{
-        backgroundColor: '#ffffff',
-        border: '1.5px solid var(--border-light)',
-        borderRadius: '16px',
-        padding: '24px',
-        boxShadow: 'var(--shadow-sm)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '24px'
-      }}>
-        {/* Navigation Tabs Header */}
-        <div style={{
-          display: 'flex',
-          gap: '28px',
-          borderBottom: '1.5px solid var(--border-light)',
-          paddingBottom: '2px',
-          overflowX: 'auto'
-        }}>
-          {['Overview', 'Education', 'Skills', 'Projects', 'Certificates'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: '0 0 10px 0',
-                fontSize: '13.5px',
-                fontWeight: '700',
-                color: activeTab === tab ? '#7C3AED' : 'var(--text-muted)',
-                cursor: 'pointer',
-                borderBottom: activeTab === tab ? '2.5px solid #7C3AED' : '2.5px solid transparent',
-                transition: 'all 0.2s ease',
-                whiteSpace: 'nowrap',
-                fontFamily: 'var(--font-family)',
-                marginBottom: '-2px'
-              }}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+export default function Profile() {
+  const [profileData, setProfileData] = useState({
+    name: 'MADHUMITHA.K',
+    gender: 'Female',
+    photo: '',
+    regNo: '710123205020',
+    branch: 'B.Tech - Information Technology',
+    department: 'IT',
+    batch: '2023 - 2027',
+    completion: 90,
+    email: 'madhumithalakshmi9406@gmail.com',
+    phone: '+91 63694 70565',
+    mobile: '6369470565',
+    parentMobile: '9750324454',
+    dob: '15/05/2004',
+    nativeDistrict: 'Pudukkottai',
+    permanentAddress: 'Nagarathinam Pallam, Thanjur Post, Alangudi Taluk, Isugupatti, Pudukkottai',
+    location: 'Coimbatore, Tamil Nadu',
+    tenthPercentage: 'pass%',
+    twelfthPercentage: '0.83%',
+    cgpa: '9.025',
+    yearOfPassing: '2027',
+    historyOfArrears: 'nill',
+    currentArrears: 'nill',
+    technicalSkills: 'python developer, Data analyzer, python',
+    certifications: 'introduction to Automation, Data analytics',
+    languagesKnown: 'Tamil, English',
+    wishToWork: 'software developer',
+    willingInterviewAnyLocation: 'Yes',
+    willingWorkAnyLocation: 'Yes',
+    willingWorkTN: 'Yes',
+    willingWorkIndia: 'Yes',
+    github: 'github.com/jayasurya-k',
+    linkedin: 'linkedin.com/in/jayasurya-k',
+    selectedDrives: [],
+    projects: []
+  })
 
-        {/* Tab Content Rendering */}
-        <div style={{ minHeight: '220px' }}>
-          
-          {/* TAB 1: OVERVIEW */}
-          {activeTab === 'Overview' && (
-            <div className="profile-overview-grid">
-              
-              {/* Left Column */}
-              <div className="profile-overview-col left-col">
-                
-                {/* Email */}
-                <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                  <div style={{ marginTop: '2px' }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                      <polyline points="22,6 12,13 2,6" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>Email</div>
-                    <div style={{ fontSize: '13.5px', fontWeight: '700', color: 'var(--text-main)' }}>{profile.email}</div>
-                  </div>
-                </div>
+  const [activeTab, setActiveTab] = useState('Overview')
+  const [resumeName, setResumeName] = useState('Final-Resume.pdf')
+  const [resumeUploaded, setResumeUploaded] = useState(false)
+  const [resumeFile, setResumeFile] = useState(null)
 
-                {/* Phone */}
-                <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                  <div style={{ marginTop: '2px' }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>Phone</div>
-                    <div style={{ fontSize: '13.5px', fontWeight: '700', color: 'var(--text-main)' }}>{profile.phone}</div>
-                  </div>
-                </div>
+  // Edit Profile states
+  const [isEditing, setIsEditing] = useState(false)
+  const [editForm, setEditForm] = useState({})
 
-                {/* Location */}
-                <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                  <div style={{ marginTop: '2px' }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="3" />
-                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>Location</div>
-                    <div style={{ fontSize: '13.5px', fontWeight: '700', color: 'var(--text-main)' }}>{profile.location}</div>
-                  </div>
-                </div>
+  const fileInputRef = useRef(null)
+  const profilePhotoInputRef = useRef(null)
 
+  const handleEditClick = () => {
+    setEditForm({ ...profileData })
+    setIsEditing(true)
+  }
+
+  const handleCancelProfile = () => {
+    setIsEditing(false)
+  }
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault()
+    const saved = { ...editForm }
+    setProfileData(saved)
+    try {
+      localStorage.setItem('ait-profile', JSON.stringify(saved))
+      window.dispatchEvent(new CustomEvent('profile:update', { detail: saved }))
+
+      // Live sync edits directly to Cloud Firestore 'users' collection
+      const studentId = saved.uid || saved.id || saved.regNo || saved.email
+      if (studentId) {
+        await saveStudentProfileToFirestore(studentId, saved)
+      }
+    } catch (err) {
+      console.warn('Failed to save profile to Firestore/localStorage', err)
+    }
+    setIsEditing(false)
+  }
+
+  const handleProfilePhotoChange = (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      window.alert('Please choose an image file.')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      setEditForm((currentForm) => ({ ...currentForm, photo: reader.result }))
+    }
+    reader.readAsDataURL(file)
+  }
+
+  // Load saved profile from localStorage and sync live from Cloud Firestore on mount
+  React.useEffect(() => {
+    let localProfile = {}
+    try {
+      const raw = localStorage.getItem('ait-profile')
+      if (raw) {
+        localProfile = JSON.parse(raw)
+        setProfileData((prev) => ({ ...prev, ...localProfile }))
+      }
+    } catch {
+      // ignore
+    }
+
+    // Live sync from Firestore database using logged-in student identifier
+    const studentIdentifier = localProfile.uid || localProfile.id || localProfile.email || localProfile.regNo
+    if (studentIdentifier) {
+      fetchStudentProfileFromFirestore(studentIdentifier).then((fsUser) => {
+        if (fsUser) {
+          setProfileData((prev) => {
+            const merged = {
+              ...prev,
+              ...fsUser,
+              branch: fsUser.branch || fsUser.department || prev.branch,
+              selectedDrives: Array.isArray(fsUser.selectedDrives) ? fsUser.selectedDrives : prev.selectedDrives || []
+            }
+            try {
+              localStorage.setItem('ait-profile', JSON.stringify(merged))
+            } catch (e) {
+              console.warn('LocalStorage save error:', e)
+            }
+            return merged
+          })
+        }
+      })
+    }
+  }, [])
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleResumeChange = async (event) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setResumeFile(file)
+      setResumeName(file.name)
+      setResumeUploaded(true)
+
+      const updated = {
+        ...profileData,
+        resumeName: file.name,
+        resumeUploaded: true,
+        resumeUpdatedAt: new Date().toISOString()
+      }
+      setProfileData(updated)
+      try {
+        localStorage.setItem('ait-profile', JSON.stringify(updated))
+        const studentId = updated.uid || updated.id || updated.regNo || updated.email
+        if (studentId) {
+          await saveStudentProfileToFirestore(studentId, updated)
+        }
+      } catch (err) {
+        console.warn('Failed to sync uploaded resume info to Firestore:', err)
+      }
+
+      window.alert(`Successfully uploaded resume: ${file.name}`)
+    }
+  }
+
+  const handleViewResume = () => {
+    if (resumeFile) {
+      const fileURL = URL.createObjectURL(resumeFile)
+      window.open(fileURL, '_blank')
+    } else {
+      const dummyContent = `Candidate Profile Resume Summary\n\nName: ${profileData.name}\nReg. No: ${profileData.regNo}\nBranch: ${profileData.branch || profileData.department}\nBatch: ${profileData.batch}\nEmail: ${profileData.email}\nPhone: ${profileData.mobile || profileData.phone}\nLocation: ${profileData.location}\nGitHub: ${profileData.github}\nLinkedIn: ${profileData.linkedin}`
+      const dummyBlob = new Blob([dummyContent], { type: 'text/plain' })
+      const fileURL = URL.createObjectURL(dummyBlob)
+      window.open(fileURL, '_blank')
+    }
+  }
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'Placements':
+        const drivesList = Array.isArray(profileData.selectedDrives) ? profileData.selectedDrives : []
+        return (
+          <div className="tab-body">
+            {drivesList.length === 0 ? (
+              <div className="project-card" style={{ textAlign: 'center', padding: '32px 16px' }}>
+                <h3 style={{ color: '#64748b', fontSize: '16px', marginBottom: '8px' }}>No Selected Placement Drives Yet</h3>
+                <p style={{ color: '#94a3b8', fontSize: '13px', margin: 0 }}>
+                  When you are shortlisted or nominated by the Placement Admin for a drive, your selected drive details (Company, Role, Package CTC, Date, Location, Bond) will appear right here in real time!
+                </p>
               </div>
-
-              {/* Right Column */}
-              <div className="profile-overview-col">
-                
-                {/* GitHub */}
-                <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                  <div style={{ marginTop: '2px' }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>GitHub</div>
-                    <a href={`https://${profile.github}`} target="_blank" rel="noreferrer" style={{ fontSize: '13.5px', fontWeight: '700', color: '#7C3AED', textDecoration: 'none' }}>
-                      {profile.github}
-                    </a>
-                  </div>
-                </div>
-
-                {/* LinkedIn */}
-                <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                  <div style={{ marginTop: '2px' }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                      <rect x="2" y="9" width="4" height="12" />
-                      <circle cx="4" cy="4" r="2" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>LinkedIn</div>
-                    <a href={`https://${profile.linkedin}`} target="_blank" rel="noreferrer" style={{ fontSize: '13.5px', fontWeight: '700', color: '#7C3AED', textDecoration: 'none' }}>
-                      {profile.linkedin}
-                    </a>
-                  </div>
-                </div>
-
-                {/* Resume */}
-                <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                  <div style={{ marginTop: '2px' }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                      <line x1="16" y1="13" x2="8" y2="13" />
-                      <line x1="16" y1="17" x2="8" y2="17" />
-                      <polyline points="10 9 9 9 8 9" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Resume</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{
-                        padding: '4px 10px',
-                        borderRadius: '6px',
-                        fontSize: '11.5px',
-                        fontWeight: '800',
-                        backgroundColor: '#EEF8F1',
-                        color: '#16A34A'
-                      }}>
-                        Uploaded
+            ) : (
+              <div style={{ display: 'grid', gap: '16px' }}>
+                {drivesList.map((drive, idx) => (
+                  <div key={drive.driveId || idx} className="project-card" style={{ borderLeft: '4px solid #16a34a', background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
+                      <div>
+                        <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                          {drive.company}
+                        </h3>
+                        <p style={{ fontSize: '14px', fontWeight: 600, color: '#2563eb', margin: '4px 0' }}>
+                          {drive.role}
+                        </p>
+                      </div>
+                      <span className="badge-uploaded" style={{ backgroundColor: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', fontWeight: 700, padding: '4px 12px', borderRadius: '20px' }}>
+                        🎉 {drive.status || 'Selected / Nominated'}
                       </span>
-                      <button
-                        onClick={() => alert("Simulating Resume PDF preview...")}
-                        style={{
-                          padding: '3px 12px',
-                          fontSize: '11.5px',
-                          fontWeight: '700',
-                          backgroundColor: '#ffffff',
-                          border: '1.5px solid var(--border-medium)',
-                          color: 'var(--text-main)',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          fontFamily: 'var(--font-family)'
-                        }}
-                      >
-                        View
-                      </button>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginTop: '14px', paddingTop: '12px', borderTop: '1px stroke #e2e8f0' }}>
+                      <div>
+                        <span style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Package CTC</span>
+                        <div style={{ fontSize: '14px', fontWeight: 700, color: '#166534' }}>{drive.package || 'N/A'}</div>
+                      </div>
+                      <div>
+                        <span style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Drive Date</span>
+                        <div style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>{drive.date || 'Scheduled'}</div>
+                      </div>
+                      <div>
+                        <span style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Location</span>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>{drive.location || 'Campus'}</div>
+                      </div>
+                      <div>
+                        <span style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Service Bond</span>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>{drive.bond || 'None'}</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-
+                ))}
               </div>
-
-            </div>
-          )}
-
-          {/* TAB 2: EDUCATION */}
-          {activeTab === 'Education' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ display: 'flex', gap: '16px', paddingBottom: '16px', borderBottom: '1px dashed var(--border-light)' }}>
-                <span style={{ fontSize: '20px' }}>🎓</span>
-                <div>
-                  <h4 style={{ margin: '0 0 4px 0', fontSize: '14.5px', fontWeight: '800', color: 'var(--text-main)' }}>B.Tech in Information Technology</h4>
-                  <p style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: '600', color: 'var(--text-muted)' }}>{profile.college} | {profile.batch}</p>
-                  <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#7C3AED' }}>CGPA: {profile.education.college.cgpa} | Arrears: {profile.education.college.arrears}</p>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '16px', paddingBottom: '16px', borderBottom: '1px dashed var(--border-light)' }}>
-                <span style={{ fontSize: '20px' }}>🏫</span>
-                <div>
-                  <h4 style={{ margin: '0 0 4px 0', fontSize: '14.5px', fontWeight: '800', color: 'var(--text-main)' }}>Higher Secondary School (XII)</h4>
-                  <p style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: '600', color: 'var(--text-muted)' }}>{profile.education.twelfth.school} | Year: {profile.education.twelfth.year}</p>
-                  <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#7C3AED' }}>Score: {profile.education.twelfth.score}</p>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '16px' }}>
-                <span style={{ fontSize: '20px' }}>🏢</span>
-                <div>
-                  <h4 style={{ margin: '0 0 4px 0', fontSize: '14.5px', fontWeight: '800', color: 'var(--text-main)' }}>Secondary School (X)</h4>
-                  <p style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: '600', color: 'var(--text-muted)' }}>{profile.education.tenth.school} | Year: {profile.education.tenth.year}</p>
-                  <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#7C3AED' }}>Score: {profile.education.tenth.score}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: SKILLS */}
-          {activeTab === 'Skills' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div>
-                <h4 style={{ fontSize: '13px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Programming Languages</h4>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {profile.skills.languages.map(skill => (
-                    <span key={skill} style={{ padding: '6px 14px', borderRadius: '20px', backgroundColor: 'var(--primary-maroon-light)', color: 'var(--primary-maroon)', fontSize: '12.5px', fontWeight: '700' }}>
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h4 style={{ fontSize: '13px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Libraries &amp; Frameworks</h4>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {profile.skills.frameworks.map(skill => (
-                    <span key={skill} style={{ padding: '6px 14px', borderRadius: '20px', backgroundColor: 'var(--primary-maroon-light)', color: 'var(--primary-maroon)', fontSize: '12.5px', fontWeight: '700' }}>
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h4 style={{ fontSize: '13px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Developer Tools</h4>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {profile.skills.tools.map(skill => (
-                    <span key={skill} style={{ padding: '6px 14px', borderRadius: '20px', backgroundColor: 'var(--primary-maroon-light)', color: 'var(--primary-maroon)', fontSize: '12.5px', fontWeight: '700' }}>
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: PROJECTS */}
-          {activeTab === 'Projects' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {profile.projects.map((proj, idx) => (
-                <div key={idx} style={{
-                  padding: '16px',
-                  borderRadius: '12px',
-                  border: '1px solid var(--border-light)',
-                  backgroundColor: '#FAF8F5',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px'
-                }}>
-                  <h4 style={{ margin: 0, fontSize: '14.5px', fontWeight: '800', color: 'var(--text-main)' }}>{proj.title}</h4>
-                  <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.4' }}>{proj.desc}</p>
-                  <div style={{ fontSize: '12px', fontWeight: '700', color: '#7C3AED' }}>Tech Stack: {proj.tech}</div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* TAB 5: CERTIFICATES */}
-          {activeTab === 'Certificates' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {profile.certificates.map((cert, idx) => (
-                <div key={idx} style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  border: '1px solid var(--border-light)',
-                  backgroundColor: '#FAF8F5'
-                }}>
-                  <div>
-                    <h4 style={{ margin: '0 0 3px 0', fontSize: '14px', fontWeight: '800', color: 'var(--text-main)' }}>{cert.name}</h4>
-                    <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--text-muted)', fontWeight: '600' }}>Issued by {cert.issuer} • {cert.date}</p>
+            )}
+          </div>
+        )
+      case 'Academic Info':
+        return (
+          <div className="tab-body">
+            <div className="project-card" style={{ background: '#ffffff', borderRadius: '12px', padding: '20px', border: '1px solid #e2e8f0' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                🎓 Academic Performance & Arrears Track
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '10px' }}>
+                  <span style={{ color: '#64748b', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase' }}>10th Score</span>
+                  <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '18px', marginTop: '2px' }}>
+                    {profileData.tenthPercentage ? `${profileData.tenthPercentage}` : 'pass%'}
                   </div>
-                  <span style={{ fontSize: '18px' }}>📜</span>
                 </div>
-              ))}
-            </div>
-          )}
 
+                <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '10px' }}>
+                  <span style={{ color: '#64748b', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase' }}>12th / Diploma</span>
+                  <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '18px', marginTop: '2px' }}>
+                    {profileData.twelfthPercentage ? `${profileData.twelfthPercentage}` : '0.83%'}
+                  </div>
+                </div>
+
+                <div style={{ padding: '12px', background: '#eff6ff', borderRadius: '10px', border: '1px solid #bfdbfe' }}>
+                  <span style={{ color: '#1e40af', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase' }}>CGPA (till VI Sem)</span>
+                  <div style={{ fontWeight: 800, color: '#2563eb', fontSize: '22px', marginTop: '2px' }}>
+                    {profileData.cgpa || '9.025'}
+                  </div>
+                </div>
+
+                <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '10px' }}>
+                  <span style={{ color: '#64748b', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase' }}>Year of Passing</span>
+                  <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '18px', marginTop: '2px' }}>
+                    {profileData.yearOfPassing || '2027'}
+                  </div>
+                </div>
+
+                <div style={{ padding: '12px', background: '#f0fdf4', borderRadius: '10px' }}>
+                  <span style={{ color: '#166534', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase' }}>Arrears Cleared</span>
+                  <div style={{ fontWeight: 800, color: '#166534', fontSize: '18px', marginTop: '2px' }}>
+                    {profileData.historyOfArrears || 'nill'}
+                  </div>
+                </div>
+
+                <div style={{ padding: '12px', background: profileData.currentArrears && profileData.currentArrears !== '0' && profileData.currentArrears !== 'nill' ? '#fef2f2' : '#f0fdf4', borderRadius: '10px' }}>
+                  <span style={{ color: profileData.currentArrears && profileData.currentArrears !== '0' && profileData.currentArrears !== 'nill' ? '#991b1b' : '#166534', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase' }}>Current Arrears</span>
+                  <div style={{ fontWeight: 800, color: profileData.currentArrears && profileData.currentArrears !== '0' && profileData.currentArrears !== 'nill' ? '#dc2626' : '#166534', fontSize: '18px', marginTop: '2px' }}>
+                    {profileData.currentArrears || 'nill'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      case 'Education':
+        return (
+          <div className="tab-body">
+            <div className="section-row">
+              <div>
+                <h3>Adithya Institute Of Technology</h3>
+                <p className="section-meta">{profileData.branch || profileData.department || 'B.Tech - Information Technology'} • {profileData.batch || '2023 - 2027'}</p>
+              </div>
+              <span className="detail-pill">CGPA {profileData.cgpa || '9.025'}</span>
+            </div>
+            <div className="section-row">
+              <div>
+                <h3>Central Board of Secondary Education</h3>
+                <p className="section-meta">Higher Secondary / Diploma • {profileData.yearOfPassing ? Number(profileData.yearOfPassing) - 4 : '2023'}</p>
+              </div>
+              <span className="detail-pill">{profileData.twelfthPercentage || '0.83%'}</span>
+            </div>
+            <div className="section-row">
+              <div>
+                <h3>Secondary School Certificate</h3>
+                <p className="section-meta">Secondary School (10th) • {profileData.yearOfPassing ? Number(profileData.yearOfPassing) - 6 : '2021'}</p>
+              </div>
+              <span className="detail-pill">{profileData.tenthPercentage || 'pass%'}</span>
+            </div>
+          </div>
+        )
+      case 'Skills':
+        const skillsArray = profileData.technicalSkills
+          ? profileData.technicalSkills.split(',').map(s => s.trim()).filter(Boolean)
+          : ['python developer', 'Data analyzer', 'python', 'React', 'JavaScript', 'CSS']
+        const certsList = profileData.certifications
+          ? profileData.certifications.split(',').map(c => c.trim()).filter(Boolean)
+          : ['introduction to Automation', 'Data analytics']
+
+        return (
+          <div className="tab-body" style={{ display: 'grid', gap: '20px' }}>
+            <div>
+              <h4 style={{ color: '#64748b', fontSize: '13px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '10px' }}>
+                Technical Skills
+              </h4>
+              <div className="feature-grid" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {skillsArray.map((skill, sIdx) => (
+                  <span key={sIdx} className="skill-badge" style={{ background: '#f3e8ff', color: '#6b21a8', border: '1px solid #d8b4fe', fontWeight: 700 }}>
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h4 style={{ color: '#64748b', fontSize: '13px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '10px' }}>
+                Certification Courses
+              </h4>
+              <div style={{ display: 'grid', gap: '8px' }}>
+                {certsList.map((cert, cIdx) => (
+                  <div key={cIdx} style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', fontWeight: 600, color: '#0f172a' }}>
+                    📜 {cert}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h4 style={{ color: '#64748b', fontSize: '13px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '8px' }}>
+                Languages Known
+              </h4>
+              <div style={{ color: '#0f172a', fontWeight: 600, fontSize: '15px' }}>
+                🗣️ {profileData.languagesKnown || 'Tamil, English'}
+              </div>
+            </div>
+          </div>
+        )
+      case 'Projects':
+        const projectsList = Array.isArray(profileData.projects) && profileData.projects.length > 0
+          ? profileData.projects
+          : [
+            {
+              title: 'Placement Portal Dashboard',
+              description: 'Designed a student-facing dashboard with profile tracking, milestones, and resume upload flows.',
+              meta: 'React, Vite, CSS'
+            },
+            {
+              title: 'Job Application Tracker',
+              description: 'Built a responsive interface for tracking applications, interview status and upcoming events.',
+              meta: 'JavaScript, API Design'
+            }
+          ]
+        return (
+          <div className="tab-body">
+            {projectsList.map((proj, idx) => (
+              <div key={proj.id || idx} className="project-card">
+                <h3>{proj.title || proj.name}</h3>
+                <p>{proj.description || proj.desc}</p>
+                <div className="project-meta">{proj.meta || proj.tech || proj.technologies || 'Web App'}</div>
+              </div>
+            ))}
+          </div>
+        )
+      case 'Certificates':
+        return (
+          <div className="tab-body feature-grid certificates-grid">
+            {[
+              { title: 'AWS Cloud Practitioner', issuer: 'Amazon', date: '2024' },
+              { title: 'Full Stack Web Dev', issuer: 'Coursera', date: '2023' },
+              { title: 'UI/UX Foundations', issuer: 'LinkedIn Learning', date: '2024' }
+            ].map((cert) => (
+              <div key={cert.title} className="cert-card">
+                <strong>{cert.title}</strong>
+                <p>{cert.issuer}</p>
+                <span>{cert.date}</span>
+              </div>
+            ))}
+          </div>
+        )
+      default:
+        return (
+          <div className="overview-columns" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+            <div className="overview-column" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '15px', borderBottom: '1px stroke #e2e8f0', paddingBottom: '6px' }}>
+                📞 Contact & Personal Info
+              </div>
+              <InfoItem
+                title="Email"
+                value={profileData.email}
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="info-icon">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <polyline points="22,6 12,13 2,6" />
+                  </svg>
+                }
+              />
+              <InfoItem
+                title="Student Mobile"
+                value={profileData.mobile || profileData.phone || '6369470565'}
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="info-icon">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                  </svg>
+                }
+              />
+              <InfoItem
+                title="Parent Mobile"
+                value={profileData.parentMobile || '9750324454'}
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="info-icon">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                  </svg>
+                }
+              />
+              <InfoItem
+                title="Date of Birth / Gender"
+                value={`${profileData.dob || '15/05/2004'} | ${profileData.gender || 'Female'}`}
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="info-icon">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                }
+              />
+              <InfoItem
+                title="Native District"
+                value={profileData.nativeDistrict || 'Pudukkottai'}
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="info-icon">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                }
+              />
+              <InfoItem
+                title="Permanent Address"
+                value={profileData.permanentAddress || 'Nagarathinam Pallam, Thanjur Post, Alangudi Taluk, Isugupatti, Pudukkottai'}
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="info-icon">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                  </svg>
+                }
+              />
+            </div>
+
+            <div className="overview-column" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '15px', borderBottom: '1px stroke #e2e8f0', paddingBottom: '6px' }}>
+                📍 Placement Preferences & Resume
+              </div>
+              <InfoItem
+                title="Wish to Work (Role)"
+                value={<span style={{ color: '#2563eb', fontWeight: 700 }}>{profileData.wishToWork || 'software developer'}</span>}
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="info-icon">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                  </svg>
+                }
+              />
+              <InfoItem
+                title="Location Preferences"
+                value={
+                  <div style={{ fontSize: '13px', display: 'grid', gap: '4px' }}>
+                    <div>Interview Anywhere: <strong style={{ color: '#166534' }}>{profileData.willingInterviewAnyLocation || 'Yes'}</strong></div>
+                    <div>Work Anywhere: <strong style={{ color: '#166534' }}>{profileData.willingWorkAnyLocation || 'Yes'}</strong></div>
+                    <div>Work in TN: <strong style={{ color: '#166534' }}>{profileData.willingWorkTN || 'Yes'}</strong> | Work in India: <strong style={{ color: '#166534' }}>{profileData.willingWorkIndia || 'Yes'}</strong></div>
+                  </div>
+                }
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="info-icon">
+                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+                    <line x1="8" y1="2" x2="8" y2="18" />
+                    <line x1="16" y1="6" x2="16" y2="22" />
+                  </svg>
+                }
+              />
+              <InfoItem
+                title="GitHub"
+                value={<a href={`https://${profileData.github}`} target="_blank" rel="noreferrer" className="link-purple">{profileData.github}</a>}
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="info-icon">
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+                  </svg>
+                }
+              />
+              <InfoItem
+                title="LinkedIn"
+                value={<a href={`https://${profileData.linkedin}`} target="_blank" rel="noreferrer" className="link-purple">{profileData.linkedin}</a>}
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="info-icon">
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                    <rect x="2" y="9" width="4" height="12" />
+                    <circle cx="4" cy="4" r="2" />
+                  </svg>
+                }
+              />
+              <InfoItem
+                title="Resume Document"
+                value={
+                  <div className="resume-value-row">
+                    {resumeUploaded || profileData.resumeUrl ? (
+                      <>
+                        <span className="badge-uploaded" title={resumeName}>Uploaded ({resumeName})</span>
+                        <button className="btn-view" type="button" onClick={handleViewResume}>
+                          View
+                        </button>
+                      </>
+                    ) : (
+                      <button className="btn-upload-resume" type="button" onClick={handleUploadClick}>
+                        Upload Resume
+                      </button>
+                    )}
+                  </div>
+                }
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="info-icon">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                  </svg>
+                }
+              />
+            </div>
+          </div>
+        )
+    }
+  }
+
+  return (
+    <div className="profile-page-wrapper">
+      <h1 className="page-title">Student Profile</h1>
+
+      <div className="profile-page-content">
+        {/* Card 1: My Profile */}
+        <div className="profile-card profile-main-card">
+          <div className="profile-card-header">
+            <h2 className="card-title">My Profile</h2>
+            <button className="btn-edit" type="button" onClick={handleEditClick}>
+              Edit Profile
+            </button>
+          </div>
+
+          <div className="profile-card-body">
+            <div className="student-profile-info">
+              <Avatar profileData={profileData} />
+              <div className="student-profile-details">
+                <h3 className="student-name">{profileData.name}</h3>
+                <div className="student-meta-item">
+                  <span className="meta-label">Reg. No:</span>
+                  <span className="meta-value">{profileData.regNo}</span>
+                </div>
+                <div className="student-meta-item">
+                  <span className="meta-label">{profileData.branch || profileData.department || 'IT'}</span>
+                </div>
+                <div className="student-meta-item">
+                  <span className="meta-label">Batch:</span>
+                  <span className="meta-value">{profileData.batch}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="profile-completion-row">
+              <span className="completion-label">Profile Completion</span>
+              <div className="completion-bar-track">
+                <div className="completion-bar-fill" style={{ width: `${profileData.completion}%` }} />
+              </div>
+              <span className="completion-value">{profileData.completion}%</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: Tabs Details */}
+        <div className="profile-card profile-details-card">
+          <div className="tabs-header">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          <div className="tab-panel">{renderTabContent()}</div>
         </div>
       </div>
 
-      {/* 3. EDIT PROFILE MODAL */}
-      {showEditModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '20px'
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            padding: '28px',
-            maxWidth: '500px',
-            width: '100%',
-            maxHeight: '90vh',
-            overflowY: 'auto',
-            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)',
-            border: '1px solid var(--border-light)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '14px', marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--primary-maroon)', margin: 0 }}>Edit Profile</h3>
-              <button
-                style={{ border: 'none', background: 'transparent', fontSize: '18px', fontWeight: '800', cursor: 'pointer', color: 'var(--text-light)' }}
-                onClick={() => setShowEditModal(false)}
-              >
-                ✕
-              </button>
-            </div>
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden-input"
+        onChange={handleResumeChange}
+        accept=".pdf,.doc,.docx"
+      />
 
-            <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)' }}>Name</label>
-                <input
-                  type="text"
-                  required
-                  value={tempProfile.name}
-                  onChange={(e) => setTempProfile({ ...tempProfile, name: e.target.value })}
-                  style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium)', fontSize: '13px', outline: 'none' }}
-                />
+      {/* Edit Profile Modal */}
+      {isEditing && (
+        <div className="modal-overlay" onClick={handleCancelProfile}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '780px' }}>
+            <form onSubmit={handleSaveProfile}>
+              <div className="modal-header">
+                <h2 className="modal-company-name">Edit Complete Profile Details</h2>
+                <button className="modal-close-btn" type="button" onClick={handleCancelProfile}>
+                  &times;
+                </button>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)' }}>Gender</label>
-                <select
-                  value={tempProfile.gender}
-                  onChange={(e) => setTempProfile({ ...tempProfile, gender: e.target.value })}
-                  style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium)', fontSize: '13px', outline: 'none', backgroundColor: '#fff', cursor: 'pointer' }}
-                >
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other / Prefer not to say</option>
-                </select>
+              <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
+                <h4 style={{ color: '#0f172a', margin: '0 0 12px 0', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px' }}>Personal & Contact Details</h4>
+                <div className="edit-profile-form-grid">
+                  <div className="form-group">
+                    <label>Full Name</label>
+                    <input
+                      type="text"
+                      value={editForm.name || ''}
+                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Gender</label>
+                    <select
+                      value={editForm.gender || 'Male'}
+                      onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
+                    >
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Registration Number</label>
+                    <input
+                      type="text"
+                      value={editForm.regNo || ''}
+                      onChange={(e) => setEditForm({ ...editForm, regNo: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Branch / Department</label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '6px' }}>
+                      {['AI&DS', 'CSE', 'IT', 'ECE', 'EEE', 'MECH', 'CIVIL'].map(dept => (
+                        <button
+                          key={dept}
+                          type="button"
+                          onClick={() => setEditForm({ ...editForm, branch: dept, department: dept })}
+                          style={{
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            border: ((editForm.branch || editForm.department || '').toUpperCase() === dept) ? '1px solid #be185d' : '1px solid #cbd5e1',
+                            backgroundColor: ((editForm.branch || editForm.department || '').toUpperCase() === dept) ? '#fce7f3' : '#ffffff',
+                            color: ((editForm.branch || editForm.department || '').toUpperCase() === dept) ? '#be185d' : '#475569',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {dept}
+                        </button>
+                      ))}
+                    </div>
+                    <input
+                      type="text"
+                      value={editForm.branch || editForm.department || ''}
+                      onChange={(e) => setEditForm({ ...editForm, branch: e.target.value, department: e.target.value })}
+                      placeholder="e.g. CSE, IT, AI&DS"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Batch</label>
+                    <input
+                      type="text"
+                      value={editForm.batch || ''}
+                      onChange={(e) => setEditForm({ ...editForm, batch: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Email Address</label>
+                    <input
+                      type="email"
+                      value={editForm.email || ''}
+                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Student Mobile</label>
+                    <input
+                      type="text"
+                      value={editForm.mobile || editForm.phone || ''}
+                      onChange={(e) => setEditForm({ ...editForm, mobile: e.target.value, phone: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Parent Mobile</label>
+                    <input
+                      type="text"
+                      value={editForm.parentMobile || ''}
+                      onChange={(e) => setEditForm({ ...editForm, parentMobile: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Date of Birth</label>
+                    <input
+                      type="text"
+                      value={editForm.dob || ''}
+                      onChange={(e) => setEditForm({ ...editForm, dob: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Native District</label>
+                    <input
+                      type="text"
+                      value={editForm.nativeDistrict || ''}
+                      onChange={(e) => setEditForm({ ...editForm, nativeDistrict: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                    <label>Permanent Address</label>
+                    <input
+                      type="text"
+                      value={editForm.permanentAddress || ''}
+                      onChange={(e) => setEditForm({ ...editForm, permanentAddress: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <h4 style={{ color: '#0f172a', margin: '20px 0 12px 0', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px' }}>Academic Performance</h4>
+                <div className="edit-profile-form-grid">
+                  <div className="form-group">
+                    <label>10th Percentage (%)</label>
+                    <input
+                      type="text"
+                      value={editForm.tenthPercentage || ''}
+                      onChange={(e) => setEditForm({ ...editForm, tenthPercentage: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>12th / Diploma (%)</label>
+                    <input
+                      type="text"
+                      value={editForm.twelfthPercentage || ''}
+                      onChange={(e) => setEditForm({ ...editForm, twelfthPercentage: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>CGPA (till VI Sem)</label>
+                    <input
+                      type="text"
+                      value={editForm.cgpa || ''}
+                      onChange={(e) => setEditForm({ ...editForm, cgpa: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Year of Passing</label>
+                    <input
+                      type="text"
+                      value={editForm.yearOfPassing || ''}
+                      onChange={(e) => setEditForm({ ...editForm, yearOfPassing: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Arrears Cleared</label>
+                    <input
+                      type="text"
+                      value={editForm.historyOfArrears || ''}
+                      onChange={(e) => setEditForm({ ...editForm, historyOfArrears: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Current Arrears</label>
+                    <input
+                      type="text"
+                      value={editForm.currentArrears || ''}
+                      onChange={(e) => setEditForm({ ...editForm, currentArrears: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <h4 style={{ color: '#0f172a', margin: '20px 0 12px 0', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px' }}>Skills & Preferences</h4>
+                <div className="edit-profile-form-grid">
+                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                    <label>Technical Skills (Comma Separated)</label>
+                    <input
+                      type="text"
+                      value={editForm.technicalSkills || ''}
+                      onChange={(e) => setEditForm({ ...editForm, technicalSkills: e.target.value })}
+                      placeholder="python developer, Data analyzer, React, Node.js"
+                    />
+                  </div>
+                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                    <label>Certification Courses</label>
+                    <input
+                      type="text"
+                      value={editForm.certifications || ''}
+                      onChange={(e) => setEditForm({ ...editForm, certifications: e.target.value })}
+                      placeholder="introduction to Automation, Data analytics"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Languages Known</label>
+                    <input
+                      type="text"
+                      value={editForm.languagesKnown || ''}
+                      onChange={(e) => setEditForm({ ...editForm, languagesKnown: e.target.value })}
+                      placeholder="Tamil, English"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Wish to Work (Role)</label>
+                    <input
+                      type="text"
+                      value={editForm.wishToWork || ''}
+                      onChange={(e) => setEditForm({ ...editForm, wishToWork: e.target.value })}
+                      placeholder="software developer"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>GitHub Profile</label>
+                    <input
+                      type="text"
+                      value={editForm.github || ''}
+                      onChange={(e) => setEditForm({ ...editForm, github: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>LinkedIn Profile</label>
+                    <input
+                      type="text"
+                      value={editForm.linkedin || ''}
+                      onChange={(e) => setEditForm({ ...editForm, linkedin: e.target.value })}
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)' }}>Reg. No</label>
-                <input
-                  type="text"
-                  required
-                  value={tempProfile.regNo}
-                  onChange={(e) => setTempProfile({ ...tempProfile, regNo: e.target.value })}
-                  style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium)', fontSize: '13px', outline: 'none' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)' }}>Batch</label>
-                <input
-                  type="text"
-                  required
-                  value={tempProfile.batch}
-                  onChange={(e) => setTempProfile({ ...tempProfile, batch: e.target.value })}
-                  style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium)', fontSize: '13px', outline: 'none' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)' }}>Email</label>
-                <input
-                  type="email"
-                  required
-                  value={tempProfile.email}
-                  onChange={(e) => setTempProfile({ ...tempProfile, email: e.target.value })}
-                  style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium)', fontSize: '13px', outline: 'none' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)' }}>Phone</label>
-                <input
-                  type="text"
-                  required
-                  value={tempProfile.phone}
-                  onChange={(e) => setTempProfile({ ...tempProfile, phone: e.target.value })}
-                  style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium)', fontSize: '13px', outline: 'none' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)' }}>Location</label>
-                <input
-                  type="text"
-                  required
-                  value={tempProfile.location}
-                  onChange={(e) => setTempProfile({ ...tempProfile, location: e.target.value })}
-                  style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium)', fontSize: '13px', outline: 'none' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)' }}>GitHub Link</label>
-                <input
-                  type="text"
-                  required
-                  value={tempProfile.github}
-                  onChange={(e) => setTempProfile({ ...tempProfile, github: e.target.value })}
-                  style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium)', fontSize: '13px', outline: 'none' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)' }}>LinkedIn Link</label>
-                <input
-                  type="text"
-                  required
-                  value={tempProfile.linkedin}
-                  onChange={(e) => setTempProfile({ ...tempProfile, linkedin: e.target.value })}
-                  style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-medium)', fontSize: '13px', outline: 'none' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '10px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    border: '1.5px solid var(--border-medium)',
-                    backgroundColor: '#ffffff',
-                    color: 'var(--text-main)',
-                    fontSize: '13px',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    fontFamily: 'var(--font-family)'
-                  }}
-                >
+              <div className="modal-footer">
+                <button className="btn-modal-close" type="button" onClick={handleCancelProfile} style={{ marginRight: 8 }}>
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  style={{
-                    padding: '8px 20px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    backgroundColor: 'var(--primary-maroon)',
-                    color: '#ffffff',
-                    fontSize: '13px',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    fontFamily: 'var(--font-family)'
-                  }}
-                >
-                  Save Changes
+                <button className="btn-modal-save" type="submit">
+                  Save Changes to Database
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
     </div>
-  );
+  )
 }
