@@ -205,16 +205,21 @@ export default function App() {
   if (currentScreen === 'admin') {
     return (
       <div className={`admin-layout-wrapper ${isAdminMenuOpen ? 'menu-open' : ''}`}>
-        <button 
-          className="admin-mobile-menu-btn"
-          onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
-        >
-          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
+        
+        {/* Mobile App Header */}
+        <div className="admin-mobile-header">
+          <button 
+            className="admin-mobile-menu-btn"
+            onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
+          >
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div className="admin-mobile-header-brand">AIT Placement Admin</div>
+        </div>
         {isAdminMenuOpen && (
           <div className="admin-sidebar-overlay" onClick={() => setIsAdminMenuOpen(false)} />
         )}

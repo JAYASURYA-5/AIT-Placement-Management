@@ -44,42 +44,96 @@
   --shadow-sm: 0 2px 6px rgba(78, 22, 54, 0.03);
   --shadow-md: 0 8px 24px rgba(78, 22, 54, 0.05);
   --shadow-lg: 0 16px 40px rgba(78, 22, 54, 0.08);
+
+  /* Breakpoints (Mobile First System) */
+  --bp-xs: 480px;
+  --bp-sm: 768px;
+  --bp-md: 1024px;
+  --bp-lg: 1280px;
+  --bp-xl: 1536px;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+img, video, svg, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: 16px; /* Prevent iOS zoom */
+}
+
+@media (max-width: 767px) {
+  button, input, select, textarea, .nav-item, .stat-card, .drive-card, .btn-apply {
+    min-height: 44px; /* Touch target size */
+  }
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  min-width: 0; /* Important for flex/grid children to not overflow */
 }
 
 body {
   font-family: var(--font-family);
   background-color: var(--bg-outer);
   color: var(--text-main);
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 24px;
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
   -webkit-font-smoothing: antialiased;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
+
+@media (min-width: 768px) {
+  body {
+    padding: 24px;
+  }
+}
+
 
 #root {
   width: 100%;
   max-width: 1440px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+@media (min-width: 768px) {
+  #root {
+    min-height: auto;
+  }
 }
 
 /* App Outer Shell Window */
 .app-container {
   display: flex;
   background-color: var(--bg-card);
-  border-radius: 28px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.8);
   overflow: hidden;
-  min-height: 860px;
   width: 100%;
   position: relative;
+  flex: 1;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .app-container {
+    border-radius: 28px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    min-height: clamp(600px, 85vh, 860px);
+    flex-direction: row;
+  }
 }
 
 /* Sidebar Styles */
@@ -6741,12 +6795,14 @@ body:has(.auth-page-root) #root {
 }
 
 /* 📱 Mobile Menu for Admin Portal */
-.admin-mobile-menu-btn {
+.admin-mobile-header {
   display: none;
-  position: fixed !important;
-  top: 20px;
-  left: 20px;
-  z-index: 2001;
+}
+
+.admin-mobile-menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: white;
   border: 1px solid #e2e8f0;
   color: #0f172a;
@@ -6766,10 +6822,28 @@ body:has(.auth-page-root) #root {
 }
 
 @media (max-width: 1024px) {
-  .admin-mobile-menu-btn {
+  .admin-mobile-header {
     display: flex;
     align-items: center;
-    justify-content: center;
+    background-color: #16151a;
+    padding: 12px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 2001;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .admin-mobile-header-brand {
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    margin-left: 16px;
+  }
+
+  .admin-mobile-menu-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
   }
 
   .admin-layout-wrapper {
@@ -6878,13 +6952,28 @@ html, body {
   max-width: 100%;
 }
 
+/* Admin layout wrapper must allow vertical scroll — the page content
+   (UsersPage, DriveManagement etc.) use minHeight:100vh internally */
+.admin-layout-wrapper {
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto; /* Allow page-level scroll for admin sub-pages */
+}
+
+/* The direct child div that wraps AdminDashboard must also scroll freely */
+.admin-layout-wrapper > div {
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: visible;
+}
+
 /* Force mobile layout to not overflow horizontally */
 @media (max-width: 1024px) {
-  .app-container, .main-wrapper, .admin-layout-wrapper, .admin-layout-wrapper > div {
+  .app-container, .main-wrapper {
     max-width: 100vw !important;
     overflow-x: hidden !important;
   }
-  
+
   /* Ensure grids wrap */
   .stats-grid, .drives-grid, .prep-grid, .db-row, .db-row-2col, .db-quick-grid {
     max-width: 100% !important;
@@ -6979,5 +7068,100 @@ html, body {
     position: absolute;
     right: 16px;
     top: 16px;
+  }
+}
+
+/* Fix floating mobile menu button when menu is open */
+.admin-layout-wrapper.menu-open .admin-mobile-menu-btn {
+  display: none !important;
+}
+
+/* Fix pagination and overlapping charts on mobile screens */
+@media (max-width: 768px) {
+  /* Ensure the pagination container wraps correctly instead of squishing */
+  .admin-layout-wrapper main div[style*="justifyContent: space-between"][style*="borderTop"] {
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+  
+  .admin-layout-wrapper main div[style*="justifyContent: space-between"][style*="borderTop"] > div:last-child {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+  
+  .admin-layout-wrapper main div[style*="justifyContent: space-between"][style*="borderTop"] > div:last-child > button,
+  .admin-layout-wrapper main > div:last-child > div[style*="gap: 8px"] > button {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  /* Bar chart responsive fixes - enable horizontal scrolling and prevent bar squishing */
+  .admin-layout-wrapper main div[style*="height: 300px"][style*="alignItems: flex-end"] {
+    overflow-x: auto !important;
+    padding-bottom: 16px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .admin-layout-wrapper main div[style*="height: 240px"]:not([style*="flexDirection: column"]) {
+    min-width: 500px !important; /* Force a minimum width to prevent bars overlapping */
+  }
+  
+  .admin-layout-wrapper main div[style*="height: 240px"] > div[style*="width: 48px"] {
+    flex-shrink: 0 !important;
+  }
+}
+
+/* Fixes for Student Dashboard Mobile Squishing */
+@media (max-width: 768px) {
+  /* Fix Progress and Recent Tests split */
+  .training-dashboard {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Fix Certificate Grid */
+  .cert-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Prevent filter buttons from squishing */
+  .filter-tab-btn, .cert-filter-tab {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+  
+  /* Allow filter tabs to scroll instead of squash */
+  .applications-filter-tabs, .cert-filter-tabs {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+    justify-content: flex-start !important;
+  }
+  
+  /* Fix Donut Chart Legend wrapping */
+  .legend-list {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  
+  .legend-item {
+    white-space: nowrap !important;
+    font-size: 11px !important;
+  }
+  
+  /* Fix Company Card Logo Text Wrapping */
+  .company-logo {
+    white-space: nowrap !important;
+    font-size: 10px !important;
+  }
+  
+  /* Prevent Verified badge from wrapping */
+  .cert-card-info span {
+    white-space: nowrap !important;
+  }
+
+  /* Prevent "Verified" text or tags from wrapping vertically */
+  .cert-card-info {
+    min-width: 0; 
   }
 }

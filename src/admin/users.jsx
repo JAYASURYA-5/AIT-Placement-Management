@@ -553,7 +553,7 @@ export default function UsersPage({ onNavigate, onLogout }) {
         Student
       </div>
 
-      <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingBottom: '24px' }}>
+      <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingBottom: '24px', alignItems: 'flex-start' }}>
         
         {/* Left Sidebar */}
         <aside style={{
@@ -641,7 +641,7 @@ export default function UsersPage({ onNavigate, onLogout }) {
         </aside>
 
         {/* Main Content Area */}
-        <main style={{ flex: 1, padding: '12px 36px 24px 30px', overflowY: 'auto' }}>
+        <main style={{ flex: 1, padding: '12px 36px 24px 30px', overflowY: 'visible', minHeight: 0 }}>
           
           {/* Top Row: 4 Metric Cards */}
           <div className="admin-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '28px' }}>
@@ -1127,7 +1127,7 @@ export default function UsersPage({ onNavigate, onLogout }) {
                   Showing <strong style={{ color: '#0f172a' }}>{indexOfFirstItem + 1}</strong> to <strong style={{ color: '#0f172a' }}>{Math.min(indexOfLastItem, filteredUsers.length)}</strong> of <strong style={{ color: '#0f172a' }}>{filteredUsers.length}</strong> users
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
@@ -1143,7 +1143,9 @@ export default function UsersPage({ onNavigate, onLogout }) {
                       fontSize: '14px',
                       fontWeight: 600,
                       cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'all 0.15s ease'
+                      transition: 'all 0.15s ease',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0
                     }}
                   >
                     <ChevronLeft size={16} />
@@ -1165,7 +1167,8 @@ export default function UsersPage({ onNavigate, onLogout }) {
                         fontWeight: pageNum === currentPage ? 700 : 600,
                         cursor: 'pointer',
                         transition: 'all 0.15s ease',
-                        boxShadow: pageNum === currentPage ? '0 4px 12px rgba(190, 24, 93, 0.35)' : 'none'
+                        boxShadow: pageNum === currentPage ? '0 4px 12px rgba(190, 24, 93, 0.35)' : 'none',
+                        flexShrink: 0
                       }}
                     >
                       {pageNum}
@@ -1187,7 +1190,9 @@ export default function UsersPage({ onNavigate, onLogout }) {
                       fontSize: '14px',
                       fontWeight: 600,
                       cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'all 0.15s ease'
+                      transition: 'all 0.15s ease',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0
                     }}
                   >
                     <span>Next</span>

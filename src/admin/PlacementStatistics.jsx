@@ -274,7 +274,7 @@ export default function PlacementStatistics({ onNavigate, onLogout }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingBottom: '24px' }}>
+      <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingBottom: '24px', alignItems: 'flex-start' }}>
         
         {/* Left Sidebar - All 4 Corners Rounded */}
         <aside style={{
@@ -362,7 +362,7 @@ export default function PlacementStatistics({ onNavigate, onLogout }) {
         </aside>
 
         {/* Main Content Area */}
-        <main style={{ flex: 1, padding: '12px 36px 24px 30px', overflowY: 'auto' }}>
+        <main style={{ flex: 1, padding: '12px 36px 24px 30px', overflowY: 'visible', minHeight: 0 }}>
           
           {/* Top Row: 4 Metric Cards with 54px Vertical Spacing */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '32px', marginBottom: '54px' }}>
@@ -403,7 +403,7 @@ export default function PlacementStatistics({ onNavigate, onLogout }) {
               </div>
 
               {/* Bar Chart Container */}
-              <div style={{ display: 'flex', height: '300px', alignItems: 'flex-end', position: 'relative' }}>
+              <div style={{ display: 'flex', height: '300px', alignItems: 'flex-end', position: 'relative', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                 
                 {/* Y-Axis Labels */}
                 <div style={{

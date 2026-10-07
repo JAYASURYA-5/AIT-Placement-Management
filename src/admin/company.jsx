@@ -559,7 +559,7 @@ export default function CompanyManagement({ onNavigate, onLogout }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingBottom: '24px' }}>
+      <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingBottom: '24px', alignItems: 'flex-start' }}>
         
         {/* Left Sidebar */}
         <aside style={{
@@ -645,7 +645,7 @@ export default function CompanyManagement({ onNavigate, onLogout }) {
         </aside>
 
         {/* Main Content Area */}
-        <main style={{ flex: 1, padding: '12px 36px 24px 30px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+        <main style={{ flex: 1, padding: '12px 36px 24px 30px', overflowY: 'visible', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           
           {/* Table Container Card */}
           <div style={{ ...glassCardStyle, padding: '28px 32px', width: '100%', marginBottom: '24px' }}>
@@ -805,17 +805,19 @@ export default function CompanyManagement({ onNavigate, onLogout }) {
               justifyContent: 'space-between',
               paddingTop: '20px',
               marginTop: '16px',
-              borderTop: '1px solid #e2e8f0'
+              borderTop: '1px solid #e2e8f0',
+              flexWrap: 'wrap',
+              gap: '12px'
             }}>
               <div style={{ fontSize: '14px', color: '#64748b', fontWeight: 500 }}>
                 Showing <strong style={{ color: '#0f172a' }}>{startItem}</strong> to <strong style={{ color: '#0f172a' }}>{endItem}</strong> of <strong style={{ color: '#0f172a' }}>{totalItems}</strong> companies
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <button
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: currentPage === 1 ? '#cbd5e1' : '#334155', fontSize: '13px', fontWeight: 600, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: currentPage === 1 ? '#cbd5e1' : '#334155', fontSize: '13px', fontWeight: 600, cursor: currentPage === 1 ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
                 >
                   <ChevronLeft size={16} /> Previous
                 </button>
@@ -834,7 +836,8 @@ export default function CompanyManagement({ onNavigate, onLogout }) {
                       fontSize: '14px',
                       fontWeight: 700,
                       cursor: 'pointer',
-                      boxShadow: pageNum === currentPage ? '0 4px 14px rgba(190, 24, 93, 0.4)' : 'none'
+                      boxShadow: pageNum === currentPage ? '0 4px 14px rgba(190, 24, 93, 0.4)' : 'none',
+                      flexShrink: 0
                     }}
                   >
                     {pageNum}
@@ -844,7 +847,7 @@ export default function CompanyManagement({ onNavigate, onLogout }) {
                 <button
                   disabled={currentPage === totalPages || totalPages === 0}
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: currentPage === totalPages || totalPages === 0 ? '#cbd5e1' : '#334155', fontSize: '13px', fontWeight: 600, cursor: currentPage === totalPages || totalPages === 0 ? 'not-allowed' : 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: currentPage === totalPages || totalPages === 0 ? '#cbd5e1' : '#334155', fontSize: '13px', fontWeight: 600, cursor: currentPage === totalPages || totalPages === 0 ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
                 >
                   Next <ChevronRight size={16} />
                 </button>
@@ -903,6 +906,8 @@ export default function CompanyManagement({ onNavigate, onLogout }) {
             padding: '32px',
             width: '560px',
             maxWidth: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto',
             position: 'relative'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>

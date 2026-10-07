@@ -794,7 +794,7 @@ export default function SettingsPage({ onNavigate, onLogout }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingBottom: '24px' }}>
+      <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingBottom: '24px', alignItems: 'flex-start' }}>
         
         {/* Left Sidebar - All 4 Corners Rounded */}
         <aside style={{
@@ -882,7 +882,7 @@ export default function SettingsPage({ onNavigate, onLogout }) {
         </aside>
 
         {/* Main Content Area */}
-        <main style={{ flex: 1, padding: '12px 36px 24px 30px', overflowY: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <main style={{ flex: 1, padding: '12px 36px 24px 30px', overflowY: 'visible', minHeight: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           
           {activeSubPage ? (
             renderSubPage()
