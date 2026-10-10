@@ -1271,29 +1271,44 @@ export default function DriveManagement({ onNavigate, onLogout }) {
                           }}
                         >
                           {/* COMPANY */}
-                          <td style={{ padding: '14px 16px', fontWeight: 800, color: '#0f172a', fontSize: '14px' }}>
+                          <td style={{ padding: '14px 16px', fontWeight: 800, color: '#0f172a', fontSize: '14px', borderRadius: '12px 0 0 12px' }}>
                             {drive.company}
                           </td>
 
                           {/* DATE */}
-                          <td style={{ padding: '14px 16px', color: '#64748b', fontSize: '13px' }}>
+                          <td style={{ padding: '14px 16px', color: '#64748b', fontSize: '12.5px', whiteSpace: 'nowrap' }}>
                             {drive.date}
                           </td>
 
                           {/* ROLE */}
-                          <td style={{ padding: '14px 16px', color: '#475569', fontSize: '13px', fontWeight: 600 }}>
+                          <td style={{ padding: '14px 16px', color: '#334155', fontSize: '13px', fontWeight: 600 }}>
                             {drive.role}
                           </td>
 
-                          {/* MIN CGPA */}
+                          {/* MIN CGPA - Stacked Mortarboard Badge from attached screenshot */}
                           <td style={{ padding: '14px 16px' }}>
-                            <span style={{ backgroundColor: '#eff6ff', color: '#1d4ed8', padding: '4px 10px', borderRadius: '8px', fontSize: '13px', fontWeight: 700 }}>
-                              🎓 {drive.minCGPA} CGPA
-                            </span>
+                            <div style={{
+                              backgroundColor: '#eff6ff',
+                              border: '1px solid #bfdbfe',
+                              color: '#1d4ed8',
+                              padding: '6px 12px',
+                              borderRadius: '12px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              fontWeight: 800,
+                              fontSize: '13px'
+                            }}>
+                              <GraduationCap size={15} color="#1d4ed8" />
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: '1.1' }}>
+                                <span style={{ fontSize: '13px', fontWeight: 800 }}>{drive.minCGPA || '6'}</span>
+                                <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.04em' }}>CGPA</span>
+                              </div>
+                            </div>
                           </td>
 
                           {/* ELIGIBLE BRANCHES */}
-                          <td style={{ padding: '14px 16px', color: '#334155', fontSize: '13px', fontWeight: 500 }}>
+                          <td style={{ padding: '14px 16px', color: '#334155', fontSize: '12.5px', fontWeight: 500, maxWidth: '200px' }}>
                             {drive.branches}
                           </td>
 
@@ -1307,30 +1322,32 @@ export default function DriveManagement({ onNavigate, onLogout }) {
                             {drive.package}
                           </td>
 
-                          {/* NOMINATED STUDENTS COUNT - CLICKABLE */}
+                          {/* NOMINATED STUDENTS COUNT - Light Green Container Box Button */}
                           <td style={{ padding: '14px 16px' }}>
                             <button
                               onClick={() => handleOpenSelectedCandidatesViewModal(drive)}
                               title="Click to view selected student names & complete profile details"
                               style={{
-                                backgroundColor: nominatedCount > 0 ? '#f0fdf4' : '#f1f5f9',
+                                backgroundColor: nominatedCount > 0 ? '#e6f4ea' : '#f1f5f9',
                                 color: nominatedCount > 0 ? '#166534' : '#64748b',
-                                border: nominatedCount > 0 ? '1px solid #bbf7d0' : '1px solid #e2e8f0',
-                                padding: '5px 12px',
-                                borderRadius: '10px',
-                                fontSize: '13px',
-                                fontWeight: 700,
+                                border: nominatedCount > 0 ? '1px solid #bbf7d0' : '1px solid #cbd5e1',
+                                padding: '6px 12px',
+                                borderRadius: '12px',
+                                fontSize: '12px',
+                                fontWeight: 800,
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '6px',
                                 cursor: 'pointer',
-                                transition: 'all 0.15s ease',
-                                boxShadow: nominatedCount > 0 ? '0 2px 6px rgba(22, 101, 52, 0.08)' : 'none'
+                                transition: 'all 0.15s ease'
                               }}
                             >
-                              <UserCheck size={15} color={nominatedCount > 0 ? '#166534' : '#64748b'} />
-                              <span>{nominatedCount} Selected</span>
-                              <Eye size={13} style={{ marginLeft: '2px', opacity: 0.8 }} />
+                              <UserCheck size={14} color={nominatedCount > 0 ? '#166534' : '#64748b'} />
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: '1.1' }}>
+                                <span style={{ fontSize: '13px', fontWeight: 800 }}>{nominatedCount}</span>
+                                <span style={{ fontSize: '10px', fontWeight: 700 }}>Selected</span>
+                              </div>
+                              <Eye size={12} style={{ opacity: 0.6, marginLeft: '2px' }} />
                             </button>
                           </td>
 
@@ -1340,39 +1357,88 @@ export default function DriveManagement({ onNavigate, onLogout }) {
                           </td>
 
                           {/* ACTIONS */}
-                          <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+                          <td style={{ padding: '14px 16px', textAlign: 'right', borderRadius: '0 12px 12px 0' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
                               {/* CIRCULAR PDF BUTTON */}
                               <button
                                 onClick={() => setSelectedCircularDrive(drive)}
                                 title="Generate & Download Campus Drive Circular PDF"
-                                style={{ border: '1px solid #fde68a', backgroundColor: '#fffbeb', color: '#b45309', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 700 }}
+                                style={{
+                                  border: '1px solid #fde68a',
+                                  backgroundColor: '#fffbeb',
+                                  color: '#b45309',
+                                  padding: '6px 10px',
+                                  borderRadius: '10px',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  fontSize: '12px',
+                                  fontWeight: 700
+                                }}
                               >
-                                <FileText size={14} color="#b45309" /> Circular
+                                <FileText size={13} color="#b45309" />
+                                <span>Circular</span>
                               </button>
 
-                              {/* AUTO-SUGGEST CANDIDATES BUTTON */}
+                              {/* CANDIDATES BUTTON */}
                               <button
                                 onClick={() => handleOpenEligibleCandidatesModal(drive)}
                                 title="Check Auto-Suggested Eligible Student Profiles"
-                                style={{ border: '1px solid #c7d2fe', backgroundColor: '#e0e7ff', color: '#4338ca', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 700 }}
+                                style={{
+                                  border: '1px solid #c7d2fe',
+                                  backgroundColor: '#e0e7ff',
+                                  color: '#4338ca',
+                                  padding: '6px 10px',
+                                  borderRadius: '10px',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  fontSize: '12px',
+                                  fontWeight: 700
+                                }}
                               >
-                                <Sparkles size={14} /> Candidates
+                                <Sparkles size={13} color="#4338ca" />
+                                <span>Candidates</span>
                               </button>
 
+                              {/* EDIT BUTTON */}
                               <button
                                 onClick={() => handleOpenEditModal(drive)}
                                 title="Edit Drive"
-                                style={{ border: 'none', backgroundColor: '#f1f5f9', color: '#334155', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer' }}
+                                style={{
+                                  border: 'none',
+                                  backgroundColor: '#f1f5f9',
+                                  color: '#475569',
+                                  padding: '8px',
+                                  borderRadius: '10px',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
                               >
-                                <Edit2 size={15} />
+                                <Edit2 size={14} color="#475569" />
                               </button>
+
+                              {/* DELETE BUTTON */}
                               <button
                                 onClick={() => handleDeleteDrive(drive.id, drive.company)}
                                 title="Delete Drive"
-                                style={{ border: 'none', backgroundColor: '#fff1f2', color: '#e11d48', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer' }}
+                                style={{
+                                  border: 'none',
+                                  backgroundColor: '#ffe4e6',
+                                  color: '#e11d48',
+                                  padding: '8px',
+                                  borderRadius: '10px',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
                               >
-                                <Trash2 size={15} />
+                                <Trash2 size={14} color="#e11d48" />
                               </button>
                             </div>
                           </td>
