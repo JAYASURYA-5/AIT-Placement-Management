@@ -854,42 +854,42 @@ export default function DriveManagement({ onNavigate, onLogout }) {
   const startItem = totalItems === 0 ? 0 : startIndex + 1;
   const endItem = Math.min(startIndex + itemsPerPage, totalItems);
 
-  // Badge Status Helper matching attached image design
+  // Badge Status Helper
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Completed':
         return (
-          <span style={{ backgroundColor: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '6px 14px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, display: 'inline-block' }}>
+          <span style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '5px 14px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, display: 'inline-block' }}>
             Completed
           </span>
         );
       case 'Ongoing':
         return (
-          <span style={{ backgroundColor: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', padding: '6px 14px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, display: 'inline-block' }}>
+          <span style={{ backgroundColor: '#fef3c7', color: '#92400e', padding: '5px 14px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, display: 'inline-block' }}>
             Ongoing
           </span>
         );
       case 'Upcoming':
       default:
         return (
-          <span style={{ backgroundColor: '#f3e8ff', color: '#7e22ce', border: '1px solid #e9d5ff', padding: '6px 14px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, display: 'inline-block' }}>
+          <span style={{ backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '5px 14px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, display: 'inline-block' }}>
             Upcoming
           </span>
         );
     }
   };
 
-  // Bond Badge Helper matching attached image design
+  // Bond Badge Helper
   const getBondBadge = (bond) => {
-    if ((bond || '').toLowerCase().includes('no bond') || bond === '0' || !bond) {
+    if ((bond || '').toLowerCase().includes('no bond') || bond === '0') {
       return (
-        <span style={{ backgroundColor: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '6px 12px', borderRadius: '10px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+        <span style={{ backgroundColor: '#dcfce7', color: '#15803d', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: 700 }}>
           ✓ No Bond
         </span>
       );
     }
     return (
-      <span style={{ backgroundColor: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', padding: '6px 12px', borderRadius: '10px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+      <span style={{ backgroundColor: '#f1f5f9', color: '#475569', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: 700 }}>
         📜 {bond}
       </span>
     );
@@ -975,8 +975,8 @@ export default function DriveManagement({ onNavigate, onLogout }) {
           <div style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
             Drive Management
           </div>
-          <div style={{ fontSize: '15px', color: '#64748b', marginTop: '2px', fontWeight: 500 }}>
-            
+          <div style={{ fontSize: '14px', color: '#64748b', marginTop: '2px', fontWeight: 500 }}>
+            Manage campus placement drives in Firebase & auto-suggest eligible student candidates
           </div>
         </div>
 
@@ -1271,44 +1271,29 @@ export default function DriveManagement({ onNavigate, onLogout }) {
                           }}
                         >
                           {/* COMPANY */}
-                          <td style={{ padding: '14px 16px', fontWeight: 800, color: '#0f172a', fontSize: '14px', borderRadius: '12px 0 0 12px' }}>
+                          <td style={{ padding: '14px 16px', fontWeight: 800, color: '#0f172a', fontSize: '14px' }}>
                             {drive.company}
                           </td>
 
                           {/* DATE */}
-                          <td style={{ padding: '14px 16px', color: '#64748b', fontSize: '13px', whiteSpace: 'nowrap' }}>
+                          <td style={{ padding: '14px 16px', color: '#64748b', fontSize: '13px' }}>
                             {drive.date}
                           </td>
 
                           {/* ROLE */}
-                          <td style={{ padding: '14px 16px', color: '#334155', fontSize: '13px', fontWeight: 600 }}>
+                          <td style={{ padding: '14px 16px', color: '#475569', fontSize: '13px', fontWeight: 600 }}>
                             {drive.role}
                           </td>
 
-                          {/* MIN CGPA - Exact Blue Mortarboard Badge from Screenshot */}
+                          {/* MIN CGPA */}
                           <td style={{ padding: '14px 16px' }}>
-                            <div style={{
-                              backgroundColor: '#eff6ff',
-                              border: '1px solid #bfdbfe',
-                              color: '#1d4ed8',
-                              padding: '5px 10px',
-                              borderRadius: '12px',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              fontWeight: 800,
-                              fontSize: '13px'
-                            }}>
-                              <GraduationCap size={15} color="#1d4ed8" />
-                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: '1.1' }}>
-                                <span style={{ fontSize: '13px', fontWeight: 800 }}>{drive.minCGPA || '6'}</span>
-                                <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.04em' }}>CGPA</span>
-                              </div>
-                            </div>
+                            <span style={{ backgroundColor: '#eff6ff', color: '#1d4ed8', padding: '4px 10px', borderRadius: '8px', fontSize: '13px', fontWeight: 700 }}>
+                              🎓 {drive.minCGPA} CGPA
+                            </span>
                           </td>
 
                           {/* ELIGIBLE BRANCHES */}
-                          <td style={{ padding: '14px 16px', color: '#334155', fontSize: '13px', fontWeight: 500, maxWidth: '220px' }}>
+                          <td style={{ padding: '14px 16px', color: '#334155', fontSize: '13px', fontWeight: 500 }}>
                             {drive.branches}
                           </td>
 
@@ -1322,32 +1307,30 @@ export default function DriveManagement({ onNavigate, onLogout }) {
                             {drive.package}
                           </td>
 
-                          {/* NOMINATED STUDENTS COUNT - Light Green Container Button */}
+                          {/* NOMINATED STUDENTS COUNT - CLICKABLE */}
                           <td style={{ padding: '14px 16px' }}>
                             <button
                               onClick={() => handleOpenSelectedCandidatesViewModal(drive)}
                               title="Click to view selected student names & complete profile details"
                               style={{
-                                backgroundColor: nominatedCount > 0 ? '#e6f4ea' : '#f1f5f9',
+                                backgroundColor: nominatedCount > 0 ? '#f0fdf4' : '#f1f5f9',
                                 color: nominatedCount > 0 ? '#166534' : '#64748b',
-                                border: nominatedCount > 0 ? '1px solid #bbf7d0' : '1px solid #cbd5e1',
-                                padding: '6px 12px',
-                                borderRadius: '12px',
-                                fontSize: '12px',
-                                fontWeight: 800,
+                                border: nominatedCount > 0 ? '1px solid #bbf7d0' : '1px solid #e2e8f0',
+                                padding: '5px 12px',
+                                borderRadius: '10px',
+                                fontSize: '13px',
+                                fontWeight: 700,
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '6px',
                                 cursor: 'pointer',
-                                transition: 'all 0.15s ease'
+                                transition: 'all 0.15s ease',
+                                boxShadow: nominatedCount > 0 ? '0 2px 6px rgba(22, 101, 52, 0.08)' : 'none'
                               }}
                             >
-                              <UserCheck size={14} color={nominatedCount > 0 ? '#166534' : '#64748b'} />
-                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: '1.1' }}>
-                                <span style={{ fontSize: '13px', fontWeight: 800 }}>{nominatedCount}</span>
-                                <span style={{ fontSize: '10px', fontWeight: 700 }}>Selected</span>
-                              </div>
-                              <Eye size={12} style={{ opacity: 0.6, marginLeft: '2px' }} />
+                              <UserCheck size={15} color={nominatedCount > 0 ? '#166534' : '#64748b'} />
+                              <span>{nominatedCount} Selected</span>
+                              <Eye size={13} style={{ marginLeft: '2px', opacity: 0.8 }} />
                             </button>
                           </td>
 
@@ -1357,88 +1340,39 @@ export default function DriveManagement({ onNavigate, onLogout }) {
                           </td>
 
                           {/* ACTIONS */}
-                          <td style={{ padding: '14px 16px', textAlign: 'right', borderRadius: '0 12px 12px 0' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
+                          <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
                               {/* CIRCULAR PDF BUTTON */}
                               <button
                                 onClick={() => setSelectedCircularDrive(drive)}
                                 title="Generate & Download Campus Drive Circular PDF"
-                                style={{
-                                  border: '1px solid #fde68a',
-                                  backgroundColor: '#fffbeb',
-                                  color: '#b45309',
-                                  padding: '6px 10px',
-                                  borderRadius: '10px',
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
-                                  fontSize: '12px',
-                                  fontWeight: 700
-                                }}
+                                style={{ border: '1px solid #fde68a', backgroundColor: '#fffbeb', color: '#b45309', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 700 }}
                               >
-                                <FileText size={13} color="#b45309" />
-                                <span>Circular</span>
+                                <FileText size={14} color="#b45309" /> Circular
                               </button>
 
-                              {/* CANDIDATES BUTTON */}
+                              {/* AUTO-SUGGEST CANDIDATES BUTTON */}
                               <button
                                 onClick={() => handleOpenEligibleCandidatesModal(drive)}
                                 title="Check Auto-Suggested Eligible Student Profiles"
-                                style={{
-                                  border: '1px solid #c7d2fe',
-                                  backgroundColor: '#e0e7ff',
-                                  color: '#4338ca',
-                                  padding: '6px 10px',
-                                  borderRadius: '10px',
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
-                                  fontSize: '12px',
-                                  fontWeight: 700
-                                }}
+                                style={{ border: '1px solid #c7d2fe', backgroundColor: '#e0e7ff', color: '#4338ca', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 700 }}
                               >
-                                <Sparkles size={13} color="#4338ca" />
-                                <span>Candidates</span>
+                                <Sparkles size={14} /> Candidates
                               </button>
 
-                              {/* EDIT BUTTON */}
                               <button
                                 onClick={() => handleOpenEditModal(drive)}
                                 title="Edit Drive"
-                                style={{
-                                  border: 'none',
-                                  backgroundColor: '#f1f5f9',
-                                  color: '#475569',
-                                  padding: '8px',
-                                  borderRadius: '10px',
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center'
-                                }}
+                                style={{ border: 'none', backgroundColor: '#f1f5f9', color: '#334155', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer' }}
                               >
-                                <Edit2 size={14} color="#475569" />
+                                <Edit2 size={15} />
                               </button>
-
-                              {/* DELETE BUTTON */}
                               <button
                                 onClick={() => handleDeleteDrive(drive.id, drive.company)}
                                 title="Delete Drive"
-                                style={{
-                                  border: 'none',
-                                  backgroundColor: '#ffe4e6',
-                                  color: '#e11d48',
-                                  padding: '8px',
-                                  borderRadius: '10px',
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center'
-                                }}
+                                style={{ border: 'none', backgroundColor: '#fff1f2', color: '#e11d48', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer' }}
                               >
-                                <Trash2 size={14} color="#e11d48" />
+                                <Trash2 size={15} />
                               </button>
                             </div>
                           </td>
