@@ -24,7 +24,7 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
       email: '',
       placeholder: 'Enter Student Email or Register Number',
       label: 'Student Email / Register Number',
-      hint: 'Default password is your Register Number',
+      hint: 'Default access: ID = student  |  Password = student',
     },
     Admin: {
       email: 'admin@ait.edu.in',
@@ -341,6 +341,7 @@ export default function AuthPage({ initialRole = 'Student', onLoginSuccess, onBa
                   Forgot Password?
                 </a>
               </div>
+
 
               {/* Submit Button */}
               <button

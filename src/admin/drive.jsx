@@ -300,68 +300,136 @@ export default function DriveManagement({ onNavigate, onLogout }) {
   const computeEligibleCandidates = (driveCriteria, studentsList) => {
     if (!studentsList || studentsList.length === 0) return [];
 
-    const minCgpa = parseFloat(driveCriteria.minCGPA) || 0;
-    const min10th = parseFloat(driveCriteria.min10thMark || driveCriteria.min10th || driveCriteria.tenthMark || driveCriteria.tenthPercentage) || 0;
-    const min12th = parseFloat(driveCriteria.min12thMark || driveCriteria.min12th || driveCriteria.twelfthMark || driveCriteria.twelfthPercentage) || 0;
-    const maxBacklogs = parseInt(driveCriteria.maxBacklogs) || 0;
+    const minCgpa = parseFloat(String(driveCriteria.minCGPA || '0').replace(/[^0-9.]/g, '')) || 0;
+    const min10th = parseFloat(String(driveCriteria.min10thMark || driveCriteria.min10th || driveCriteria.tenthMark || driveCriteria.tenthPercentage || '0').replace(/[^0-9.]/g, '')) || 0;
+    const min12th = parseFloat(String(driveCriteria.min12thMark || driveCriteria.min12th || driveCriteria.twelfthMark || driveCriteria.twelfthPercentage || '0').replace(/[^0-9.]/g, '')) || 0;
+    const maxBacklogs = parseInt(String(driveCriteria.maxBacklogs || '0').replace(/[^0-9]/g, '')) || 0;
     const branchesStr = (driveCriteria.branches || '').toLowerCase();
     const genderReq = (driveCriteria.gender || driveCriteria.eligibleGender || 'Both').toLowerCase().trim();
 
+    const normalizeDept = (deptStr) => {
+      if (!deptStr) return '';
+      let str = String(deptStr).toLowerCase().trim();
+      // Correct common typos in student dataset (e.g., 'clvil' -> 'civil', 'civi' -> 'civil')
+      str = str.replace(/clvil/g, 'civil').replace(/civi\b/g, 'civil');
+      if (str.includes('civil')) return 'civil';
+      if (str.includes('cse') || str.includes('computer') || str === 'cs') return 'cse';
+      if (str.includes('it') || str.includes('information')) return 'it';
+      if (str.includes('aids') || str.includes('ai&ds') || str.includes('ai & ds') || str.includes('artificial')) return 'ai&ds';
+      if (str.includes('ece') || str.includes('electronics')) return 'ece';
+      if (str.includes('eee') || str.includes('electrical')) return 'eee';
+      if (str.includes('mech') || str.includes('mechanical')) return 'mech';
+      return str.replace(/[^a-z0-9]/g, '');
+    };
+
+    const parsePct = (rawVal) => {
+      if (rawVal === undefined || rawVal === null || rawVal === '') return NaN;
+      const str = String(rawVal).trim().toLowerCase();
+      if (str.includes('pass') || str.includes('clear')) return 100;
+      const numStr = str.replace(/[^0-9.]/g, '');
+      if (!numStr) return NaN;
+      let val = parseFloat(numStr);
+      if (isNaN(val)) return NaN;
+      // Convert Excel decimal percentages like 0.76 or 0.798 to 76% or 79.8%
+      if (val > 0 && val <= 1.0) {
+        val = val * 100;
+      }
+      return val;
+    };
+
     return studentsList.filter(student => {
       // 1. CGPA Cutoff Check
-      const studentCgpa = parseFloat(student.cgpa) || 0;
-      if (studentCgpa < minCgpa) return false;
+      const rawCgpa = String(
+        student.cgpa ||
+        student['CGPA till last (VI) semester'] ||
+        student['CGPA'] ||
+        student.gpa ||
+        student.overallCgpa ||
+        '0'
+      ).replace(/[^0-9.]/g, '');
+      const studentCgpa = parseFloat(rawCgpa) || 0;
+      if (minCgpa > 0 && studentCgpa < minCgpa) return false;
 
       // 2. 10th Mark Cutoff Check
       if (min10th > 0) {
-        const student10thVal = parseFloat(
-          student.tenthPercentage ||
+        const raw10th = student.tenthPercentage ||
           student.tenthMark ||
-          student['10thMark'] ||
-          student.min10thMark ||
-          student.mark10th ||
+          student['10th %'] ||
           student['10th'] ||
-          0
-        );
-        if (student10thVal < min10th) return false;
+          student['10thMark'] ||
+          student['10th Percentage'] ||
+          student.mark10th ||
+          student.min10thMark ||
+          student.tenth ||
+          '';
+
+        const student10thVal = parsePct(raw10th);
+        if (!isNaN(student10thVal) && student10thVal < min10th) return false;
       }
 
       // 3. 12th Mark Cutoff Check
       if (min12th > 0) {
-        const student12thVal = parseFloat(
-          student.twelfthPercentage ||
+        const raw12th = student.twelfthPercentage ||
           student.twelfthMark ||
-          student['12thMark'] ||
-          student.min12thMark ||
-          student.mark12th ||
+          student['12th % or Diploma %'] ||
+          student['12th %'] ||
+          student['Diploma %'] ||
           student['12th'] ||
-          0
-        );
-        if (student12thVal < min12th) return false;
+          student['12thMark'] ||
+          student['12th Percentage'] ||
+          student.mark12th ||
+          student.min12thMark ||
+          student.twelfth ||
+          student.diplomaPercentage ||
+          '';
+
+        const student12thVal = parsePct(raw12th);
+        if (!isNaN(student12thVal) && student12thVal < min12th) return false;
       }
 
       // 4. Gender Requirement Check
       if (genderReq && !genderReq.includes('any') && !genderReq.includes('all') && !genderReq.includes('both')) {
-        const studentGender = (student.gender || '').toLowerCase().trim();
-        if (genderReq.includes('male') && !genderReq.includes('female')) {
-          if (studentGender !== 'male' && studentGender !== 'm') return false;
-        } else if (genderReq.includes('female')) {
-          if (studentGender !== 'female' && studentGender !== 'f') return false;
+        const studentGender = String(
+          student.gender ||
+          student['Gender'] ||
+          student.sex ||
+          ''
+        ).toLowerCase().trim();
+
+        if (studentGender) {
+          if (genderReq.includes('male') && !genderReq.includes('female')) {
+            if (studentGender !== 'male' && studentGender !== 'm') return false;
+          } else if (genderReq.includes('female')) {
+            if (studentGender !== 'female' && studentGender !== 'f') return false;
+          }
         }
       }
 
-      // 4. Current Arrears / Backlogs Check
-      const studentArrears = parseInt(student.currentArrears) || 0;
+      // 5. Current Arrears / Backlogs Check
+      const rawArrears = String(
+        student.currentArrears ||
+        student['Number of CURRENT arrears'] ||
+        student['Current Arrears'] ||
+        student['Arrears'] ||
+        student.standingArrears ||
+        student.activeArrears ||
+        '0'
+      ).toLowerCase().trim();
+
+      let studentArrears = 0;
+      if (rawArrears && !rawArrears.includes('nil') && !rawArrears.includes('nill') && !rawArrears.includes('no') && !rawArrears.includes('zero') && !rawArrears.includes('pass') && !rawArrears.includes('none')) {
+        studentArrears = parseInt(rawArrears.replace(/[^0-9]/g, ''), 10) || 0;
+      }
       if (studentArrears > maxBacklogs) return false;
 
-      // 5. Department / Branch Check
+      // 6. Department / Branch Check
       if (!branchesStr.includes('all') && branchesStr.trim() !== '') {
-        const dept = (student.department || student.branch || '').toLowerCase().trim();
-        if (!dept) return false;
+        const studentDeptRaw = student.department || student.branch || student['Department'] || student['Branch'] || '';
+        const studentNorm = normalizeDept(studentDeptRaw);
+        if (!studentNorm) return false;
 
-        // Match against list of allowed branches
-        const allowedList = branchesStr.split(',').map(b => b.trim());
-        const isMatch = allowedList.some(b => b === dept || dept.includes(b) || b.includes(dept));
+        const allowedBranches = branchesStr.split(',').map(b => normalizeDept(b)).filter(Boolean);
+        const isMatch = allowedBranches.some(b => b === studentNorm || studentNorm.includes(b) || b.includes(studentNorm));
         if (!isMatch) return false;
       }
 

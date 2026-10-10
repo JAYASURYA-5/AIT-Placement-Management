@@ -63,36 +63,37 @@ export async function fetchUsersFromFirestore() {
       firestoreUsers.push({
         id: docSnap.id,
         uid: docSnap.id,
-        regNo: data.regNo || data.reg_no || '',
-        name: data.name || data.email?.split('@')[0] || 'User',
-        department: data.department || data.branch || '',
-        tenthPercentage: data.tenthPercentage || data.tenth || '',
-        twelfthPercentage: data.twelfthPercentage || data.twelfth || data.diploma || '',
-        cgpa: data.cgpa || '',
-        mobile: data.mobile || data.phone || '',
-        email: data.email || '',
-        yearOfPassing: data.yearOfPassing || data.yop || '',
-        historyOfArrears: data.historyOfArrears || '0',
-        currentArrears: data.currentArrears || '0',
-        permanentAddress: data.permanentAddress || data.address || '',
-        nativeDistrict: data.nativeDistrict || data.district || '',
-        parentMobile: data.parentMobile || '',
-        dob: data.dob || '',
-        gender: data.gender || '',
-        certifications: data.certifications || '',
-        technicalSkills: data.technicalSkills || data.skills || '',
-        languagesKnown: data.languagesKnown || '',
-        wishToWork: data.wishToWork || '',
-        willingInterviewAnyLocation: data.willingInterviewAnyLocation || 'Yes',
-        willingWorkAnyLocation: data.willingWorkAnyLocation || 'Yes',
-        willingWorkTN: data.willingWorkTN || 'Yes',
-        willingWorkIndia: data.willingWorkIndia || 'Yes',
-        futurePlan: data.futurePlan || '',
-        resumeUrl: data.resumeUrl || data.resume || '',
-        role: data.role || 'Student',
-        status: data.status || 'Active',
-        joined: data.joined || (data.createdAt ? new Date(data.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Recently'),
-        provider: 'firebase'
+        regNo: data.regNo || data.reg_no || data['Register Number'] || data['Register No'] || data['Reg No'] || data['RegNo'] || '',
+        name: data.name || data.Name || data['Name of the Student'] || data['Student Name'] || data.email?.split('@')[0] || 'User',
+        department: data.department || data.Department || data.branch || data['Branch'] || '',
+        tenthPercentage: data.tenthPercentage || data['10th %'] || data['10th Percentage'] || data['10th'] || data.tenth || '',
+        twelfthPercentage: data.twelfthPercentage || data['12th % or Diploma %'] || data['12th %'] || data['Diploma %'] || data['12th'] || data.twelfth || data.diploma || '',
+        cgpa: data.cgpa || data['CGPA till last (VI) semester'] || data['CGPA'] || data.gpa || '',
+        mobile: data.mobile || data['MOBILE NO'] || data['Mobile Number'] || data['Mobile'] || data.phone || '',
+        email: data.email || data.Email || data['MAIL ID'] || data['Email ID'] || '',
+        yearOfPassing: data.yearOfPassing || data['Year of Passing'] || data.yop || '',
+        historyOfArrears: data.historyOfArrears || data['arrears (Number of arrears cleared from first semester)'] || data['History of arrears (Number of arrears cleared from first semester)'] || data['History of Arrears'] || '0',
+        currentArrears: data.currentArrears || data['Number of CURRENT arrears'] || data['Current Arrears'] || '0',
+        permanentAddress: data.permanentAddress || data['Permanent Address'] || data.address || '',
+        nativeDistrict: data.nativeDistrict || data['Native Place District'] || data.district || '',
+        parentMobile: data.parentMobile || data["Parent's Mobile Number"] || data['Parent Mobile'] || '',
+        dob: data.dob || data['Date of Birth'] || data['DOB'] || '',
+        gender: data.gender || data['Gender'] || data.sex || '',
+        certifications: data.certifications || data['Certification Courses'] || data['Certifications'] || '',
+        technicalSkills: data.technicalSkills || data['Technical Skills'] || data.skills || '',
+        languagesKnown: data.languagesKnown || data['Languages Known'] || data['Languages'] || '',
+        wishToWork: data.wishToWork || data['I wish to work'] || '',
+        willingInterviewAnyLocation: data.willingInterviewAnyLocation || data['Willing to attend interview in any location'] || 'Yes',
+        willingWorkAnyLocation: data.willingWorkAnyLocation || data['Willing to work in any location'] || 'Yes',
+        willingWorkTN: data.willingWorkTN || data['Willing to work in any location in Tamil Nadu'] || 'Yes',
+        willingWorkIndia: data.willingWorkIndia || data['Willing to work in any location in India'] || 'Yes',
+        futurePlan: data.futurePlan || data['Future plan (If you do not require placement assistance)'] || data['Future Plan'] || '',
+        resumeUrl: data.resumeUrl || data['UPLOAD RESUME UPDATED RESUME'] || data['Resume Link'] || data.resume || '',
+        role: data.role || data.Role || 'Student',
+        status: data.status || data.Status || 'Active',
+        joined: data.joined || data.Joined || (data.createdAt ? new Date(data.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Recently'),
+        provider: 'firebase',
+        ...data
       });
     });
     return firestoreUsers;
@@ -173,13 +174,13 @@ export async function batchAddStudentsToFirestore(studentsArray) {
           regNo: student.regNo || student.reg_no || student['Register Number'] || student['Register No'] || student['Reg No'] || '',
           name: student.name || student.Name || student['Name of the Student'] || student['Student Name'] || 'Imported Student',
           department: student.department || student.Department || student.branch || student['Branch'] || '',
-          tenthPercentage: student.tenthPercentage || student['10th %'] || student['10th Percentage'] || '',
-          twelfthPercentage: student.twelfthPercentage || student['12th % or Diploma %'] || student['12th %'] || student['Diploma %'] || '',
-          cgpa: student.cgpa || student['CGPA till last (VI) semester'] || student['CGPA'] || '',
-          mobile: student.mobile || student['Mobile Number'] || student['Mobile'] || student['Phone'] || '',
-          email: student.email || student.Email || student['Email ID'] || '',
+          tenthPercentage: student.tenthPercentage || student['10th %'] || student['10th Percentage'] || student['10th'] || '',
+          twelfthPercentage: student.twelfthPercentage || student['12th % or Diploma %'] || student['12th %'] || student['Diploma %'] || student['12th'] || '',
+          cgpa: student.cgpa || student['CGPA till last (VI) semester'] || student['CGPA'] || student.gpa || '',
+          mobile: student.mobile || student['MOBILE NO'] || student['Mobile Number'] || student['Mobile'] || student['Phone'] || '',
+          email: student.email || student.Email || student['MAIL ID'] || student['Email ID'] || '',
           yearOfPassing: student.yearOfPassing || student['Year of Passing'] || student['YOP'] || '',
-          historyOfArrears: student.historyOfArrears || student['History of arrears (Number of arrears cleared from first semester)'] || student['History of Arrears'] || '0',
+          historyOfArrears: student.historyOfArrears || student['arrears (Number of arrears cleared from first semester)'] || student['History of arrears (Number of arrears cleared from first semester)'] || student['History of Arrears'] || '0',
           currentArrears: student.currentArrears || student['Number of CURRENT arrears'] || student['Current Arrears'] || '0',
           permanentAddress: student.permanentAddress || student['Permanent Address'] || student['Address'] || '',
           nativeDistrict: student.nativeDistrict || student['Native Place District'] || student['District'] || '',
@@ -353,18 +354,60 @@ export function getFirebaseProjectInfo() {
 }
 
 /**
+ * ── Default Demo Student Account ─────────────────────────────────────────────
+ * Credentials: ID = "student"  |  Password = "student"
+ * This account bypasses Firebase Auth and gets automatic "Selected" access
+ * to ALL placement drives created by the admin.
+ */
+const DEFAULT_STUDENT_CREDENTIALS = { id: 'student', password: 'student' };
+
+export const DEFAULT_STUDENT_PROFILE = {
+  uid: 'default_student_demo',
+  id: 'default_student_demo',
+  email: 'student@ait.edu.in',
+  name: 'Demo Student',
+  role: 'Student',
+  regNo: 'AIT2024DEMO',
+  branch: 'Information Technology',
+  department: 'Information Technology',
+  cgpa: '8.5',
+  yearOfPassing: '2025',
+  isDefaultStudent: true,   // ← key flag: auto-selected for all drives
+  provider: 'demo'
+};
+
+/**
  * Log in a user using Firebase Auth / Firestore database.
  * Supports login via Student Email OR Register Number with Register Number as Password.
+ * Special case: "student" / "student" gives instant access as Default Demo Student.
  */
 export async function loginWithFirebase(emailOrReg, password, expectedRole) {
   try {
-    const rawIdentifier = (emailOrReg || '').trim();
+    const rawIdentifier = (emailOrReg || '').trim().toLowerCase();
     const cleanPassword = (password || '').trim();
 
+    // ── 0. Default Student Demo Account ──────────────────────────────────────
+    // Credentials: student / student  →  instant access, all drives auto-selected
+    if (
+      (rawIdentifier === DEFAULT_STUDENT_CREDENTIALS.id ||
+       rawIdentifier === 'student@ait.edu.in') &&
+      cleanPassword === DEFAULT_STUDENT_CREDENTIALS.password
+    ) {
+      localStorage.setItem('ait-profile', JSON.stringify(DEFAULT_STUDENT_PROFILE));
+      return {
+        success: true,
+        user: DEFAULT_STUDENT_PROFILE,
+        message: '✅ Welcome, Demo Student! You have access to all placement drives.'
+      };
+    }
+
+    // Re-assign with original casing for downstream Firebase calls
+    const rawIdentifierOriginal = (emailOrReg || '').trim();
+
     // 1. Try direct Firebase Auth login if identifier has '@'
-    if (rawIdentifier.includes('@')) {
+    if (rawIdentifierOriginal.includes('@')) {
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, rawIdentifier, cleanPassword);
+        const userCredential = await signInWithEmailAndPassword(auth, rawIdentifierOriginal, cleanPassword);
         const user = userCredential.user;
 
         let userProfile = null;
@@ -379,7 +422,7 @@ export async function loginWithFirebase(emailOrReg, password, expectedRole) {
         }
 
         const role = userProfile?.role || expectedRole || 'Student';
-        const name = userProfile?.name || user.displayName || rawIdentifier.split('@')[0];
+        const name = userProfile?.name || user.displayName || rawIdentifierOriginal.split('@')[0];
 
         const resultUser = {
           uid: user.uid,
@@ -407,9 +450,9 @@ export async function loginWithFirebase(emailOrReg, password, expectedRole) {
     // 2. Query Firestore 'users' collection to match by email, regNo, or username
     const allUsers = await fetchUsersFromFirestore();
     const matchedUser = allUsers.find(u => {
-      const emailMatch = (u.email || '').toLowerCase() === rawIdentifier.toLowerCase();
-      const regMatch = (u.regNo || '').toLowerCase() === rawIdentifier.toLowerCase();
-      const idMatch = (u.id || '').toLowerCase() === rawIdentifier.toLowerCase();
+      const emailMatch = (u.email || '').toLowerCase() === rawIdentifierOriginal.toLowerCase();
+      const regMatch = (u.regNo || '').toLowerCase() === rawIdentifierOriginal.toLowerCase();
+      const idMatch = (u.id || '').toLowerCase() === rawIdentifierOriginal.toLowerCase();
       return emailMatch || regMatch || idMatch;
     });
 
@@ -585,6 +628,9 @@ export async function fetchDrivesFromFirestore() {
         date: data.date || '',
         role: data.role || '',
         minCGPA: String(data.minCGPA || '6.5'),
+        min10thMark: String(data.min10thMark || data.min10th || '60%'),
+        min12thMark: String(data.min12thMark || data.min12th || '60%'),
+        gender: data.gender || data.eligibleGender || 'Both',
         branches: data.branches || 'All Branches',
         maxBacklogs: String(data.maxBacklogs || '0'),
         bond: data.bond || 'No Bond',
@@ -595,7 +641,8 @@ export async function fetchDrivesFromFirestore() {
         driveUrl: data.url || data.driveUrl || data.link || '',
         link: data.url || data.driveUrl || data.link || '',
         nominatedStudents: data.nominatedStudents || [],
-        createdAt: data.createdAt || ''
+        createdAt: data.createdAt || '',
+        ...data
       });
     });
     return firestoreDrives;
@@ -616,6 +663,9 @@ export async function addDriveToFirestore(driveData) {
       date: driveData.date || '',
       role: driveData.role || '',
       minCGPA: String(driveData.minCGPA || '6.5'),
+      min10thMark: String(driveData.min10thMark || driveData.min10th || '60%'),
+      min12thMark: String(driveData.min12thMark || driveData.min12th || '60%'),
+      gender: driveData.gender || driveData.eligibleGender || 'Both',
       branches: driveData.branches || 'CSE, IT, ECE',
       maxBacklogs: String(driveData.maxBacklogs || '0'),
       bond: driveData.bond || 'No Bond',
@@ -686,6 +736,9 @@ export async function batchAddDrivesToFirestore(drivesArray) {
         date: drive.date || '',
         role: drive.role || '',
         minCGPA: String(drive.minCGPA || '6.5'),
+        min10thMark: String(drive.min10thMark || drive.min10th || '60%'),
+        min12thMark: String(drive.min12thMark || drive.min12th || '60%'),
+        gender: drive.gender || drive.eligibleGender || 'Both',
         branches: drive.branches || 'All Branches',
         maxBacklogs: String(drive.maxBacklogs || '0'),
         bond: drive.bond || 'No Bond',

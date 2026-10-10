@@ -363,9 +363,7 @@ export default function UsersPage({ onNavigate, onLogout }) {
         showToast(`Failed to clear users: ${res?.error || 'Unknown error'}`, 'error');
       }
     }
-  };
-
-  // Upload CSV / Excel File Import (Flexible mapping of all 26 column headers directly to Firebase)
+  };  // Upload CSV / Excel File Import (Flexible mapping of all 26 column headers directly to Firebase)
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -374,52 +372,266 @@ export default function UsersPage({ onNavigate, onLogout }) {
     reader.onload = async (evt) => {
       try {
         const bstr = evt.target.result;
-        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wb = XLSX.read(bstr, { type: 'binary', cellDates: true });
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
-        const data = XLSX.utils.sheet_to_json(ws);
 
-        if (!data || data.length === 0) {
+        // 1. Get raw and formatted rows as 2D arrays
+        const rawRows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
+        const formattedRows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
+
+        if (!formattedRows || formattedRows.length === 0) {
           showToast('No data found in uploaded file', 'error');
           return;
         }
 
-        showToast(`Uploading ${data.length} student profiles to Firebase dataset...`, 'info');
+        const normalize = (h) => String(h || '').toLowerCase().replace(/[\r\n]+/g, ' ').replace(/[^a-z0-9]/g, '').trim();
 
-        const studentsToUpload = data.map((row, idx) => ({
-          regNo: String(row['Register Number'] || row['Register No'] || row['Reg No'] || row['RegNo'] || row.regNo || ''),
-          name: String(row['Name of the Student'] || row['Student Name'] || row['Name'] || row.name || `Student ${idx + 1}`),
-          department: String(row['Department'] || row['Branch'] || row.department || row.branch || ''),
-          tenthPercentage: String(row['10th %'] || row['10th Percentage'] || row['10th'] || row.tenthPercentage || ''),
-          twelfthPercentage: String(row['12th % or Diploma %'] || row['12th %'] || row['Diploma %'] || row.twelfthPercentage || ''),
-          cgpa: String(row['CGPA till last (VI) semester'] || row['CGPA'] || row.cgpa || ''),
-          mobile: String(row['Mobile Number'] || row['Mobile'] || row['Phone'] || row.mobile || ''),
-          email: String(row['Email ID'] || row['Email'] || row.email || `student${idx + 1}@college.edu`),
-          yearOfPassing: String(row['Year of Passing'] || row['YOP'] || row.yearOfPassing || ''),
-          historyOfArrears: String(row['History of arrears (Number of arrears cleared from first semester)'] || row['History of Arrears'] || row.historyOfArrears || '0'),
-          currentArrears: String(row['Number of CURRENT arrears'] || row['Current Arrears'] || row.currentArrears || '0'),
-          permanentAddress: String(row['Permanent Address'] || row['Address'] || row.permanentAddress || ''),
-          nativeDistrict: String(row['Native Place District'] || row['District'] || row.nativeDistrict || ''),
-          parentMobile: String(row["Parent's Mobile Number"] || row['Parent Mobile'] || row.parentMobile || ''),
-          dob: String(row['Date of Birth'] || row['DOB'] || row.dob || ''),
-          gender: String(row['Gender'] || row.gender || ''),
-          certifications: String(row['Certification Courses'] || row['Certifications'] || row.certifications || ''),
-          technicalSkills: String(row['Technical Skills'] || row['Skills'] || row.technicalSkills || ''),
-          languagesKnown: String(row['Languages Known'] || row['Languages'] || row.languagesKnown || ''),
-          wishToWork: String(row['I wish to work'] || row.wishToWork || ''),
-          willingInterviewAnyLocation: String(row['Willing to attend interview in any location'] || row.willingInterviewAnyLocation || 'Yes'),
-          willingWorkAnyLocation: String(row['Willing to work in any location'] || row.willingWorkAnyLocation || 'Yes'),
-          willingWorkTN: String(row['Willing to work in any location in Tamil Nadu'] || row.willingWorkTN || 'Yes'),
-          willingWorkIndia: String(row['Willing to work in any location in India'] || row.willingWorkIndia || 'Yes'),
-          futurePlan: String(row['Future plan (If you do not require placement assistance)'] || row['Future Plan'] || row.futurePlan || ''),
-          resumeUrl: String(row['UPLOAD RESUME UPDATED RESUME'] || row['Resume Link'] || row['Resume'] || row.resumeUrl || ''),
-          role: String(row['Role'] || row.role || 'Student'),
-          status: String(row['Status'] || row.status || 'Active'),
-          joined: String(row['Joined'] || row.joined || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }))
-        }));
+        const formatVal = (rVal, fVal) => {
+          if (typeof rVal === 'number' && !isNaN(rVal)) {
+            if (Number.isInteger(rVal)) return String(rVal);
+            return String(rVal);
+          }
+          let str = String(fVal || rVal || '').trim();
+          if (!str) return '';
+          if (/^[+-]?\d+(\.\d+)?[eE][+-]?\d+$/.test(str)) {
+            try {
+              const num = Number(str);
+              if (!isNaN(num)) {
+                str = BigInt(Math.round(num)).toString();
+              }
+            } catch (err) {
+              // keep str
+            }
+          }
+          return str;
+        };
+
+        // 2. Identify header rows and first data row
+        const headerRowIndices = [];
+        let firstDataRowIdx = -1;
+
+        const maxScanRows = Math.min(25, formattedRows.length);
+        for (let r = 0; r < maxScanRows; r++) {
+          const fRow = formattedRows[r];
+          if (!fRow || !Array.isArray(fRow) || fRow.every(c => !String(c).trim())) continue;
+
+          // Check if row has data indicators (e.g. Email with @, numeric reg number, phone)
+          let hasDataEmail = false;
+          let hasDataDigits = false;
+          let headerWordCount = 0;
+
+          fRow.forEach(cell => {
+            const str = String(cell || '').trim();
+            const norm = normalize(str);
+            if (str.includes('@') && str.includes('.')) hasDataEmail = true;
+            if (/^\d{8,12}$/.test(str) || /^[+-]?\d+(\.\d+)?[eE][+-]?\d+$/.test(str)) hasDataDigits = true;
+
+            if (
+              norm.includes('reg') || norm.includes('student') || norm.includes('name') ||
+              norm.includes('dept') || norm.includes('branch') || norm.includes('gender') ||
+              norm.includes('mobile') || norm.includes('phone') || norm.includes('mail') ||
+              norm.includes('email') || norm.includes('10th') || norm.includes('12th') ||
+              norm.includes('cgpa') || norm.includes('arrear') || norm.includes('district') ||
+              norm.includes('address') || norm.includes('yop') || norm.includes('passing')
+            ) {
+              headerWordCount++;
+            }
+          });
+
+          if (hasDataEmail || (hasDataDigits && headerWordCount === 0)) {
+            firstDataRowIdx = r;
+            break;
+          } else if (headerWordCount >= 1) {
+            headerRowIndices.push(r);
+          }
+        }
+
+        if (firstDataRowIdx === -1) {
+          firstDataRowIdx = headerRowIndices.length > 0 ? Math.max(...headerRowIndices) + 1 : 1;
+        }
+
+        // 3. Build unified combined header row across all header rows
+        const numCols = Math.max(
+          ...formattedRows.slice(0, Math.min(10, formattedRows.length)).map(row => (Array.isArray(row) ? row.length : 0))
+        );
+
+        const combinedHeader = [];
+        for (let c = 0; c < numCols; c++) {
+          let text = '';
+          const rowsToCombine = headerRowIndices.length > 0 ? headerRowIndices : [0];
+          rowsToCombine.forEach(hIdx => {
+            const cellVal = formattedRows[hIdx] ? formattedRows[hIdx][c] : '';
+            if (cellVal && String(cellVal).trim()) {
+              text += ' ' + String(cellVal).trim();
+            }
+          });
+          combinedHeader[c] = text.trim();
+        }
+
+        // 4. Map columns based on combined header text
+        const colMap = {};
+        combinedHeader.forEach((colHeader, c) => {
+          const norm = normalize(colHeader);
+          if (!norm) return;
+
+          if (!colMap.regNo && (norm.includes('register') || norm.includes('regno') || norm === 'reg' || norm.includes('registration'))) {
+            colMap.regNo = c;
+          } else if (!colMap.name && (norm.includes('nameofthestudent') || norm.includes('studentname') || norm.includes('candidatename') || (norm.includes('name') && !norm.includes('dept') && !norm.includes('father') && !norm.includes('company')))) {
+            colMap.name = c;
+          } else if (!colMap.department && (norm.includes('department') || norm.includes('dept') || norm.includes('branch') || norm.includes('stream') || norm.includes('course'))) {
+            colMap.department = c;
+          } else if (!colMap.gender && (norm.includes('gender') || norm === 'sex')) {
+            colMap.gender = c;
+          } else if (!colMap.mobile && (norm.includes('mobileno') || norm.includes('mobilenumber') || norm.includes('mobile') || norm.includes('phone') || norm.includes('contact')) && !norm.includes('parent')) {
+            colMap.mobile = c;
+          } else if (!colMap.email && (norm.includes('mailid') || norm.includes('emailid') || norm.includes('email') || norm.includes('mail'))) {
+            colMap.email = c;
+          } else if (!colMap.tenthPercentage && (norm.includes('10th') || norm.includes('sslc') || norm.includes('tenth'))) {
+            colMap.tenthPercentage = c;
+          } else if (!colMap.twelfthPercentage && (norm.includes('12th') || norm.includes('diploma') || norm.includes('hsc') || norm.includes('twelfth'))) {
+            colMap.twelfthPercentage = c;
+          } else if (!colMap.cgpa && (norm.includes('cgpa') || norm === 'gpa' || norm.includes('overallcgpa'))) {
+            colMap.cgpa = c;
+          } else if (!colMap.currentArrears && (norm.includes('currentarrear') || norm.includes('standingarrear') || norm.includes('activearrear') || (norm.includes('arrear') && !norm.includes('history') && !norm.includes('cleared')))) {
+            colMap.currentArrears = c;
+          } else if (!colMap.historyOfArrears && (norm.includes('history') || norm.includes('cleared') || norm.includes('totalarrear'))) {
+            colMap.historyOfArrears = c;
+          } else if (!colMap.permanentAddress && (norm.includes('address') || norm.includes('nativeaddress'))) {
+            colMap.permanentAddress = c;
+          } else if (!colMap.nativeDistrict && (norm.includes('district') || norm.includes('nativeplace'))) {
+            colMap.nativeDistrict = c;
+          } else if (!colMap.parentMobile && (norm.includes('parent') && (norm.includes('mobile') || norm.includes('phone')))) {
+            colMap.parentMobile = c;
+          } else if (!colMap.dob && (norm.includes('dateofbirth') || norm.includes('dob') || norm.includes('birthdate'))) {
+            colMap.dob = c;
+          } else if (!colMap.certifications && (norm.includes('certification') || norm.includes('certifications'))) {
+            colMap.certifications = c;
+          } else if (!colMap.technicalSkills && (norm.includes('technicalskill') || norm.includes('skill'))) {
+            colMap.technicalSkills = c;
+          } else if (!colMap.languagesKnown && norm.includes('language')) {
+            colMap.languagesKnown = c;
+          } else if (!colMap.wishToWork && norm.includes('wishtowork')) {
+            colMap.wishToWork = c;
+          } else if (!colMap.willingInterviewAnyLocation && norm.includes('willingtoattendinterview')) {
+            colMap.willingInterviewAnyLocation = c;
+          } else if (!colMap.willingWorkTN && (norm.includes('tamilnadu') || norm.includes('tn'))) {
+            colMap.willingWorkTN = c;
+          } else if (!colMap.willingWorkIndia && norm.includes('india')) {
+            colMap.willingWorkIndia = c;
+          } else if (!colMap.willingWorkAnyLocation && norm.includes('willingtoworkinanylocation')) {
+            colMap.willingWorkAnyLocation = c;
+          } else if (!colMap.futurePlan && norm.includes('futureplan')) {
+            colMap.futurePlan = c;
+          } else if (!colMap.resumeUrl && (norm.includes('resume') || norm.includes('cv'))) {
+            colMap.resumeUrl = c;
+          } else if (!colMap.yearOfPassing && (norm.includes('yearofpassing') || norm.includes('yop') || norm.includes('batch') || norm.includes('passout'))) {
+            colMap.yearOfPassing = c;
+          }
+        });
+
+        // 5. Data-Type Inspection Fallback for unmapped key columns
+        const sampleRows = formattedRows.slice(firstDataRowIdx, Math.min(firstDataRowIdx + 5, formattedRows.length));
+        for (let c = 0; c < numCols; c++) {
+          const colSamples = sampleRows.map((r, i) => formatVal(rawRows[firstDataRowIdx + i] ? rawRows[firstDataRowIdx + i][c] : '', r ? r[c] : ''));
+
+          // Email check
+          if (colMap.email === undefined && colSamples.some(s => s.includes('@') && s.includes('.'))) {
+            colMap.email = c;
+          }
+          // RegNo check (numeric / scientific string length >= 8, starting with digits)
+          if (colMap.regNo === undefined && colSamples.some(s => /^\d{8,14}$/.test(s))) {
+            colMap.regNo = c;
+          }
+          // Mobile check (10 digits starting with 6-9)
+          if (colMap.mobile === undefined && colMap.regNo !== c && colSamples.some(s => /^[6-9]\d{9}$/.test(s))) {
+            colMap.mobile = c;
+          }
+          // CGPA check (numbers between 4.0 and 10.0)
+          if (colMap.cgpa === undefined && colSamples.some(s => {
+            const num = parseFloat(s);
+            return !isNaN(num) && num >= 4.0 && num <= 10.0;
+          })) {
+            colMap.cgpa = c;
+          }
+          // Department check (matches common department names)
+          if (colMap.department === undefined && colSamples.some(s => {
+            const sNorm = normalize(s);
+            return ['civil', 'mech', 'cse', 'it', 'ece', 'eee', 'aids', 'ai'].some(d => sNorm.includes(d));
+          })) {
+            colMap.department = c;
+          }
+          // Student Name check (non-numeric, no email, non-department, contains spaces/dots)
+          if (colMap.name === undefined && colSamples.some(s => {
+            return s.length >= 3 && !s.includes('@') && !/^\d+$/.test(s) && c !== colMap.department && c !== colMap.gender;
+          })) {
+            colMap.name = c;
+          }
+        }
+
+        // 6. Extract student records starting from firstDataRowIdx
+        const parsedStudents = [];
+        for (let r = firstDataRowIdx; r < formattedRows.length; r++) {
+          const fRow = formattedRows[r];
+          const rRow = rawRows[r];
+          if (!fRow || !Array.isArray(fRow) || fRow.every(c => !String(c).trim())) continue;
+
+          const getVal = (field) => {
+            const cIdx = colMap[field];
+            if (cIdx === undefined || cIdx < 0) return '';
+            const rVal = rRow ? rRow[cIdx] : undefined;
+            const fVal = fRow[cIdx];
+            return formatVal(rVal, fVal);
+          };
+
+          const name = getVal('name');
+          const email = getVal('email');
+          const regNo = getVal('regNo');
+
+          if (!name && !email && !regNo && !getVal('department') && !getVal('mobile')) continue;
+
+          parsedStudents.push({
+            regNo: regNo,
+            name: name || (email ? email.split('@')[0] : `Student ${parsedStudents.length + 1}`),
+            department: getVal('department'),
+            tenthPercentage: getVal('tenthPercentage'),
+            twelfthPercentage: getVal('twelfthPercentage'),
+            cgpa: getVal('cgpa'),
+            mobile: getVal('mobile'),
+            email: email || (regNo ? `${regNo}@ait.edu.in` : `student${parsedStudents.length + 1}@college.edu`),
+            yearOfPassing: getVal('yearOfPassing'),
+            historyOfArrears: getVal('historyOfArrears') || '0',
+            currentArrears: getVal('currentArrears') || '0',
+            permanentAddress: getVal('permanentAddress'),
+            nativeDistrict: getVal('nativeDistrict'),
+            parentMobile: getVal('parentMobile'),
+            dob: getVal('dob'),
+            gender: getVal('gender') || 'Male',
+            certifications: getVal('certifications'),
+            technicalSkills: getVal('technicalSkills'),
+            languagesKnown: getVal('languagesKnown'),
+            wishToWork: getVal('wishToWork'),
+            willingInterviewAnyLocation: getVal('willingInterviewAnyLocation') || 'Yes',
+            willingWorkAnyLocation: getVal('willingWorkAnyLocation') || 'Yes',
+            willingWorkTN: getVal('willingWorkTN') || 'Yes',
+            willingWorkIndia: getVal('willingWorkIndia') || 'Yes',
+            futurePlan: getVal('futurePlan'),
+            resumeUrl: getVal('resumeUrl'),
+            role: 'Student',
+            status: 'Active',
+            joined: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+          });
+        }
+
+        if (!parsedStudents || parsedStudents.length === 0) {
+          showToast('No valid student data found in uploaded file', 'error');
+          return;
+        }
+
+        showToast(`Uploading ${parsedStudents.length} student profiles to Firebase dataset...`, 'info');
 
         // Batch add to Firebase Firestore Dataset
-        const res = await batchAddStudentsToFirestore(studentsToUpload);
+        const res = await batchAddStudentsToFirestore(parsedStudents);
 
         if (res && res.success) {
           const bgColors = ['#e0e7ff', '#dbeafe', '#f3e8ff', '#c7d2fe', '#dcfce7', '#fce7f3'];
@@ -553,7 +765,7 @@ export default function UsersPage({ onNavigate, onLogout }) {
         Student
       </div>
 
-      <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingBottom: '24px', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingBottom: '24px' }}>
         
         {/* Left Sidebar */}
         <aside style={{
@@ -641,7 +853,7 @@ export default function UsersPage({ onNavigate, onLogout }) {
         </aside>
 
         {/* Main Content Area */}
-        <main style={{ flex: 1, padding: '12px 36px 24px 30px', overflowY: 'visible', minHeight: 0 }}>
+        <main style={{ flex: 1, padding: '12px 36px 24px 30px', overflowY: 'auto' }}>
           
           {/* Top Row: 4 Metric Cards */}
           <div className="admin-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '28px' }}>
@@ -1127,7 +1339,7 @@ export default function UsersPage({ onNavigate, onLogout }) {
                   Showing <strong style={{ color: '#0f172a' }}>{indexOfFirstItem + 1}</strong> to <strong style={{ color: '#0f172a' }}>{Math.min(indexOfLastItem, filteredUsers.length)}</strong> of <strong style={{ color: '#0f172a' }}>{filteredUsers.length}</strong> users
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
@@ -1143,9 +1355,7 @@ export default function UsersPage({ onNavigate, onLogout }) {
                       fontSize: '14px',
                       fontWeight: 600,
                       cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'all 0.15s ease',
-                      whiteSpace: 'nowrap',
-                      flexShrink: 0
+                      transition: 'all 0.15s ease'
                     }}
                   >
                     <ChevronLeft size={16} />
@@ -1167,8 +1377,7 @@ export default function UsersPage({ onNavigate, onLogout }) {
                         fontWeight: pageNum === currentPage ? 700 : 600,
                         cursor: 'pointer',
                         transition: 'all 0.15s ease',
-                        boxShadow: pageNum === currentPage ? '0 4px 12px rgba(190, 24, 93, 0.35)' : 'none',
-                        flexShrink: 0
+                        boxShadow: pageNum === currentPage ? '0 4px 12px rgba(190, 24, 93, 0.35)' : 'none'
                       }}
                     >
                       {pageNum}
@@ -1190,9 +1399,7 @@ export default function UsersPage({ onNavigate, onLogout }) {
                       fontSize: '14px',
                       fontWeight: 600,
                       cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'all 0.15s ease',
-                      whiteSpace: 'nowrap',
-                      flexShrink: 0
+                      transition: 'all 0.15s ease'
                     }}
                   >
                     <span>Next</span>
@@ -1615,4 +1822,4 @@ export default function UsersPage({ onNavigate, onLogout }) {
 
     </div>
   );
-}
+}

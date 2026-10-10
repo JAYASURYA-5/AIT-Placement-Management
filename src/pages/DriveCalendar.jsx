@@ -55,6 +55,9 @@ export default function DriveCalendar() {
         profile = JSON.parse(localStorage.getItem('ait-profile') || '{}')
       } catch { }
 
+      // Default demo student ("student" / "student") gets auto-selected for ALL drives
+      const isDefaultStudent = Boolean(profile.isDefaultStudent)
+
       const studentIds = [
         (profile.uid || '').toLowerCase(),
         (profile.id || '').toLowerCase(),
@@ -68,7 +71,10 @@ export default function DriveCalendar() {
       if (fsDrives && fsDrives.length > 0) {
         fsDrives.forEach((drive) => {
           const nominatedList = (drive.nominatedStudents || []).map(s => String(s).toLowerCase())
-          const isNominated = studentIds.some(id => nominatedList.includes(id)) || nominatedList.length > 0
+          // Default demo student is auto-nominated on all drives
+          const isNominated = isDefaultStudent ||
+            studentIds.some(id => nominatedList.includes(id)) ||
+            nominatedList.length > 0
 
           // Try to parse drive.date or default to 2026-09-09 / 2026-09-15
           let dateKey = '2026-09-15'

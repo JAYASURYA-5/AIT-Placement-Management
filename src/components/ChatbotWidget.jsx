@@ -22,7 +22,12 @@
  * @author AIT Placement Portal Team
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { getDailyUsage, incrementDailyUsage, getRemainingUsage, isWithinLimit, getResetTimeString } from '../utils/useRateLimit';
+
+// ─── Daily Limit Configuration ─────────────────────────────────────────────────
+const CHATBOT_DAILY_LIMIT = 5;
+const CHATBOT_FEATURE_KEY = 'chatbot';
 
 // ─── API Configuration ─────────────────────────────────────────────────────────
 /**
@@ -164,6 +169,11 @@ export default function ChatbotView({ userName = 'Jayasurya K' }) {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
+  // ── Daily rate-limit state ────────────────────────────────────────────────
+  const [usedCount, setUsedCount] = useState(() => getDailyUsage(CHATBOT_FEATURE_KEY));
+  const remaining = Math.max(0, CHATBOT_DAILY_LIMIT - usedCount);
+  const isLimitReached = usedCount >= CHATBOT_DAILY_LIMIT;
+
   // Initial greeting message shown when the chatbot opens
   const [messages, setMessages] = useState([
     {
@@ -250,11 +260,18 @@ export default function ChatbotView({ userName = 'Jayasurya K' }) {
     const trimmed = (text !== undefined ? text : inputValue).trim();
     if (!trimmed || isTyping) return; // Ignore empty or duplicate sends
 
+    // ── Daily limit check ─────────────────────────────────────────────────
+    if (isLimitReached) return;
+
     // Immediately render the user's message in the UI
     const userMsg = { id: Date.now(), sender: 'user', text: trimmed, time: getTimeString() };
     setMessages(prev => [...prev, userMsg]);
     setInputValue('');
     setIsTyping(true); // Show typing dots indicator
+
+    // Increment daily usage counter BEFORE the async call
+    const newCount = incrementDailyUsage(CHATBOT_FEATURE_KEY);
+    setUsedCount(newCount);
 
     try {
       let botText;
@@ -314,22 +331,63 @@ export default function ChatbotView({ userName = 'Jayasurya K' }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
 
-      {/* ── API Status Badge ─────────────────────────────────────────────── */}
-      {/* Shows whether Gemini AI is active or Smart Response mode is used */}
+      {/* ── API Status Badge + Daily Usage Meter ─────────────────────────── */}
       <div style={{
-        padding: '4px 14px 8px',
-        display: 'flex', alignItems: 'center', gap: '6px',
-        fontSize: '10.5px', fontWeight: '700',
-        color: GEMINI_API_KEY ? '#16A34A' : '#D97706',
+        padding: '6px 14px 8px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px',
         borderBottom: '1px solid #F1F5F9',
       }}>
-        <span style={{
-          width: '6px', height: '6px', borderRadius: '50%',
-          backgroundColor: GEMINI_API_KEY ? '#22C55E' : '#F59E0B',
-          display: 'inline-block', flexShrink: 0,
-        }} />
-        {GEMINI_API_KEY ? '● Gemini AI Connected' : '● Smart Response Mode'}
+        {/* API mode badge */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '6px',
+          fontSize: '10.5px', fontWeight: '700',
+          color: GEMINI_API_KEY ? '#16A34A' : '#D97706',
+        }}>
+          <span style={{
+            width: '6px', height: '6px', borderRadius: '50%',
+            backgroundColor: GEMINI_API_KEY ? '#22C55E' : '#F59E0B',
+            display: 'inline-block', flexShrink: 0,
+          }} />
+          {GEMINI_API_KEY ? '● Gemini AI Connected' : '● Smart Response Mode'}
+        </div>
+
+        {/* Daily message counter chip */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '4px',
+          fontSize: '10px', fontWeight: '700',
+          padding: '3px 8px', borderRadius: '20px',
+          backgroundColor: isLimitReached ? '#FEE2E2' : remaining <= 2 ? '#FEF3C7' : '#F0FDF4',
+          color: isLimitReached ? '#B91C1C' : remaining <= 2 ? '#A16207' : '#15803D',
+          border: `1px solid ${isLimitReached ? '#FCA5A5' : remaining <= 2 ? '#FCD34D' : '#86EFAC'}`,
+        }}>
+          <span style={{ fontSize: '11px' }}>{isLimitReached ? '🚫' : '💬'}</span>
+          {isLimitReached ? 'Limit Reached' : `${remaining}/${CHATBOT_DAILY_LIMIT} left today`}
+        </div>
       </div>
+
+      {/* ── Daily Limit Reached Banner ────────────────────────────────────── */}
+      {isLimitReached && (
+        <div style={{
+          margin: '12px 14px 0',
+          padding: '12px 14px',
+          borderRadius: '12px',
+          backgroundColor: '#FFF5F5',
+          border: '1.5px solid #FCA5A5',
+          display: 'flex', flexDirection: 'column', gap: '4px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '16px' }}>🚫</span>
+            <span style={{ fontSize: '12.5px', fontWeight: '800', color: '#B91C1C' }}>
+              Daily Chat Limit Reached
+            </span>
+          </div>
+          <p style={{ fontSize: '11.5px', color: '#6B7280', margin: 0, lineHeight: '1.5' }}>
+            You've used all <strong>{CHATBOT_DAILY_LIMIT} messages</strong> for today.
+            Your limit resets at midnight ({getResetTimeString()}).
+            Come back tomorrow! 🌙
+          </p>
+        </div>
+      )}
 
       {/* ── Message List ─────────────────────────────────────────────────── */}
       {/* Scrollable area displaying all chat messages with sender avatars */}
@@ -401,30 +459,32 @@ export default function ChatbotView({ userName = 'Jayasurya K' }) {
       </div>
 
       {/* ── Quick Prompt Chips ────────────────────────────────────────────── */}
-      {/* One-tap shortcut buttons for common placement questions */}
-      <div style={{ padding: '8px 12px 4px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-        {quickPrompts.map((p, i) => (
-          <button
-            key={i}
-            onClick={() => sendMessage(p)}
-            disabled={isTyping}
-            style={{
-              fontSize: '11px', fontWeight: '600', padding: '5px 10px',
-              borderRadius: '20px', border: '1.5px solid rgba(122,0,0,0.3)',
-              color: 'var(--primary-maroon)', backgroundColor: '#FFF5F5',
-              cursor: isTyping ? 'not-allowed' : 'pointer', transition: 'all 0.15s',
-              opacity: isTyping ? 0.5 : 1,
-            }}
-            onMouseEnter={e => { if (!isTyping) { e.currentTarget.style.backgroundColor = 'var(--primary-maroon)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'var(--primary-maroon)'; }}}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FFF5F5'; e.currentTarget.style.color = 'var(--primary-maroon)'; e.currentTarget.style.borderColor = 'rgba(122,0,0,0.3)'; }}
-          >
-            {p}
-          </button>
-        ))}
-      </div>
+      {/* One-tap shortcut buttons for common placement questions — hidden when limit reached */}
+      {!isLimitReached && (
+        <div style={{ padding: '8px 12px 4px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          {quickPrompts.map((p, i) => (
+            <button
+              key={i}
+              onClick={() => sendMessage(p)}
+              disabled={isTyping}
+              style={{
+                fontSize: '11px', fontWeight: '600', padding: '5px 10px',
+                borderRadius: '20px', border: '1.5px solid rgba(122,0,0,0.3)',
+                color: 'var(--primary-maroon)', backgroundColor: '#FFF5F5',
+                cursor: isTyping ? 'not-allowed' : 'pointer', transition: 'all 0.15s',
+                opacity: isTyping ? 0.5 : 1,
+              }}
+              onMouseEnter={e => { if (!isTyping) { e.currentTarget.style.backgroundColor = 'var(--primary-maroon)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'var(--primary-maroon)'; }}}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FFF5F5'; e.currentTarget.style.color = 'var(--primary-maroon)'; e.currentTarget.style.borderColor = 'rgba(122,0,0,0.3)'; }}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ── Input Bar ─────────────────────────────────────────────────────── */}
-      {/* Text input + Send button. Enter key or button click sends the message */}
+      {/* Text input + Send button. Disabled entirely when daily limit is reached */}
       <div style={{
         padding: '10px 12px 12px', borderTop: '1px solid #F1F5F9',
         display: 'flex', gap: '8px', alignItems: 'center', backgroundColor: '#fff',
@@ -432,33 +492,45 @@ export default function ChatbotView({ userName = 'Jayasurya K' }) {
         <input
           ref={inputRef}
           type="text"
-          placeholder={GEMINI_API_KEY ? 'Ask Gemini AI anything...' : 'Ask anything about placement...'}
-          value={inputValue}
-          onChange={e => setInputValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={isTyping}
+          placeholder={
+            isLimitReached
+              ? `Daily limit reached — resets at midnight (${getResetTimeString()})`
+              : GEMINI_API_KEY ? 'Ask Gemini AI anything...' : 'Ask anything about placement...'
+          }
+          value={isLimitReached ? '' : inputValue}
+          onChange={e => { if (!isLimitReached) setInputValue(e.target.value); }}
+          onKeyDown={isLimitReached ? undefined : handleKeyDown}
+          disabled={isTyping || isLimitReached}
           style={{
             flex: 1, padding: '10px 14px', borderRadius: '24px',
-            border: '1.5px solid #E2E8F0', fontSize: '12.5px', fontWeight: '500',
-            outline: 'none', backgroundColor: '#F8FAFC', fontFamily: 'inherit', color: '#1E293B',
+            border: `1.5px solid ${isLimitReached ? '#FCA5A5' : '#E2E8F0'}`,
+            fontSize: '12.5px', fontWeight: '500',
+            outline: 'none',
+            backgroundColor: isLimitReached ? '#FFF5F5' : '#F8FAFC',
+            fontFamily: 'inherit',
+            color: isLimitReached ? '#9CA3AF' : '#1E293B',
             transition: 'border-color 0.15s',
+            cursor: isLimitReached ? 'not-allowed' : 'text',
           }}
-          onFocus={e => { e.target.style.borderColor = 'var(--primary-maroon)'; }}
-          onBlur={e => { e.target.style.borderColor = '#E2E8F0'; }}
+          onFocus={e => { if (!isLimitReached) e.target.style.borderColor = 'var(--primary-maroon)'; }}
+          onBlur={e => { e.target.style.borderColor = isLimitReached ? '#FCA5A5' : '#E2E8F0'; }}
         />
-        {/* Send button — active (maroon) only when there is input text */}
+        {/* Send button — active (maroon) only when there is input text and limit not reached */}
         <button
           onClick={() => sendMessage(undefined)}
-          disabled={!inputValue.trim() || isTyping}
+          disabled={!inputValue.trim() || isTyping || isLimitReached}
+          title={isLimitReached ? 'Daily message limit reached' : 'Send message'}
           style={{
             width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0,
-            background: inputValue.trim() && !isTyping
+            background: inputValue.trim() && !isTyping && !isLimitReached
               ? 'linear-gradient(135deg, var(--primary-maroon), #9B1B30)'
-              : '#E2E8F0',
-            color: inputValue.trim() && !isTyping ? '#fff' : '#94A3B8',
-            border: 'none', cursor: inputValue.trim() && !isTyping ? 'pointer' : 'default',
+              : isLimitReached ? '#FEE2E2' : '#E2E8F0',
+            color: inputValue.trim() && !isTyping && !isLimitReached ? '#fff' : isLimitReached ? '#FCA5A5' : '#94A3B8',
+            border: 'none',
+            cursor: inputValue.trim() && !isTyping && !isLimitReached ? 'pointer' : 'not-allowed',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'all 0.15s', boxShadow: inputValue.trim() && !isTyping ? '0 2px 10px rgba(122,0,0,0.3)' : 'none',
+            transition: 'all 0.15s',
+            boxShadow: inputValue.trim() && !isTyping && !isLimitReached ? '0 2px 10px rgba(122,0,0,0.3)' : 'none',
           }}
         >
           {/* Paper-plane send icon */}
