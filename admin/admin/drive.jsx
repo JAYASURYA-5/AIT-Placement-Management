@@ -221,7 +221,8 @@ export default function DriveManagement({ onNavigate }) {
     bond: 'No Bond',
     package: '',
     location: '',
-    status: 'Upcoming'
+    status: 'Upcoming',
+    additionalFields: []
   });
 
   const [formErrors, setFormErrors] = useState([]);
@@ -722,7 +723,8 @@ export default function DriveManagement({ onNavigate }) {
       bond: 'No Bond',
       package: '',
       location: '',
-      status: 'Upcoming'
+      status: 'Upcoming',
+      additionalFields: []
     });
     setIsModalOpen(true);
   };
@@ -730,8 +732,54 @@ export default function DriveManagement({ onNavigate }) {
   const handleOpenEditModal = (drive) => {
     setEditingDrive(drive);
     setFormErrors([]);
-    setFormData({ min12thMark: '60%', gender: 'Any', ...drive });
+    let existingAdditional = [];
+    if (Array.isArray(drive.additionalFields)) {
+      existingAdditional = drive.additionalFields;
+    } else if (Array.isArray(drive.customFields)) {
+      existingAdditional = drive.customFields;
+    } else if (drive.additionalFields && typeof drive.additionalFields === 'object') {
+      existingAdditional = Object.entries(drive.additionalFields).map(([k, v]) => ({ label: k, value: String(v) }));
+    }
+    setFormData({
+      min12thMark: '60%',
+      gender: 'Any',
+      bond: drive.bond || 'No Bond',
+      ...drive,
+      additionalFields: existingAdditional
+    });
     setIsModalOpen(true);
+  };
+
+  // Additional dynamic field helpers for the Add/Edit Drive Modal
+  const handleAddAdditionalField = () => {
+    const current = formData.additionalFields || [];
+    setFormData({
+      ...formData,
+      additionalFields: [...current, { id: Date.now(), label: '', value: '' }]
+    });
+  };
+
+  const handleAddPresetField = (presetName) => {
+    const current = formData.additionalFields || [];
+    if (current.some(f => (f.label || '').toLowerCase() === presetName.toLowerCase())) {
+      showToast(`Field "${presetName}" is already added!`, 'info');
+      return;
+    }
+    setFormData({
+      ...formData,
+      additionalFields: [...current, { id: Date.now(), label: presetName, value: '' }]
+    });
+  };
+
+  const handleRemoveAdditionalField = (index) => {
+    const nextFields = (formData.additionalFields || []).filter((_, i) => i !== index);
+    setFormData({ ...formData, additionalFields: nextFields });
+  };
+
+  const handleUpdateAdditionalField = (index, key, value) => {
+    const nextFields = [...(formData.additionalFields || [])];
+    nextFields[index] = { ...nextFields[index], [key]: value };
+    setFormData({ ...formData, additionalFields: nextFields });
   };
 
   // Submit Handler for Create / Edit Drive with Firestore Persistence & Auto Candidate Suggestion Prompt
@@ -761,15 +809,27 @@ export default function DriveManagement({ onNavigate }) {
     }
     setFormErrors([]);
 
+    // Clean additional fields: filter empty labels & values
+    const cleanedAdditionalFields = (formData.additionalFields || [])
+      .filter(f => f && (f.label?.trim() || f.value?.trim()))
+      .map(f => ({ label: (f.label || '').trim(), value: (f.value || '').trim() }));
+
+    const submissionData = {
+      ...formData,
+      bond: formData.bond || 'No Bond',
+      additionalFields: cleanedAdditionalFields,
+      customFields: cleanedAdditionalFields
+    };
+
     setIsSaving(true);
 
     if (editingDrive) {
       showToast('Updating placement drive in Firebase...', 'info');
-      const res = await updateDriveInFirestore(editingDrive.id, formData);
+      const res = await updateDriveInFirestore(editingDrive.id, submissionData);
       setIsSaving(false);
 
       if (res && res.success) {
-        setDrives(drives.map(d => d.id === editingDrive.id ? { ...d, ...formData } : d));
+        setDrives(drives.map(d => d.id === editingDrive.id ? { ...d, ...submissionData } : d));
         setIsModalOpen(false);
         showToast(`Drive for "${formData.company}" updated in Firebase!`);
       } else {
@@ -777,7 +837,7 @@ export default function DriveManagement({ onNavigate }) {
       }
     } else {
       showToast('Saving new placement drive to Firebase...', 'info');
-      const res = await addDriveToFirestore(formData);
+      const res = await addDriveToFirestore(submissionData);
       setIsSaving(false);
 
       if (res && res.success) {
@@ -1246,8 +1306,46 @@ export default function DriveManagement({ onNavigate }) {
                           </td>
 
                           {/* ROLE */}
-                          <td style={{ padding: '14px 16px', color: '#475569', fontSize: '13px', fontWeight: 600, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
-                            {drive.role}
+                          <td style={{ padding: '14px 16px', color: '#475569', fontSize: '13px', fontWeight: 600, verticalAlign: 'middle' }}>
+                            <div style={{ whiteSpace: 'nowrap' }}>{drive.role}</div>
+                            {Array.isArray(drive.additionalFields) && drive.additionalFields.filter(f => f?.label && f?.value).length > 0 && (
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
+                                {drive.additionalFields.filter(f => f?.label && f?.value).slice(0, 2).map((f, fIdx) => (
+                                  <span
+                                    key={fIdx}
+                                    style={{
+                                      fontSize: '11px',
+                                      backgroundColor: '#f1f5f9',
+                                      color: '#475569',
+                                      padding: '2px 6px',
+                                      borderRadius: '4px',
+                                      border: '1px solid #e2e8f0',
+                                      fontWeight: 600,
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                    title={`${f.label}: ${f.value}`}
+                                  >
+                                    {f.label}: <strong style={{ color: '#0f172a' }}>{f.value}</strong>
+                                  </span>
+                                ))}
+                                {drive.additionalFields.filter(f => f?.label && f?.value).length > 2 && (
+                                  <span
+                                    style={{
+                                      fontSize: '11px',
+                                      backgroundColor: '#fce7f3',
+                                      color: '#be185d',
+                                      padding: '2px 6px',
+                                      borderRadius: '4px',
+                                      fontWeight: 700,
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                    title={drive.additionalFields.filter(f => f?.label && f?.value).map(f => `${f.label}: ${f.value}`).join(', ')}
+                                  >
+                                    +{drive.additionalFields.filter(f => f?.label && f?.value).length - 2} more
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </td>
 
                           {/* MIN CGPA */}
@@ -1901,11 +1999,54 @@ export default function DriveManagement({ onNavigate }) {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Location</label>
                     <input type="text" placeholder="e.g. Chennai" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} style={inputStyle} />
                   </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Service Bond *</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <select
+                        value={
+                          ['No Bond', '6 Months', '1 Year', '2 Years', '3 Years'].includes(formData.bond)
+                            ? formData.bond
+                            : 'Other'
+                        }
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === 'Other') {
+                            if (['No Bond', '6 Months', '1 Year', '2 Years', '3 Years'].includes(formData.bond)) {
+                              setFormData({ ...formData, bond: '' });
+                            }
+                          } else {
+                            setFormData({ ...formData, bond: val });
+                          }
+                        }}
+                        style={inputStyle}
+                      >
+                        <option value="No Bond">No Bond</option>
+                        <option value="6 Months">6 Months Bond</option>
+                        <option value="1 Year">1 Year Bond</option>
+                        <option value="2 Years">2 Years Bond</option>
+                        <option value="3 Years">3 Years Bond</option>
+                        <option value="Other">Other / Custom Bond</option>
+                      </select>
+                      {(!['No Bond', '6 Months', '1 Year', '2 Years', '3 Years'].includes(formData.bond)) && (
+                        <input
+                          type="text"
+                          placeholder="e.g. 18 Months, 2.5 Years, or Custom Terms"
+                          value={formData.bond || ''}
+                          onChange={(e) => setFormData({ ...formData, bond: e.target.value })}
+                          style={{ ...inputStyle, marginTop: '2px' }}
+                          autoFocus
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="admin-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Status *</label>
                     <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} style={inputStyle}>
@@ -1914,11 +2055,247 @@ export default function DriveManagement({ onNavigate }) {
                       <option value="Completed">Completed</option>
                     </select>
                   </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#be185d', marginBottom: '6px' }}>Drive URL / Link</label>
+                    <input type="url" placeholder="e.g. https://forms.gle/xyz or https://careers.company.com" value={formData.url || formData.driveUrl || ''} onChange={(e) => setFormData({ ...formData, url: e.target.value, driveUrl: e.target.value })} style={inputStyle} />
+                  </div>
                 </div>
 
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#be185d', marginBottom: '6px' }}>Drive URL / Application Link</label>
-                  <input type="url" placeholder="e.g. https://forms.gle/xyz or https://drive.google.com/..." value={formData.url || formData.driveUrl || ''} onChange={(e) => setFormData({ ...formData, url: e.target.value, driveUrl: e.target.value })} style={inputStyle} />
+                {/* ADDITIONAL FIELDS SECTION WITH "+" BUTTON */}
+                <div style={{
+                  marginTop: '6px',
+                  paddingTop: '16px',
+                  borderTop: '1.5px dashed #e2e8f0'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '10px'
+                  }}>
+                    <div>
+                      <label style={{
+                        fontSize: '13.5px',
+                        fontWeight: 700,
+                        color: '#0f172a',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        margin: 0
+                      }}>
+                        <span>Additional Fields</span>
+                        {formData.additionalFields?.length > 0 && (
+                          <span style={{
+                            fontSize: '11px',
+                            fontWeight: 800,
+                            backgroundColor: '#fce7f3',
+                            color: '#be185d',
+                            padding: '2px 8px',
+                            borderRadius: '999px'
+                          }}>
+                            {formData.additionalFields.length}
+                          </span>
+                        )}
+                      </label>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                        Add company-specific parameters (e.g. Stipend, Work Mode, Shift, Allowed Arrears)
+                      </div>
+                    </div>
+
+                    {/* THE "+" BUTTON */}
+                    <button
+                      type="button"
+                      id="add-additional-field-btn"
+                      onClick={handleAddAdditionalField}
+                      title="Add a new custom field"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 14px',
+                        borderRadius: '8px',
+                        border: '1.5px solid #be185d',
+                        backgroundColor: '#fff1f2',
+                        color: '#be185d',
+                        fontSize: '12.5px',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 3px rgba(190, 24, 93, 0.1)',
+                        transition: 'all 0.18s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#be185d';
+                        e.currentTarget.style.color = '#ffffff';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#fff1f2';
+                        e.currentTarget.style.color = '#be185d';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      <Plus size={16} strokeWidth={2.8} />
+                      <span>Add Field</span>
+                    </button>
+                  </div>
+
+                  {/* QUICK SUGGESTIONS */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    flexWrap: 'wrap',
+                    marginBottom: (formData.additionalFields?.length > 0) ? '12px' : '8px'
+                  }}>
+                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>Quick Suggestions:</span>
+                    {['Stipend', 'Work Mode', 'Interview Mode', 'Bond Penalty', 'Batch Eligible', 'Allowed Arrears', 'Joining Date'].map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => handleAddPresetField(preset)}
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          backgroundColor: '#f8fafc',
+                          color: '#475569',
+                          border: '1px solid #e2e8f0',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f1f5f9';
+                          e.currentTarget.style.borderColor = '#cbd5e1';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f8fafc';
+                          e.currentTarget.style.borderColor = '#e2e8f0';
+                        }}
+                      >
+                        <Plus size={11} color="#be185d" /> {preset}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* ADDITIONAL FIELDS LIST OR EMPTY STATE */}
+                  {(!formData.additionalFields || formData.additionalFields.length === 0) ? (
+                    <div
+                      onClick={handleAddAdditionalField}
+                      style={{
+                        padding: '14px 16px',
+                        borderRadius: '10px',
+                        border: '1.5px dashed #cbd5e1',
+                        backgroundColor: '#f8fafc',
+                        textAlign: 'center',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#fdf2f8';
+                        e.currentTarget.style.borderColor = '#f472b6';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f8fafc';
+                        e.currentTarget.style.borderColor = '#cbd5e1';
+                      }}
+                    >
+                      <div style={{ fontSize: '12.5px', color: '#64748b', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                        <Plus size={15} color="#be185d" strokeWidth={2.5} />
+                        <span>Click here or the <strong>+ Add Field</strong> button above to add custom criteria</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {formData.additionalFields.map((field, idx) => (
+                        <div
+                          key={field.id || idx}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            backgroundColor: '#f8fafc',
+                            padding: '8px 12px',
+                            borderRadius: '10px',
+                            border: '1px solid #e2e8f0'
+                          }}
+                        >
+                          <div style={{ flex: '1', minWidth: '120px' }}>
+                            <input
+                              type="text"
+                              placeholder="Field Name (e.g. Stipend)"
+                              value={field.label || ''}
+                              onChange={(e) => handleUpdateAdditionalField(idx, 'label', e.target.value)}
+                              style={{
+                                width: '100%',
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid #cbd5e1',
+                                fontSize: '13px',
+                                fontWeight: 700,
+                                color: '#0f172a',
+                                outline: 'none',
+                                backgroundColor: '#ffffff'
+                              }}
+                            />
+                          </div>
+
+                          <div style={{ flex: '1.4', minWidth: '150px' }}>
+                            <input
+                              type="text"
+                              placeholder="Field Value (e.g. ₹25,000 / month)"
+                              value={field.value || ''}
+                              onChange={(e) => handleUpdateAdditionalField(idx, 'value', e.target.value)}
+                              style={{
+                                width: '100%',
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid #cbd5e1',
+                                fontSize: '13px',
+                                fontWeight: 500,
+                                color: '#0f172a',
+                                outline: 'none',
+                                backgroundColor: '#ffffff'
+                              }}
+                            />
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAdditionalField(idx)}
+                            title="Remove field"
+                            style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '8px',
+                              border: '1px solid #fee2e2',
+                              backgroundColor: '#fff1f2',
+                              color: '#ef4444',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0,
+                              transition: 'all 0.15s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = '#ef4444';
+                              e.currentTarget.style.color = '#ffffff';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = '#fff1f2';
+                              e.currentTarget.style.color = '#ef4444';
+                            }}
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 

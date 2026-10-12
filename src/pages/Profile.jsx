@@ -251,6 +251,12 @@ export default function Profile() {
                         <span style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Service Bond</span>
                         <div style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>{drive.bond || 'None'}</div>
                       </div>
+                      {Array.isArray(drive.additionalFields) && drive.additionalFields.filter(f => f?.label && f?.value).map((f, fIdx) => (
+                        <div key={fIdx}>
+                          <span style={{ fontSize: '11px', color: '#be185d', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>{f.label}</span>
+                          <div style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>{f.value}</div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}

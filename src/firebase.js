@@ -641,6 +641,7 @@ export async function fetchDrivesFromFirestore() {
         driveUrl: data.url || data.driveUrl || data.link || '',
         link: data.url || data.driveUrl || data.link || '',
         nominatedStudents: data.nominatedStudents || [],
+        additionalFields: Array.isArray(data.additionalFields) ? data.additionalFields : (Array.isArray(data.customFields) ? data.customFields : []),
         createdAt: data.createdAt || '',
         ...data
       });
@@ -675,6 +676,8 @@ export async function addDriveToFirestore(driveData) {
       url: driveData.url || driveData.driveUrl || driveData.link || '',
       driveUrl: driveData.url || driveData.driveUrl || driveData.link || '',
       link: driveData.url || driveData.driveUrl || driveData.link || '',
+      additionalFields: Array.isArray(driveData.additionalFields) ? driveData.additionalFields : (Array.isArray(driveData.customFields) ? driveData.customFields : []),
+      customFields: Array.isArray(driveData.additionalFields) ? driveData.additionalFields : (Array.isArray(driveData.customFields) ? driveData.customFields : []),
       nominatedStudents: driveData.nominatedStudents || [],
       createdAt: new Date().toISOString()
     };
