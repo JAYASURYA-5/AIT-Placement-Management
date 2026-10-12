@@ -300,68 +300,136 @@ export default function DriveManagement({ onNavigate, onLogout }) {
   const computeEligibleCandidates = (driveCriteria, studentsList) => {
     if (!studentsList || studentsList.length === 0) return [];
 
-    const minCgpa = parseFloat(driveCriteria.minCGPA) || 0;
-    const min10th = parseFloat(driveCriteria.min10thMark || driveCriteria.min10th || driveCriteria.tenthMark || driveCriteria.tenthPercentage) || 0;
-    const min12th = parseFloat(driveCriteria.min12thMark || driveCriteria.min12th || driveCriteria.twelfthMark || driveCriteria.twelfthPercentage) || 0;
-    const maxBacklogs = parseInt(driveCriteria.maxBacklogs) || 0;
+    const minCgpa = parseFloat(String(driveCriteria.minCGPA || '0').replace(/[^0-9.]/g, '')) || 0;
+    const min10th = parseFloat(String(driveCriteria.min10thMark || driveCriteria.min10th || driveCriteria.tenthMark || driveCriteria.tenthPercentage || '0').replace(/[^0-9.]/g, '')) || 0;
+    const min12th = parseFloat(String(driveCriteria.min12thMark || driveCriteria.min12th || driveCriteria.twelfthMark || driveCriteria.twelfthPercentage || '0').replace(/[^0-9.]/g, '')) || 0;
+    const maxBacklogs = parseInt(String(driveCriteria.maxBacklogs || '0').replace(/[^0-9]/g, '')) || 0;
     const branchesStr = (driveCriteria.branches || '').toLowerCase();
     const genderReq = (driveCriteria.gender || driveCriteria.eligibleGender || 'Both').toLowerCase().trim();
 
+    const normalizeDept = (deptStr) => {
+      if (!deptStr) return '';
+      let str = String(deptStr).toLowerCase().trim();
+      // Correct common typos in student dataset (e.g., 'clvil' -> 'civil', 'civi' -> 'civil')
+      str = str.replace(/clvil/g, 'civil').replace(/civi\b/g, 'civil');
+      if (str.includes('civil')) return 'civil';
+      if (str.includes('cse') || str.includes('computer') || str === 'cs') return 'cse';
+      if (str.includes('it') || str.includes('information')) return 'it';
+      if (str.includes('aids') || str.includes('ai&ds') || str.includes('ai & ds') || str.includes('artificial')) return 'ai&ds';
+      if (str.includes('ece') || str.includes('electronics')) return 'ece';
+      if (str.includes('eee') || str.includes('electrical')) return 'eee';
+      if (str.includes('mech') || str.includes('mechanical')) return 'mech';
+      return str.replace(/[^a-z0-9]/g, '');
+    };
+
+    const parsePct = (rawVal) => {
+      if (rawVal === undefined || rawVal === null || rawVal === '') return NaN;
+      const str = String(rawVal).trim().toLowerCase();
+      if (str.includes('pass') || str.includes('clear')) return 100;
+      const numStr = str.replace(/[^0-9.]/g, '');
+      if (!numStr) return NaN;
+      let val = parseFloat(numStr);
+      if (isNaN(val)) return NaN;
+      // Convert Excel decimal percentages like 0.76 or 0.798 to 76% or 79.8%
+      if (val > 0 && val <= 1.0) {
+        val = val * 100;
+      }
+      return val;
+    };
+
     return studentsList.filter(student => {
       // 1. CGPA Cutoff Check
-      const studentCgpa = parseFloat(student.cgpa) || 0;
-      if (studentCgpa < minCgpa) return false;
+      const rawCgpa = String(
+        student.cgpa ||
+        student['CGPA till last (VI) semester'] ||
+        student['CGPA'] ||
+        student.gpa ||
+        student.overallCgpa ||
+        '0'
+      ).replace(/[^0-9.]/g, '');
+      const studentCgpa = parseFloat(rawCgpa) || 0;
+      if (minCgpa > 0 && studentCgpa < minCgpa) return false;
 
       // 2. 10th Mark Cutoff Check
       if (min10th > 0) {
-        const student10thVal = parseFloat(
-          student.tenthPercentage ||
+        const raw10th = student.tenthPercentage ||
           student.tenthMark ||
-          student['10thMark'] ||
-          student.min10thMark ||
-          student.mark10th ||
+          student['10th %'] ||
           student['10th'] ||
-          0
-        );
-        if (student10thVal < min10th) return false;
+          student['10thMark'] ||
+          student['10th Percentage'] ||
+          student.mark10th ||
+          student.min10thMark ||
+          student.tenth ||
+          '';
+
+        const student10thVal = parsePct(raw10th);
+        if (!isNaN(student10thVal) && student10thVal < min10th) return false;
       }
 
       // 3. 12th Mark Cutoff Check
       if (min12th > 0) {
-        const student12thVal = parseFloat(
-          student.twelfthPercentage ||
+        const raw12th = student.twelfthPercentage ||
           student.twelfthMark ||
-          student['12thMark'] ||
-          student.min12thMark ||
-          student.mark12th ||
+          student['12th % or Diploma %'] ||
+          student['12th %'] ||
+          student['Diploma %'] ||
           student['12th'] ||
-          0
-        );
-        if (student12thVal < min12th) return false;
+          student['12thMark'] ||
+          student['12th Percentage'] ||
+          student.mark12th ||
+          student.min12thMark ||
+          student.twelfth ||
+          student.diplomaPercentage ||
+          '';
+
+        const student12thVal = parsePct(raw12th);
+        if (!isNaN(student12thVal) && student12thVal < min12th) return false;
       }
 
       // 4. Gender Requirement Check
       if (genderReq && !genderReq.includes('any') && !genderReq.includes('all') && !genderReq.includes('both')) {
-        const studentGender = (student.gender || '').toLowerCase().trim();
-        if (genderReq.includes('male') && !genderReq.includes('female')) {
-          if (studentGender !== 'male' && studentGender !== 'm') return false;
-        } else if (genderReq.includes('female')) {
-          if (studentGender !== 'female' && studentGender !== 'f') return false;
+        const studentGender = String(
+          student.gender ||
+          student['Gender'] ||
+          student.sex ||
+          ''
+        ).toLowerCase().trim();
+
+        if (studentGender) {
+          if (genderReq.includes('male') && !genderReq.includes('female')) {
+            if (studentGender !== 'male' && studentGender !== 'm') return false;
+          } else if (genderReq.includes('female')) {
+            if (studentGender !== 'female' && studentGender !== 'f') return false;
+          }
         }
       }
 
-      // 4. Current Arrears / Backlogs Check
-      const studentArrears = parseInt(student.currentArrears) || 0;
+      // 5. Current Arrears / Backlogs Check
+      const rawArrears = String(
+        student.currentArrears ||
+        student['Number of CURRENT arrears'] ||
+        student['Current Arrears'] ||
+        student['Arrears'] ||
+        student.standingArrears ||
+        student.activeArrears ||
+        '0'
+      ).toLowerCase().trim();
+
+      let studentArrears = 0;
+      if (rawArrears && !rawArrears.includes('nil') && !rawArrears.includes('nill') && !rawArrears.includes('no') && !rawArrears.includes('zero') && !rawArrears.includes('pass') && !rawArrears.includes('none')) {
+        studentArrears = parseInt(rawArrears.replace(/[^0-9]/g, ''), 10) || 0;
+      }
       if (studentArrears > maxBacklogs) return false;
 
-      // 5. Department / Branch Check
+      // 6. Department / Branch Check
       if (!branchesStr.includes('all') && branchesStr.trim() !== '') {
-        const dept = (student.department || student.branch || '').toLowerCase().trim();
-        if (!dept) return false;
+        const studentDeptRaw = student.department || student.branch || student['Department'] || student['Branch'] || '';
+        const studentNorm = normalizeDept(studentDeptRaw);
+        if (!studentNorm) return false;
 
-        // Match against list of allowed branches
-        const allowedList = branchesStr.split(',').map(b => b.trim());
-        const isMatch = allowedList.some(b => b === dept || dept.includes(b) || b.includes(dept));
+        const allowedBranches = branchesStr.split(',').map(b => normalizeDept(b)).filter(Boolean);
+        const isMatch = allowedBranches.some(b => b === studentNorm || studentNorm.includes(b) || b.includes(studentNorm));
         if (!isMatch) return false;
       }
 
@@ -791,20 +859,20 @@ export default function DriveManagement({ onNavigate, onLogout }) {
     switch (status) {
       case 'Completed':
         return (
-          <span style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '5px 14px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, display: 'inline-block' }}>
+          <span style={{ backgroundColor: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0', padding: '0 12px', height: '28px', borderRadius: '999px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', flexShrink: 0, lineHeight: 1 }}>
             Completed
           </span>
         );
       case 'Ongoing':
         return (
-          <span style={{ backgroundColor: '#fef3c7', color: '#92400e', padding: '5px 14px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, display: 'inline-block' }}>
+          <span style={{ backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', padding: '0 12px', height: '28px', borderRadius: '999px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', flexShrink: 0, lineHeight: 1 }}>
             Ongoing
           </span>
         );
       case 'Upcoming':
       default:
         return (
-          <span style={{ backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '5px 14px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, display: 'inline-block' }}>
+          <span style={{ backgroundColor: '#f3e8ff', color: '#6b21a8', border: '1px solid #e9d5ff', padding: '0 12px', height: '28px', borderRadius: '999px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', flexShrink: 0, lineHeight: 1 }}>
             Upcoming
           </span>
         );
@@ -815,13 +883,13 @@ export default function DriveManagement({ onNavigate, onLogout }) {
   const getBondBadge = (bond) => {
     if ((bond || '').toLowerCase().includes('no bond') || bond === '0') {
       return (
-        <span style={{ backgroundColor: '#dcfce7', color: '#15803d', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: 700 }}>
+        <span style={{ backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '0 10px', height: '28px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap', flexShrink: 0, lineHeight: 1 }}>
           ✓ No Bond
         </span>
       );
     }
     return (
-      <span style={{ backgroundColor: '#f1f5f9', color: '#475569', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: 700 }}>
+      <span style={{ backgroundColor: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', padding: '0 10px', height: '28px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap', flexShrink: 0, lineHeight: 1 }}>
         📜 {bond}
       </span>
     );
@@ -908,7 +976,7 @@ export default function DriveManagement({ onNavigate, onLogout }) {
             Drive Management
           </div>
           <div style={{ fontSize: '15px', color: '#64748b', marginTop: '2px', fontWeight: 500 }}>
-            
+
           </div>
         </div>
 
@@ -978,7 +1046,7 @@ export default function DriveManagement({ onNavigate, onLogout }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingBottom: '24px' }}>
+      <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingBottom: '24px', alignItems: 'flex-start' }}>
 
         {/* Left Sidebar */}
         <aside style={{
@@ -1064,7 +1132,7 @@ export default function DriveManagement({ onNavigate, onLogout }) {
         </aside>
 
         {/* Main Content Area */}
-        <main style={{ flex: 1, padding: '12px 36px 24px 30px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+        <main style={{ flex: 1, padding: '12px 36px 24px 30px', overflowY: 'visible', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
 
           {/* Table Container Card */}
           <div style={{ ...glassCardStyle, padding: '28px 32px', width: '100%', marginBottom: '24px' }}>
@@ -1160,20 +1228,20 @@ export default function DriveManagement({ onNavigate, onLogout }) {
             </div>
 
             {/* Drives Table with Bond Column & Eligible Candidates Action */}
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px' }}>
+            <div style={{ overflowX: 'auto', width: '100%', WebkitOverflowScrolling: 'touch' }}>
+              <table style={{ width: '100%', minWidth: '1350px', borderCollapse: 'separate', borderSpacing: '0 8px', tableLayout: 'auto' }}>
                 <thead>
                   <tr style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', textAlign: 'left' }}>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>COMPANY</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>DATE</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>ROLE</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>MIN CGPA</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>ELIGIBILITY</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>SERVICE BOND</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>PACKAGE</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>NOMINATED</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>STATUS</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0', textAlign: 'right' }}>ACTIONS</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>COMPANY</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>DATE</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>ROLE</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>MIN CGPA</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>ELIGIBILITY</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>SERVICE BOND</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>PACKAGE</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>NOMINATED</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>STATUS</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', textAlign: 'right', whiteSpace: 'nowrap' }}>ACTIONS</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1203,108 +1271,242 @@ export default function DriveManagement({ onNavigate, onLogout }) {
                           }}
                         >
                           {/* COMPANY */}
-                          <td style={{ padding: '14px 16px', fontWeight: 800, color: '#0f172a', fontSize: '14px' }}>
+                          <td style={{ padding: '14px 16px', fontWeight: 800, color: '#0f172a', fontSize: '14px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                             {drive.company}
                           </td>
 
                           {/* DATE */}
-                          <td style={{ padding: '14px 16px', color: '#64748b', fontSize: '13px' }}>
+                          <td style={{ padding: '14px 16px', color: '#64748b', fontSize: '13px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                             {drive.date}
                           </td>
 
                           {/* ROLE */}
-                          <td style={{ padding: '14px 16px', color: '#475569', fontSize: '13px', fontWeight: 600 }}>
+                          <td style={{ padding: '14px 16px', color: '#475569', fontSize: '13px', fontWeight: 600, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                             {drive.role}
                           </td>
 
                           {/* MIN CGPA */}
-                          <td style={{ padding: '14px 16px' }}>
-                            <span style={{ backgroundColor: '#eff6ff', color: '#1d4ed8', padding: '4px 10px', borderRadius: '8px', fontSize: '13px', fontWeight: 700 }}>
+                          <td style={{ padding: '14px 16px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                            <span style={{ backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #dbeafe', padding: '0 10px', height: '28px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
                               🎓 {drive.minCGPA} CGPA
                             </span>
                           </td>
 
                           {/* ELIGIBLE BRANCHES */}
-                          <td style={{ padding: '14px 16px', color: '#334155', fontSize: '13px', fontWeight: 500 }}>
+                          <td style={{ padding: '14px 16px', color: '#334155', fontSize: '13px', fontWeight: 500, verticalAlign: 'middle', whiteSpace: 'nowrap', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis' }} title={drive.branches}>
                             {drive.branches}
                           </td>
 
                           {/* SERVICE BOND */}
-                          <td style={{ padding: '14px 16px' }}>
+                          <td style={{ padding: '14px 16px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                             {getBondBadge(drive.bond)}
                           </td>
 
                           {/* PACKAGE */}
-                          <td style={{ padding: '14px 16px', fontWeight: 800, color: '#0f172a', fontSize: '14px' }}>
+                          <td style={{ padding: '14px 16px', fontWeight: 800, color: '#0f172a', fontSize: '14px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                             {drive.package}
                           </td>
 
                           {/* NOMINATED STUDENTS COUNT - CLICKABLE */}
-                          <td style={{ padding: '14px 16px' }}>
+                          <td style={{ padding: '14px 16px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                             <button
                               onClick={() => handleOpenSelectedCandidatesViewModal(drive)}
                               title="Click to view selected student names & complete profile details"
                               style={{
-                                backgroundColor: nominatedCount > 0 ? '#f0fdf4' : '#f1f5f9',
-                                color: nominatedCount > 0 ? '#166534' : '#64748b',
-                                border: nominatedCount > 0 ? '1px solid #bbf7d0' : '1px solid #e2e8f0',
-                                padding: '5px 12px',
-                                borderRadius: '10px',
-                                fontSize: '13px',
+                                height: '34px',
+                                backgroundColor: nominatedCount > 0 ? '#f0fdf4' : '#f8fafc',
+                                color: nominatedCount > 0 ? '#15803d' : '#64748b',
+                                border: nominatedCount > 0 ? '1px solid #86efac' : '1px solid #e2e8f0',
+                                padding: '0 12px',
+                                borderRadius: '8px',
+                                fontSize: '12.5px',
                                 fontWeight: 700,
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '6px',
                                 cursor: 'pointer',
-                                transition: 'all 0.15s ease',
-                                boxShadow: nominatedCount > 0 ? '0 2px 6px rgba(22, 101, 52, 0.08)' : 'none'
+                                whiteSpace: 'nowrap',
+                                flexShrink: 0,
+                                transition: 'all 0.18s ease',
+                                boxShadow: nominatedCount > 0 ? '0 1px 3px rgba(22, 101, 52, 0.08)' : 'none'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = nominatedCount > 0 ? '#dcfce7' : '#f1f5f9';
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = nominatedCount > 0 ? '#f0fdf4' : '#f8fafc';
+                                e.currentTarget.style.transform = 'translateY(0)';
                               }}
                             >
-                              <UserCheck size={15} color={nominatedCount > 0 ? '#166534' : '#64748b'} />
+                              <UserCheck size={15} color={nominatedCount > 0 ? '#16a34a' : '#64748b'} />
                               <span>{nominatedCount} Selected</span>
-                              <Eye size={13} style={{ marginLeft: '2px', opacity: 0.8 }} />
+                              <Eye size={13} style={{ opacity: 0.7 }} />
                             </button>
                           </td>
 
                           {/* STATUS */}
-                          <td style={{ padding: '14px 16px' }}>
+                          <td style={{ padding: '14px 16px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                             {getStatusBadge(drive.status)}
                           </td>
 
                           {/* ACTIONS */}
-                          <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+                          <td style={{ padding: '14px 16px', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
                               {/* CIRCULAR PDF BUTTON */}
                               <button
+                                type="button"
                                 onClick={() => setSelectedCircularDrive(drive)}
                                 title="Generate & Download Campus Drive Circular PDF"
-                                style={{ border: '1px solid #fde68a', backgroundColor: '#fffbeb', color: '#b45309', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 700 }}
+                                style={{
+                                  height: '34px',
+                                  border: '1px solid #fde68a',
+                                  backgroundColor: '#fffbeb',
+                                  color: '#92400e',
+                                  padding: '0 12px',
+                                  borderRadius: '8px',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  fontSize: '12px',
+                                  fontWeight: 700,
+                                  whiteSpace: 'nowrap',
+                                  flexShrink: 0,
+                                  transition: 'all 0.18s ease',
+                                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#fef3c7';
+                                  e.currentTarget.style.borderColor = '#fcd34d';
+                                  e.currentTarget.style.transform = 'translateY(-1px)';
+                                  e.currentTarget.style.boxShadow = '0 3px 8px rgba(180, 83, 9, 0.15)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#fffbeb';
+                                  e.currentTarget.style.borderColor = '#fde68a';
+                                  e.currentTarget.style.transform = 'translateY(0)';
+                                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.03)';
+                                }}
                               >
-                                <FileText size={14} color="#b45309" /> Circular
+                                <FileText size={14} color="#b45309" strokeWidth={2.2} />
+                                <span>Circular</span>
                               </button>
 
                               {/* AUTO-SUGGEST CANDIDATES BUTTON */}
                               <button
+                                type="button"
                                 onClick={() => handleOpenEligibleCandidatesModal(drive)}
                                 title="Check Auto-Suggested Eligible Student Profiles"
-                                style={{ border: '1px solid #c7d2fe', backgroundColor: '#e0e7ff', color: '#4338ca', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 700 }}
+                                style={{
+                                  height: '34px',
+                                  border: '1px solid #c7d2fe',
+                                  backgroundColor: '#eef2ff',
+                                  color: '#4338ca',
+                                  padding: '0 12px',
+                                  borderRadius: '8px',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  fontSize: '12px',
+                                  fontWeight: 700,
+                                  whiteSpace: 'nowrap',
+                                  flexShrink: 0,
+                                  transition: 'all 0.18s ease',
+                                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#e0e7ff';
+                                  e.currentTarget.style.borderColor = '#a5b4fc';
+                                  e.currentTarget.style.transform = 'translateY(-1px)';
+                                  e.currentTarget.style.boxShadow = '0 3px 8px rgba(67, 56, 202, 0.15)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#eef2ff';
+                                  e.currentTarget.style.borderColor = '#c7d2fe';
+                                  e.currentTarget.style.transform = 'translateY(0)';
+                                  e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.03)';
+                                }}
                               >
-                                <Sparkles size={14} /> Candidates
+                                <Sparkles size={14} strokeWidth={2.2} />
+                                <span>Candidates</span>
                               </button>
 
+                              {/* EDIT BUTTON */}
                               <button
+                                type="button"
                                 onClick={() => handleOpenEditModal(drive)}
                                 title="Edit Drive"
-                                style={{ border: 'none', backgroundColor: '#f1f5f9', color: '#334155', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer' }}
+                                style={{
+                                  height: '34px',
+                                  width: '34px',
+                                  border: '1px solid #e2e8f0',
+                                  backgroundColor: '#f8fafc',
+                                  color: '#475569',
+                                  padding: 0,
+                                  borderRadius: '8px',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  whiteSpace: 'nowrap',
+                                  flexShrink: 0,
+                                  transition: 'all 0.18s ease',
+                                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#f1f5f9';
+                                  e.currentTarget.style.borderColor = '#cbd5e1';
+                                  e.currentTarget.style.color = '#0f172a';
+                                  e.currentTarget.style.transform = 'translateY(-1px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                                  e.currentTarget.style.borderColor = '#e2e8f0';
+                                  e.currentTarget.style.color = '#475569';
+                                  e.currentTarget.style.transform = 'translateY(0)';
+                                }}
                               >
-                                <Edit2 size={15} />
+                                <Edit2 size={15} strokeWidth={2} />
                               </button>
+
+                              {/* DELETE BUTTON */}
                               <button
+                                type="button"
                                 onClick={() => handleDeleteDrive(drive.id, drive.company)}
                                 title="Delete Drive"
-                                style={{ border: 'none', backgroundColor: '#fff1f2', color: '#e11d48', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer' }}
+                                style={{
+                                  height: '34px',
+                                  width: '34px',
+                                  border: '1px solid #fecdd3',
+                                  backgroundColor: '#fff1f2',
+                                  color: '#e11d48',
+                                  padding: 0,
+                                  borderRadius: '8px',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  whiteSpace: 'nowrap',
+                                  flexShrink: 0,
+                                  transition: 'all 0.18s ease',
+                                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#ffe4e6';
+                                  e.currentTarget.style.borderColor = '#fda4af';
+                                  e.currentTarget.style.color = '#be123c';
+                                  e.currentTarget.style.transform = 'translateY(-1px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#fff1f2';
+                                  e.currentTarget.style.borderColor = '#fecdd3';
+                                  e.currentTarget.style.color = '#e11d48';
+                                  e.currentTarget.style.transform = 'translateY(0)';
+                                }}
                               >
-                                <Trash2 size={15} />
+                                <Trash2 size={15} strokeWidth={2} />
                               </button>
                             </div>
                           </td>
@@ -1323,17 +1525,19 @@ export default function DriveManagement({ onNavigate, onLogout }) {
               justifyContent: 'space-between',
               paddingTop: '20px',
               marginTop: '16px',
-              borderTop: '1px solid #e2e8f0'
+              borderTop: '1px solid #e2e8f0',
+              flexWrap: 'wrap',
+              gap: '12px'
             }}>
               <div style={{ fontSize: '14px', color: '#64748b', fontWeight: 500 }}>
                 Showing <strong style={{ color: '#0f172a' }}>{startItem}</strong> to <strong style={{ color: '#0f172a' }}>{endItem}</strong> of <strong style={{ color: '#0f172a' }}>{totalItems}</strong> placement drives
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <button
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: currentPage === 1 ? '#cbd5e1' : '#334155', fontSize: '13px', fontWeight: 600, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: currentPage === 1 ? '#cbd5e1' : '#334155', fontSize: '13px', fontWeight: 600, cursor: currentPage === 1 ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
                 >
                   <ChevronLeft size={16} /> Previous
                 </button>
@@ -1352,7 +1556,8 @@ export default function DriveManagement({ onNavigate, onLogout }) {
                       fontSize: '14px',
                       fontWeight: 700,
                       cursor: 'pointer',
-                      boxShadow: pageNum === currentPage ? '0 4px 14px rgba(190, 24, 93, 0.4)' : 'none'
+                      boxShadow: pageNum === currentPage ? '0 4px 14px rgba(190, 24, 93, 0.4)' : 'none',
+                      flexShrink: 0
                     }}
                   >
                     {pageNum}
@@ -1362,7 +1567,7 @@ export default function DriveManagement({ onNavigate, onLogout }) {
                 <button
                   disabled={currentPage === totalPages || totalPages === 0}
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: currentPage === totalPages || totalPages === 0 ? '#cbd5e1' : '#334155', fontSize: '13px', fontWeight: 600, cursor: currentPage === totalPages || totalPages === 0 ? 'not-allowed' : 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '7px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: currentPage === totalPages || totalPages === 0 ? '#cbd5e1' : '#334155', fontSize: '13px', fontWeight: 600, cursor: currentPage === totalPages || totalPages === 0 ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
                 >
                   Next <ChevronRight size={16} />
                 </button>
@@ -1719,6 +1924,8 @@ export default function DriveManagement({ onNavigate, onLogout }) {
             padding: '32px',
             width: '560px',
             maxWidth: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto',
             position: 'relative'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
@@ -2073,31 +2280,33 @@ export default function DriveManagement({ onNavigate, onLogout }) {
                   ) : (
                     selectedCandidatesModal.candidates.map((candidate) => (
                       <tr key={candidate.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '12px 16px', fontWeight: 700, color: '#2563eb', fontSize: '13px' }}>
+                        <td style={{ padding: '12px 16px', fontWeight: 700, color: '#2563eb', fontSize: '13px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                           {candidate.regNo || '-'}
                         </td>
-                        <td style={{ padding: '12px 16px', fontWeight: 700, color: '#0f172a', fontSize: '14px' }}>
+                        <td style={{ padding: '12px 16px', fontWeight: 700, color: '#0f172a', fontSize: '14px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                           {candidate.name}
                         </td>
-                        <td style={{ padding: '12px 16px', color: '#334155', fontSize: '13px', fontWeight: 600 }}>
+                        <td style={{ padding: '12px 16px', color: '#334155', fontSize: '13px', fontWeight: 600, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                           {candidate.department || candidate.branch || '-'}
                         </td>
-                        <td style={{ padding: '12px 16px', fontWeight: 800, color: '#16a34a', fontSize: '13px' }}>
+                        <td style={{ padding: '12px 16px', fontWeight: 800, color: '#16a34a', fontSize: '13px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                           {candidate.cgpa ? `${candidate.cgpa} CGPA` : '-'}
                         </td>
-                        <td style={{ padding: '12px 16px', fontSize: '12px', color: '#64748b' }}>
-                          <div>{candidate.email}</div>
-                          <div style={{ marginTop: '2px' }}>{candidate.mobile || '-'}</div>
+                        <td style={{ padding: '12px 16px', fontSize: '12px', color: '#64748b', verticalAlign: 'middle' }}>
+                          <div style={{ whiteSpace: 'nowrap' }}>{candidate.email}</div>
+                          <div style={{ marginTop: '2px', whiteSpace: 'nowrap' }}>{candidate.mobile || '-'}</div>
                         </td>
-                        <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                        <td style={{ padding: '12px 16px', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                           <button
+                            type="button"
                             onClick={() => setViewingStudentProfile(candidate)}
                             title="View Complete 26-Attribute Profile Details"
                             style={{
+                              height: '32px',
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '6px',
-                              padding: '6px 12px',
+                              padding: '0 12px',
                               borderRadius: '8px',
                               border: '1px solid #cbd5e1',
                               backgroundColor: '#ffffff',
@@ -2105,7 +2314,20 @@ export default function DriveManagement({ onNavigate, onLogout }) {
                               fontSize: '12.5px',
                               fontWeight: 700,
                               cursor: 'pointer',
-                              boxShadow: '0 2px 4px rgba(0,0,0,0.03)'
+                              whiteSpace: 'nowrap',
+                              flexShrink: 0,
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                              transition: 'all 0.18s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = '#f8fafc';
+                              e.currentTarget.style.borderColor = '#94a3b8';
+                              e.currentTarget.style.transform = 'translateY(-1px)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = '#ffffff';
+                              e.currentTarget.style.borderColor = '#cbd5e1';
+                              e.currentTarget.style.transform = 'translateY(0)';
                             }}
                           >
                             <Eye size={14} color="#be185d" />

@@ -5,6 +5,7 @@ import ProfilePage from '../pages/Profile';
 import SettingsPage from '../pages/Settings';
 import ChatbotView from './ChatbotWidget';
 import { fetchUsersFromFirestore, fetchNotificationsForStudent, markNotificationAsReadInFirestore } from '../firebase';
+import { getDailyUsage, incrementDailyUsage, isWithinLimit, getResetTimeString } from '../utils/useRateLimit';
 import '../index.css';
 import {
   ProfileIcon,
@@ -1026,12 +1027,20 @@ function AlumniView() {
   );
 }
 
+// ─── ATS Checker Daily Limit Config ──────────────────────────────────
+const ATS_DAILY_LIMIT = 1;
+const ATS_FEATURE_KEY = 'ats';
+
 // ─── Standalone Resume View Component ─────────────────────────────────
 function ResumeView({ userName = 'Jayasurya K' }) {
   const [subTab, setSubTab] = useState('checker');
 
   // Inbuilt Gemini API Key. Paste your key here or set VITE_GEMINI_API_KEY in your .env file
   const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
+
+  // ── ATS Daily Rate-Limit State ────────────────────────────────────────────
+  const [atsUsedToday, setAtsUsedToday] = useState(() => getDailyUsage(ATS_FEATURE_KEY));
+  const isAtsLimitReached = atsUsedToday >= ATS_DAILY_LIMIT;
 
     // Checker states
     const [dragActive, setDragActive] = useState(false);
@@ -1194,6 +1203,11 @@ PROJECTS:
     };
 
     const analyzeResume = async (content, mimeType, name) => {
+      // ── Enforce ATS daily limit ─────────────────────────────────────────────
+      if (isAtsLimitReached) return;
+      const newAtsCount = incrementDailyUsage(ATS_FEATURE_KEY);
+      setAtsUsedToday(newAtsCount);
+
       setLoading(true);
       setScanProgress(0);
 
@@ -1441,8 +1455,46 @@ Report generated via AIT AI Resume Workspace.
           {subTab === 'checker' ? (
             // Checker view
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* ── ATS Daily Limit Gate — shown instead of upload zone ──────────────── */}
               {!file && !loading && !results && (
-                // Dropzone area
+                isAtsLimitReached ? (
+                  // Locked state — ATS limit reached for today
+                  <div style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    gap: '16px', padding: '40px 24px', textAlign: 'center',
+                    borderRadius: '20px', border: '2px dashed #FCA5A5',
+                    backgroundColor: '#FFF5F5', minHeight: '220px',
+                  }}>
+                    <div style={{
+                      width: '56px', height: '56px', borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #FEE2E2, #FECACA)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px',
+                      boxShadow: '0 4px 14px rgba(220,38,38,0.15)',
+                    }}>🚫</div>
+                    <div>
+                      <h4 style={{ fontSize: '16px', fontWeight: '800', color: '#B91C1C', marginBottom: '6px' }}>
+                        Daily ATS Check Limit Reached
+                      </h4>
+                      <p style={{ fontSize: '13px', color: '#6B7280', maxWidth: '340px', lineHeight: '1.6' }}>
+                        You've used your <strong>1 free ATS score check</strong> for today.
+                        Each student gets <strong>1 AI Resume analysis per day</strong> to keep the service fair.
+                      </p>
+                    </div>
+                    <div style={{
+                      padding: '10px 20px', borderRadius: '12px',
+                      backgroundColor: '#FEE2E2', border: '1px solid #FCA5A5',
+                      fontSize: '12.5px', fontWeight: '700', color: '#B91C1C',
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                    }}>
+                      <span style={{ fontSize: '14px' }}>⏰</span>
+                      Resets at midnight &nbsp;·&nbsp; {getResetTimeString()}
+                    </div>
+                    <p style={{ fontSize: '11.5px', color: '#9CA3AF', marginTop: '4px' }}>
+                      💡 Tip: Use the <strong>Resume Builder</strong> tab to craft your resume while you wait!
+                    </p>
+                  </div>
+                ) : (
+                // Normal upload zone
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div
                     className={`resume-upload-zone ${dragActive ? 'dragging' : ''}`}
@@ -1472,6 +1524,15 @@ Report generated via AIT AI Resume Workspace.
                       <p style={{ fontSize: '11px', color: 'var(--text-light)', marginTop: '8px', fontWeight: '600' }}>
                         Maximum File Size: 5MB • Supported Formats: .pdf, .txt
                       </p>
+                      {/* Daily usage indicator inside dropzone */}
+                      <div style={{
+                        marginTop: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px',
+                        padding: '4px 12px', borderRadius: '20px',
+                        backgroundColor: '#F0FDF4', border: '1px solid #86EFAC',
+                        fontSize: '11px', fontWeight: '700', color: '#15803D',
+                      }}>
+                        <span>✅</span> 1 free ATS check available today
+                      </div>
                     </div>
                   </div>
 
@@ -1522,6 +1583,7 @@ Report generated via AIT AI Resume Workspace.
                     </div>
                   )}
                 </div>
+                )
               )}
 
               {loading && (

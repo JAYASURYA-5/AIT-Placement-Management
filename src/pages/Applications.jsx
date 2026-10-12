@@ -107,6 +107,9 @@ export default function Applications() {
         setStudentProfile(profile)
       } catch { }
 
+      // Default demo student ("student" / "student") gets auto-selected for ALL drives
+      const isDefaultStudent = Boolean(profile.isDefaultStudent)
+
       const studentIds = [
         (profile.uid || '').toLowerCase(),
         (profile.id || '').toLowerCase(),
@@ -119,7 +122,10 @@ export default function Applications() {
       if (fsDrives && fsDrives.length > 0) {
         const formattedDrives = fsDrives.map(drive => {
           const nominatedList = (drive.nominatedStudents || []).map(s => String(s).toLowerCase())
-          const isNominated = studentIds.some(id => nominatedList.includes(id)) || nominatedList.length > 0
+          // Default student is auto-selected for every drive the admin created
+          const isNominated = isDefaultStudent ||
+            studentIds.some(id => nominatedList.includes(id)) ||
+            nominatedList.length > 0
           const driveUrl = drive.url || drive.driveUrl || drive.link || ''
 
           return {
