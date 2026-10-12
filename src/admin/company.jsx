@@ -394,20 +394,20 @@ export default function CompanyManagement({ onNavigate, onLogout }) {
     switch (status) {
       case 'Active Partner':
         return (
-          <span style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '4px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, display: 'inline-block' }}>
+          <span style={{ backgroundColor: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0', padding: '0 12px', height: '28px', borderRadius: '999px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', flexShrink: 0, lineHeight: 1 }}>
             ● Active Partner
           </span>
         );
       case 'Drive Scheduled':
         return (
-          <span style={{ backgroundColor: '#fef3c7', color: '#92400e', padding: '4px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, display: 'inline-block' }}>
+          <span style={{ backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', padding: '0 12px', height: '28px', borderRadius: '999px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', flexShrink: 0, lineHeight: 1 }}>
             📅 Drive Scheduled
           </span>
         );
       case 'MoU Signed':
       default:
         return (
-          <span style={{ backgroundColor: '#e0e7ff', color: '#3730a3', padding: '4px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, display: 'inline-block' }}>
+          <span style={{ backgroundColor: '#e0e7ff', color: '#3730a3', border: '1px solid #c7d2fe', padding: '0 12px', height: '28px', borderRadius: '999px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', flexShrink: 0, lineHeight: 1 }}>
             🤝 MoU Signed
           </span>
         );
@@ -417,12 +417,12 @@ export default function CompanyManagement({ onNavigate, onLogout }) {
   // Tier Badge Helper
   const getTierBadge = (tier) => {
     if (tier === 'Super Dream') {
-      return <span style={{ backgroundColor: '#fce7f3', color: '#be185d', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: 800 }}>⚡ Super Dream (10+ LPA)</span>;
+      return <span style={{ backgroundColor: '#fce7f3', color: '#be185d', border: '1px solid #fbcfe8', padding: '0 10px', height: '28px', borderRadius: '8px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap', flexShrink: 0, lineHeight: 1 }}>⚡ Super Dream (10+ LPA)</span>;
     }
     if (tier === 'Tier 1') {
-      return <span style={{ backgroundColor: '#dbeafe', color: '#1e40af', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: 800 }}>🌟 Tier 1 (6-10 LPA)</span>;
+      return <span style={{ backgroundColor: '#dbeafe', color: '#1e40af', border: '1px solid #bfdbfe', padding: '0 10px', height: '28px', borderRadius: '8px', fontSize: '12px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap', flexShrink: 0, lineHeight: 1 }}>🌟 Tier 1 (6-10 LPA)</span>;
     }
-    return <span style={{ backgroundColor: '#f1f5f9', color: '#475569', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: 700 }}>💼 Tier 2 (Core)</span>;
+    return <span style={{ backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', padding: '0 10px', height: '28px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap', flexShrink: 0, lineHeight: 1 }}>💼 Tier 2 (Core)</span>;
   };
 
   const glassCardStyle = {
@@ -704,18 +704,18 @@ export default function CompanyManagement({ onNavigate, onLogout }) {
             </div>
 
             {/* Companies Table */}
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px' }}>
+            <div style={{ overflowX: 'auto', width: '100%', WebkitOverflowScrolling: 'touch' }}>
+              <table style={{ width: '100%', minWidth: '1150px', borderCollapse: 'separate', borderSpacing: '0 8px', tableLayout: 'auto' }}>
                 <thead>
                   <tr style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', textAlign: 'left' }}>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>COMPANY</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>INDUSTRY</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>HIRING ROLES</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>TIER</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>PACKAGE</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>HIRED</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>STATUS</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0', textAlign: 'right' }}>ACTIONS</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>COMPANY</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>INDUSTRY</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>HIRING ROLES</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>TIER</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>PACKAGE</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>HIRED</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>STATUS</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', textAlign: 'right', whiteSpace: 'nowrap' }}>ACTIONS</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -737,57 +737,115 @@ export default function CompanyManagement({ onNavigate, onLogout }) {
                         }}
                       >
                         {/* COMPANY NAME */}
-                        <td style={{ padding: '14px 16px' }}>
+                        <td style={{ padding: '14px 16px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                           <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '14px' }}>{company.name}</div>
                           <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>📍 {company.location}</div>
                         </td>
 
                         {/* INDUSTRY */}
-                        <td style={{ padding: '14px 16px', color: '#475569', fontSize: '13px', fontWeight: 500 }}>
+                        <td style={{ padding: '14px 16px', color: '#475569', fontSize: '13px', fontWeight: 500, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                           {company.industry}
                         </td>
 
                         {/* HIRING ROLES */}
-                        <td style={{ padding: '14px 16px', color: '#1e293b', fontSize: '13px', fontWeight: 600 }}>
+                        <td style={{ padding: '14px 16px', color: '#1e293b', fontSize: '13px', fontWeight: 600, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                           {company.roles}
                         </td>
 
                         {/* TIER */}
-                        <td style={{ padding: '14px 16px' }}>
+                        <td style={{ padding: '14px 16px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                           {getTierBadge(company.tier)}
                         </td>
 
                         {/* PACKAGE */}
-                        <td style={{ padding: '14px 16px', fontWeight: 800, color: '#0f172a', fontSize: '14px' }}>
+                        <td style={{ padding: '14px 16px', fontWeight: 800, color: '#0f172a', fontSize: '14px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                           {company.package}
                         </td>
 
                         {/* HIRED COUNT */}
-                        <td style={{ padding: '14px 16px', fontWeight: 700, color: '#16a34a', fontSize: '13px' }}>
+                        <td style={{ padding: '14px 16px', fontWeight: 700, color: '#16a34a', fontSize: '13px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                           {company.totalHires} Students
                         </td>
 
                         {/* STATUS */}
-                        <td style={{ padding: '14px 16px' }}>
+                        <td style={{ padding: '14px 16px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                           {getStatusBadge(company.status)}
                         </td>
 
                         {/* ACTIONS */}
-                        <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+                        <td style={{ padding: '14px 16px', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
                             <button
+                              type="button"
                               onClick={() => handleOpenEditModal(company)}
                               title="Edit Company"
-                              style={{ border: 'none', backgroundColor: '#f1f5f9', color: '#334155', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer' }}
+                              style={{
+                                height: '34px',
+                                width: '34px',
+                                border: '1px solid #e2e8f0',
+                                backgroundColor: '#f8fafc',
+                                color: '#475569',
+                                padding: 0,
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                whiteSpace: 'nowrap',
+                                flexShrink: 0,
+                                transition: 'all 0.18s ease',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#f1f5f9';
+                                e.currentTarget.style.borderColor = '#cbd5e1';
+                                e.currentTarget.style.color = '#0f172a';
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#f8fafc';
+                                e.currentTarget.style.borderColor = '#e2e8f0';
+                                e.currentTarget.style.color = '#475569';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                              }}
                             >
-                              <Edit2 size={15} />
+                              <Edit2 size={15} strokeWidth={2} />
                             </button>
                             <button
+                              type="button"
                               onClick={() => handleDeleteCompany(company.id, company.name)}
                               title="Remove Company"
-                              style={{ border: 'none', backgroundColor: '#fff1f2', color: '#e11d48', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer' }}
+                              style={{
+                                height: '34px',
+                                width: '34px',
+                                border: '1px solid #fecdd3',
+                                backgroundColor: '#fff1f2',
+                                color: '#e11d48',
+                                padding: 0,
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                whiteSpace: 'nowrap',
+                                flexShrink: 0,
+                                transition: 'all 0.18s ease',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#ffe4e6';
+                                e.currentTarget.style.borderColor = '#fda4af';
+                                e.currentTarget.style.color = '#be123c';
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#fff1f2';
+                                e.currentTarget.style.borderColor = '#fecdd3';
+                                e.currentTarget.style.color = '#e11d48';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                              }}
                             >
-                              <Trash2 size={15} />
+                              <Trash2 size={15} strokeWidth={2} />
                             </button>
                           </div>
                         </td>

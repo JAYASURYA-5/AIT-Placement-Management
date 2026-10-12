@@ -847,24 +847,25 @@ export default function DriveManagement({ onNavigate }) {
   const endItem = Math.min(startIndex + itemsPerPage, totalItems);
 
   // Badge Status Helper
+  // Badge Status Helper
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Completed':
         return (
-          <span style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '5px 14px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, display: 'inline-block' }}>
+          <span style={{ backgroundColor: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0', padding: '0 12px', height: '28px', borderRadius: '999px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', flexShrink: 0, lineHeight: 1 }}>
             Completed
           </span>
         );
       case 'Ongoing':
         return (
-          <span style={{ backgroundColor: '#fef3c7', color: '#92400e', padding: '5px 14px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, display: 'inline-block' }}>
+          <span style={{ backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', padding: '0 12px', height: '28px', borderRadius: '999px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', flexShrink: 0, lineHeight: 1 }}>
             Ongoing
           </span>
         );
       case 'Upcoming':
       default:
         return (
-          <span style={{ backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '5px 14px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, display: 'inline-block' }}>
+          <span style={{ backgroundColor: '#f3e8ff', color: '#6b21a8', border: '1px solid #e9d5ff', padding: '0 12px', height: '28px', borderRadius: '999px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', flexShrink: 0, lineHeight: 1 }}>
             Upcoming
           </span>
         );
@@ -875,13 +876,13 @@ export default function DriveManagement({ onNavigate }) {
   const getBondBadge = (bond) => {
     if ((bond || '').toLowerCase().includes('no bond') || bond === '0') {
       return (
-        <span style={{ backgroundColor: '#dcfce7', color: '#15803d', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: 700 }}>
+        <span style={{ backgroundColor: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '0 10px', height: '28px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap', flexShrink: 0, lineHeight: 1 }}>
           ✓ No Bond
         </span>
       );
     }
     return (
-      <span style={{ backgroundColor: '#f1f5f9', color: '#475569', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: 700 }}>
+      <span style={{ backgroundColor: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', padding: '0 10px', height: '28px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap', flexShrink: 0, lineHeight: 1 }}>
         📜 {bond}
       </span>
     );
@@ -1191,20 +1192,21 @@ export default function DriveManagement({ onNavigate }) {
             </div>
 
             {/* Drives Table with Bond Column & Eligible Candidates Action */}
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px' }}>
+            {/* Drives Table with Bond Column & Eligible Candidates Action */}
+            <div style={{ overflowX: 'auto', width: '100%', WebkitOverflowScrolling: 'touch' }}>
+              <table style={{ width: '100%', minWidth: '1350px', borderCollapse: 'separate', borderSpacing: '0 8px', tableLayout: 'auto' }}>
                 <thead>
                   <tr style={{ color: '#64748b', fontSize: '12px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', textAlign: 'left' }}>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>COMPANY</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>DATE</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>ROLE</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>MIN CGPA</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>ELIGIBILITY</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>SERVICE BOND</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>PACKAGE</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>NOMINATED</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0' }}>STATUS</th>
-                    <th style={{ padding: '8px 14px', borderBottom: '1px solid #e2e8f0', textAlign: 'right' }}>ACTIONS</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>COMPANY</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>DATE</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>ROLE</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>MIN CGPA</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>ELIGIBILITY</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>SERVICE BOND</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>PACKAGE</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>NOMINATED</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap' }}>STATUS</th>
+                    <th style={{ padding: '10px 16px', borderBottom: '1px solid #e2e8f0', textAlign: 'right', whiteSpace: 'nowrap' }}>ACTIONS</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1234,188 +1236,177 @@ export default function DriveManagement({ onNavigate }) {
                           }}
                         >
                           {/* COMPANY */}
-                          <td style={{ padding: '14px 16px', fontWeight: 800, color: '#0f172a', fontSize: '14px', borderRadius: '12px 0 0 12px' }}>
+                          <td style={{ padding: '14px 16px', fontWeight: 800, color: '#0f172a', fontSize: '14px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                             {drive.company}
                           </td>
 
-                          {/* DATE - Stacked 3-line format matching attached screenshot */}
-                          <td style={{ padding: '14px 16px', color: '#64748b', fontSize: '12px', lineHeight: '1.25', whiteSpace: 'nowrap', fontWeight: 500 }}>
-                            {(() => {
-                              const parts = (drive.date || '').split(/\s+/).filter(Boolean);
-                              if (parts.length >= 3) {
-                                return (
-                                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                    <span>{parts[0]}</span>
-                                    <span>{parts[1]}</span>
-                                    <span>{parts[2]}</span>
-                                  </div>
-                                );
-                              }
-                              return drive.date;
-                            })()}
+                          {/* DATE */}
+                          <td style={{ padding: '14px 16px', color: '#64748b', fontSize: '13px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                            {drive.date}
                           </td>
 
                           {/* ROLE */}
-                          <td style={{ padding: '14px 16px', color: '#334155', fontSize: '13px', fontWeight: 600 }}>
+                          <td style={{ padding: '14px 16px', color: '#475569', fontSize: '13px', fontWeight: 600, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                             {drive.role}
                           </td>
 
-                          {/* MIN CGPA - Stacked Mortarboard Badge matching attached screenshot */}
-                          <td style={{ padding: '14px 16px' }}>
-                            <div style={{
-                              backgroundColor: '#eff6ff',
-                              border: '1px solid #bfdbfe',
-                              color: '#1d4ed8',
-                              padding: '6px 12px',
-                              borderRadius: '12px',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              fontWeight: 800,
-                              fontSize: '13px'
-                            }}>
-                              <GraduationCap size={16} color="#1d4ed8" />
-                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: '1.1' }}>
-                                <span style={{ fontSize: '14px', fontWeight: 800 }}>{drive.minCGPA || '6'}</span>
-                                <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.04em' }}>CGPA</span>
-                              </div>
-                            </div>
+                          {/* MIN CGPA */}
+                          <td style={{ padding: '14px 16px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                            <span style={{ backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #dbeafe', padding: '0 10px', height: '28px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                              🎓 {drive.minCGPA} CGPA
+                            </span>
                           </td>
 
-                          {/* ELIGIBLE BRANCHES - Multi-line stacked branches matching attached screenshot */}
-                          <td style={{ padding: '14px 16px', color: '#334155', fontSize: '12px', fontWeight: 500, lineHeight: '1.3', maxWidth: '150px' }}>
-                            {(drive.branches || '').split(',').map((b, idx, arr) => (
-                              <div key={idx}>{b.trim()}{idx < arr.length - 1 ? ',' : ''}</div>
-                            ))}
+                          {/* ELIGIBLE BRANCHES */}
+                          <td style={{ padding: '14px 16px', color: '#334155', fontSize: '13px', fontWeight: 500, verticalAlign: 'middle', whiteSpace: 'nowrap', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis' }} title={drive.branches}>
+                            {drive.branches}
                           </td>
 
                           {/* SERVICE BOND */}
-                          <td style={{ padding: '14px 16px' }}>
+                          <td style={{ padding: '14px 16px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                             {getBondBadge(drive.bond)}
                           </td>
 
                           {/* PACKAGE */}
-                          <td style={{ padding: '14px 16px', fontWeight: 800, color: '#0f172a', fontSize: '15px' }}>
+                          <td style={{ padding: '14px 16px', fontWeight: 800, color: '#0f172a', fontSize: '14px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                             {drive.package}
                           </td>
 
-                          {/* NOMINATED STUDENTS COUNT - Light Green Container Box Button matching attached screenshot */}
-                          <td style={{ padding: '14px 16px' }}>
+                          {/* NOMINATED STUDENTS COUNT - CLICKABLE */}
+                          <td style={{ padding: '14px 16px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                             <button
-                              onClick={() => handleOpenSelectedCandidatesViewModal && handleOpenSelectedCandidatesViewModal(drive)}
+                              onClick={() => handleOpenSelectedCandidatesViewModal(drive)}
                               title="Click to view selected student names & complete profile details"
                               style={{
-                                backgroundColor: nominatedCount > 0 ? '#e6f4ea' : '#f1f5f9',
-                                color: nominatedCount > 0 ? '#166534' : '#64748b',
-                                border: nominatedCount > 0 ? '1px solid #bbf7d0' : '1px solid #cbd5e1',
-                                padding: '8px 14px',
-                                borderRadius: '14px',
-                                fontSize: '12px',
-                                fontWeight: 800,
+                                height: '34px',
+                                backgroundColor: nominatedCount > 0 ? '#f0fdf4' : '#f8fafc',
+                                color: nominatedCount > 0 ? '#15803d' : '#64748b',
+                                border: nominatedCount > 0 ? '1px solid #86efac' : '1px solid #e2e8f0',
+                                padding: '0 12px',
+                                borderRadius: '8px',
+                                fontSize: '12.5px',
+                                fontWeight: 700,
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '8px',
+                                gap: '6px',
                                 cursor: 'pointer',
-                                transition: 'all 0.15s ease'
+                                whiteSpace: 'nowrap',
+                                flexShrink: 0,
+                                transition: 'all 0.18s ease',
+                                boxShadow: nominatedCount > 0 ? '0 1px 3px rgba(22, 101, 52, 0.08)' : 'none'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = nominatedCount > 0 ? '#dcfce7' : '#f1f5f9';
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = nominatedCount > 0 ? '#f0fdf4' : '#f8fafc';
+                                e.currentTarget.style.transform = 'translateY(0)';
                               }}
                             >
-                              <UserCheck size={16} color={nominatedCount > 0 ? '#166534' : '#64748b'} />
-                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: '1.1' }}>
-                                <span style={{ fontSize: '14px', fontWeight: 800 }}>{nominatedCount}</span>
-                                <span style={{ fontSize: '10px', fontWeight: 700 }}>Selected</span>
-                              </div>
-                              <Eye size={13} style={{ opacity: 0.6, marginLeft: '2px' }} />
+                              <UserCheck size={15} color={nominatedCount > 0 ? '#16a34a' : '#64748b'} />
+                              <span>{nominatedCount} Selected</span>
+                              <Eye size={13} style={{ opacity: 0.7 }} />
                             </button>
                           </td>
 
                           {/* STATUS */}
-                          <td style={{ padding: '14px 16px' }}>
+                          <td style={{ padding: '14px 16px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                             {getStatusBadge(drive.status)}
                           </td>
 
                           {/* ACTIONS */}
-                          <td style={{ padding: '14px 16px', textAlign: 'right', borderRadius: '0 12px 12px 0' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
-                              {/* CIRCULAR PDF BUTTON */}
-                              <button
-                                onClick={() => setSelectedCircularDrive && setSelectedCircularDrive(drive)}
-                                title="Generate & Download Campus Drive Circular PDF"
-                                style={{
-                                  border: '1px solid #fde68a',
-                                  backgroundColor: '#fffbeb',
-                                  color: '#b45309',
-                                  padding: '6px 10px',
-                                  borderRadius: '10px',
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
-                                  fontSize: '12px',
-                                  fontWeight: 700
-                                }}
-                              >
-                                <FileText size={13} color="#b45309" />
-                                <span>Circular</span>
-                              </button>
-
-                              {/* CANDIDATES BUTTON */}
+                          <td style={{ padding: '14px 16px', textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', flexWrap: 'nowrap', whiteSpace: 'nowrap' }}>
+                              {/* AUTO-SUGGEST CANDIDATES BUTTON */}
                               <button
                                 onClick={() => handleOpenEligibleCandidatesModal(drive)}
                                 title="Check Auto-Suggested Eligible Student Profiles"
                                 style={{
+                                  height: '34px',
                                   border: '1px solid #c7d2fe',
                                   backgroundColor: '#e0e7ff',
                                   color: '#4338ca',
-                                  padding: '7px 14px',
-                                  borderRadius: '12px',
+                                  padding: '0 12px',
+                                  borderRadius: '8px',
                                   cursor: 'pointer',
                                   display: 'inline-flex',
                                   alignItems: 'center',
                                   gap: '6px',
-                                  fontSize: '13px',
-                                  fontWeight: 700
+                                  fontSize: '12px',
+                                  fontWeight: 700,
+                                  whiteSpace: 'nowrap',
+                                  flexShrink: 0,
+                                  transition: 'all 0.18s ease',
+                                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#c7d2fe';
+                                  e.currentTarget.style.transform = 'translateY(-1px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#e0e7ff';
+                                  e.currentTarget.style.transform = 'translateY(0)';
                                 }}
                               >
-                                <Sparkles size={14} color="#4338ca" />
-                                <span>Candidates</span>
+                                <Sparkles size={14} /> Candidates
                               </button>
 
-                              {/* EDIT BUTTON */}
                               <button
                                 onClick={() => handleOpenEditModal(drive)}
                                 title="Edit Drive"
                                 style={{
-                                  border: 'none',
-                                  backgroundColor: '#f1f5f9',
-                                  color: '#475569',
-                                  padding: '8px 10px',
-                                  borderRadius: '10px',
+                                  height: '34px',
+                                  width: '34px',
+                                  border: '1px solid #e2e8f0',
+                                  backgroundColor: '#f8fafc',
+                                  color: '#334155',
+                                  borderRadius: '8px',
                                   cursor: 'pointer',
                                   display: 'inline-flex',
                                   alignItems: 'center',
-                                  justifyContent: 'center'
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                  transition: 'all 0.18s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#f1f5f9';
+                                  e.currentTarget.style.transform = 'translateY(-1px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                                  e.currentTarget.style.transform = 'translateY(0)';
                                 }}
                               >
-                                <Edit2 size={15} color="#475569" />
+                                <Edit2 size={15} />
                               </button>
-
-                              {/* DELETE BUTTON */}
                               <button
                                 onClick={() => handleDeleteDrive(drive.id, drive.company)}
                                 title="Delete Drive"
                                 style={{
-                                  border: 'none',
-                                  backgroundColor: '#ffe4e6',
+                                  height: '34px',
+                                  width: '34px',
+                                  border: '1px solid #fecdd3',
+                                  backgroundColor: '#fff1f2',
                                   color: '#e11d48',
-                                  padding: '8px 10px',
-                                  borderRadius: '10px',
+                                  borderRadius: '8px',
                                   cursor: 'pointer',
                                   display: 'inline-flex',
                                   alignItems: 'center',
-                                  justifyContent: 'center'
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                  transition: 'all 0.18s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#ffe4e6';
+                                  e.currentTarget.style.transform = 'translateY(-1px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#fff1f2';
+                                  e.currentTarget.style.transform = 'translateY(0)';
                                 }}
                               >
-                                <Trash2 size={15} color="#e11d48" />
+                                <Trash2 size={15} />
                               </button>
                             </div>
                           </td>
