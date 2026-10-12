@@ -143,6 +143,7 @@ export default function Applications() {
             eligibility: `Min CGPA: ${drive.minCGPA || '6.5'}, Branches: ${drive.branches || 'CSE, IT, ECE'}, Max Backlogs: ${drive.maxBacklogs || '0'}`,
             bond: drive.bond || 'No Bond',
             location: drive.location || 'Campus',
+            additionalFields: Array.isArray(drive.additionalFields) ? drive.additionalFields : [],
             driveUrl: driveUrl,
             rounds: [
               { name: 'Admin Candidate Nomination', status: isNominated ? 'Completed' : 'Upcoming' },
@@ -342,6 +343,27 @@ export default function Applications() {
               <div className="modal-section">
                 <h4 className="modal-section-title">Eligibility Criteria</h4>
                 <p className="modal-description">{selectedApp.eligibility}</p>
+              </div>
+
+              {/* Service Terms & Additional Custom Fields */}
+              <div className="modal-section">
+                <h4 className="modal-section-title">Drive Key Details & Service Terms</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', marginTop: '8px' }}>
+                  <div style={{ backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>Service Bond</div>
+                    <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>{selectedApp.bond || 'No Bond'}</div>
+                  </div>
+                  <div style={{ backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>Location</div>
+                    <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>{selectedApp.location || 'Campus'}</div>
+                  </div>
+                  {Array.isArray(selectedApp.additionalFields) && selectedApp.additionalFields.filter(f => f?.label && f?.value).map((f, idx) => (
+                    <div key={idx} style={{ backgroundColor: '#fdf2f8', padding: '10px 14px', borderRadius: '10px', border: '1px solid #fbcfe8' }}>
+                      <div style={{ fontSize: '11px', color: '#9d174d', fontWeight: 700, textTransform: 'uppercase' }}>{f.label}</div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#be185d', marginTop: '2px' }}>{f.value}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Placement Drive Link Section */}
