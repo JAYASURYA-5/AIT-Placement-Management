@@ -40,13 +40,12 @@
 }
 
 .auth-portal-title .auth-brand-icon {
-  background: var(--primary-maroon) !important;
-  color: white;
-  padding: 4px;
-  border-radius: 8px;
+  background: transparent !important;
+  padding: 0;
+  border-radius: 50%;
 }
 .auth-portal-title .auth-brand-icon svg {
-  fill: white;
+  fill: var(--primary-maroon);
 }
 
 .auth-container-wrapper {
@@ -83,18 +82,24 @@
 }
 
 .auth-illustration-wrap {
+  width: 180px;
+  height: 180px;
+  background: #FFFFFF;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px;
-  margin-bottom: 28px;
+  box-shadow: 0 10px 28px rgba(76, 21, 54, 0.08);
+  margin-bottom: 24px;
+  overflow: hidden;
 }
 
 .auth-logo-image {
-  width: 180px;
-  height: 180px;
-  object-fit: contain;
-  mix-blend-mode: multiply;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  transform: scale(1.35);
 }
 
 .auth-welcome-title {
@@ -184,11 +189,18 @@
 
 .auth-input-password-wrap {
   position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.auth-input-password {
+  padding-right: 44px;
 }
 
 .auth-eye-btn {
   position: absolute;
-  right: 16px;
+  right: 14px;
   top: 50%;
   transform: translateY(-50%);
   background: transparent;
@@ -198,6 +210,8 @@
   padding: 4px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  z-index: 2;
 }
 
 .auth-options-row {
